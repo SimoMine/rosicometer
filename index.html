@@ -1,0 +1,1538 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#d9e6e8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1e26" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Risiko">
+<title>Classifica Risiko</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Big+Shoulders+Display:wght@600;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sea: #d9e6e8;
+  --sea-line: #b9cfd4;
+  --paper: #f6f9f9;
+  --ink: #172634;
+  --ink-soft: #4d5f6c;
+  --red: #c8352b;
+  --red-ink: #ffffff;
+  --gold: #a9840f;
+  --up: #23744a;
+  --down: #b23a2e;
+  --focus: #2457a6;
+  --display: "Big Shoulders Display", "Arial Narrow", sans-serif;
+  --body: "Atkinson Hyperlegible", system-ui, sans-serif;
+  --nav-h: 64px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --sea: #0f1e26;
+    --sea-line: #26414c;
+    --paper: #162a33;
+    --ink: #e5eef0;
+    --ink-soft: #9fb3bc;
+    --red: #e0493e;
+    --gold: #e1bc45;
+    --up: #5cc28b;
+    --down: #f07a6e;
+    --focus: #8fb6ff;
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--sea);
+  color: var(--ink);
+  font: 400 16px/1.5 var(--body);
+  padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom) + 96px);
+}
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.wrap { max-width: 640px; margin: 0 auto; padding: 0 16px; }
+
+/* Barra in alto */
+.top {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding-top: calc(env(safe-area-inset-top) + 14px); padding-bottom: 10px;
+}
+.top h1 {
+  margin: 0; font: 800 28px/1 var(--display); letter-spacing: .01em;
+}
+.auth-btn {
+  border: 1.5px solid var(--ink); background: transparent; border-radius: 999px;
+  padding: 6px 14px; font-weight: 700; font-size: 15px; max-width: 55vw;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.notice {
+  margin: 4px 0 12px; padding: 10px 12px; border-radius: 10px;
+  background: var(--paper); border-left: 4px solid var(--gold); font-size: 15px;
+}
+.notice.err { border-left-color: var(--down); }
+.notice button { margin-top: 8px; }
+
+/* Pedine */
+.token {
+  --c: #777; --t: #fff;
+  flex: none; width: 36px; height: 36px; border-radius: 7px;
+  display: grid; place-items: center; background: var(--c); color: var(--t);
+  font: 800 19px/1 var(--display);
+  box-shadow: inset 0 -4px 0 rgba(0,0,0,.22), inset 0 2px 0 rgba(255,255,255,.18);
+}
+.token.big { width: 68px; height: 68px; border-radius: 12px; font-size: 38px;
+  box-shadow: inset 0 -7px 0 rgba(0,0,0,.22), inset 0 3px 0 rgba(255,255,255,.18); }
+.token.sm { width: 26px; height: 26px; border-radius: 5px; font-size: 14px;
+  box-shadow: inset 0 -3px 0 rgba(0,0,0,.22); }
+
+/* Viste */
+.view[hidden] { display: none; }
+h2 { font: 800 30px/1.05 var(--display); margin: 18px 0 10px; }
+h3 { font: 700 18px/1.25 var(--body); margin: 0; }
+.muted { color: var(--ink-soft); }
+.small { font-size: 14px; }
+.empty { padding: 28px 4px; color: var(--ink-soft); }
+.empty strong { color: var(--ink); display: block; font-size: 18px; margin-bottom: 4px; }
+
+/* Leader */
+.leader {
+  display: grid; grid-template-columns: auto 1fr; gap: 4px 16px; align-items: center;
+  padding: 20px 0 22px; border-bottom: 2px solid var(--ink);
+}
+.leader .who { font: 800 34px/1 var(--display); overflow-wrap: anywhere; }
+.leader .who button { all: unset; cursor: pointer; }
+.leader .score {
+  grid-column: 1 / -1; display: flex; align-items: baseline; gap: 10px; margin-top: 8px;
+}
+.leader .score b { font: 800 84px/.85 var(--display); color: var(--gold); letter-spacing: -.01em; }
+.leader .score span { font-size: 15px; color: var(--ink-soft); }
+
+/* Classifica */
+.ranks { list-style: none; margin: 0; padding: 0; }
+.rank {
+  display: grid; grid-template-columns: 26px auto 1fr auto; gap: 12px; align-items: center;
+  padding: 12px 0; border-bottom: 1px solid var(--sea-line);
+}
+.rank .n { font: 800 22px/1 var(--display); color: var(--ink-soft); text-align: right; }
+.rank .main { min-width: 0; }
+.rank .name { all: unset; cursor: pointer; font-weight: 700; font-size: 17px; display: block;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rank .name:focus-visible { outline: 3px solid var(--focus); }
+.rank .sub { font-size: 13.5px; color: var(--ink-soft); }
+.front { display: block; height: 4px; margin-top: 6px; background: var(--sea-line); border-radius: 2px; overflow: hidden; }
+.front i { display: block; height: 100%; background: var(--ink); border-radius: 2px; }
+.rank .elo { text-align: right; }
+.rank .elo b { font: 800 30px/1 var(--display); display: block; }
+.delta { font-size: 13.5px; font-weight: 700; }
+.delta.up { color: var(--up); }
+.delta.down { color: var(--down); }
+.delta.zero { color: var(--ink-soft); }
+.trial { margin-top: 26px; }
+.trial h2 { font-size: 24px; }
+
+/* Partite */
+.game { background: var(--paper); border-radius: 14px; padding: 14px 14px 10px; margin-bottom: 12px; }
+.game.deleted { opacity: .62; }
+.game header { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.game header .num { font: 800 22px/1 var(--display); }
+.game .note { margin: 6px 0 0; font-size: 15px; }
+.tag { display: inline-block; font-size: 12.5px; font-weight: 700; padding: 1px 8px; border-radius: 999px;
+  background: var(--down); color: #fff; }
+.result { list-style: none; margin: 10px 0 0; padding: 0; }
+.result li { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding: 6px 0; }
+.result li + li { border-top: 1px solid var(--sea-line); }
+.result .out { font-size: 13.5px; color: var(--ink-soft); }
+.result .win .nm { font-weight: 700; }
+.game-actions { display: flex; gap: 8px; justify-content: flex-end; padding-top: 8px; }
+.toggle-deleted { margin: 6px 0 16px; }
+
+/* Bottoni */
+.btn {
+  border: 0; border-radius: 10px; padding: 10px 16px; font-weight: 700;
+  background: var(--ink); color: var(--sea); min-height: 44px;
+}
+.btn.red { background: var(--red); color: var(--red-ink); }
+.btn.ghost { background: transparent; color: var(--ink); border: 1.5px solid var(--sea-line); }
+.btn.quiet { background: transparent; color: var(--ink); padding: 8px 10px; min-height: 40px; font-size: 15px; text-decoration: underline; text-underline-offset: 3px; }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.fab {
+  position: fixed; right: max(16px, calc(50vw - 304px)); bottom: calc(var(--nav-h) + env(safe-area-inset-bottom) + 14px);
+  display: flex; align-items: center; gap: 8px; border: 0; border-radius: 16px;
+  background: var(--red); color: var(--red-ink); padding: 14px 18px; font-weight: 700; font-size: 16px;
+  box-shadow: 0 6px 18px rgba(80, 20, 15, .35); z-index: 5;
+}
+.fab[hidden] { display: none; }
+.fab svg { width: 20px; height: 20px; }
+
+/* Barra in basso */
+.tabs {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 6;
+  background: var(--paper); border-top: 1px solid var(--sea-line);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.tabs .wrap { display: grid; grid-template-columns: repeat(4, 1fr); padding: 0; }
+.tabs button {
+  all: unset; cursor: pointer; height: var(--nav-h); display: grid; place-items: center; align-content: center; gap: 2px;
+  font-size: 12.5px; color: var(--ink-soft); text-align: center;
+}
+.tabs button svg { width: 24px; height: 24px; }
+.tabs button[aria-current="page"] { color: var(--ink); font-weight: 700; }
+.tabs button[aria-current="page"] svg { color: var(--red); }
+.tabs button:focus-visible { outline: 3px solid var(--focus); outline-offset: -3px; }
+
+/* Giocatori */
+.add-player { display: flex; gap: 8px; margin-bottom: 14px; }
+.add-player input { flex: 1; min-width: 0; }
+input[type=text], input[type=email], input[type=password], input[type=date] {
+  width: 100%; padding: 11px 12px; border: 1.5px solid var(--sea-line); border-radius: 10px;
+  background: var(--paper); min-height: 46px;
+}
+.plist { list-style: none; margin: 0; padding: 0; }
+.plist li button {
+  all: unset; cursor: pointer; box-sizing: border-box; width: 100%;
+  display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; padding: 10px 0;
+  border-bottom: 1px solid var(--sea-line);
+}
+.plist li button:focus-visible { outline: 3px solid var(--focus); }
+.plist .pn { font-weight: 700; }
+.plist .pe { font: 800 24px/1 var(--display); }
+
+/* Storico */
+.log { list-style: none; margin: 0; padding: 0; }
+.log li { padding: 12px 0; border-bottom: 1px solid var(--sea-line); }
+.log .what { font-weight: 700; }
+.log .when { font-size: 13.5px; color: var(--ink-soft); }
+.log details { margin-top: 6px; font-size: 14.5px; }
+.log summary { cursor: pointer; color: var(--ink-soft); }
+.log .diff { display: grid; gap: 8px; margin-top: 8px; }
+.log .diff div { background: var(--paper); border-radius: 8px; padding: 8px 10px; }
+.log .diff b { display: block; font-size: 13px; color: var(--ink-soft); }
+
+/* Finestre */
+dialog {
+  border: 0; padding: 0; background: var(--paper); color: var(--ink);
+  width: 100%; max-width: 640px; max-height: 92dvh;
+  margin: auto auto 0; border-radius: 20px 20px 0 0;
+}
+dialog::backdrop { background: rgba(10, 20, 28, .55); }
+@media (min-width: 700px) { dialog { margin: auto; border-radius: 20px; } }
+.sheet { padding: 18px 16px calc(18px + env(safe-area-inset-bottom)); }
+.sheet h2 { margin-top: 0; }
+.sheet .field { margin-bottom: 14px; }
+.sheet label, .sheet .lbl { display: block; font-weight: 700; margin-bottom: 6px; }
+.sheet .hint { font-size: 14px; color: var(--ink-soft); margin: -2px 0 8px; }
+.sheet .actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; position: sticky; bottom: calc(-18px - env(safe-area-inset-bottom)); background: var(--paper); padding: 12px 0 calc(12px + env(safe-area-inset-bottom)); border-top: 1px solid var(--sea-line); }
+.err-msg { color: var(--down); font-weight: 700; font-size: 15px; min-height: 1.5em; margin: 8px 0 0; }
+.row2 { display: grid; grid-template-columns: 1fr 1.4fr; gap: 10px; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  display: flex; align-items: center; gap: 8px; border: 1.5px solid var(--sea-line);
+  background: transparent; border-radius: 999px; padding: 4px 12px 4px 4px; min-height: 40px;
+}
+.chip[aria-pressed="true"] { border-color: var(--ink); background: var(--sea); font-weight: 700; }
+
+.outcomes { list-style: none; margin: 0; padding: 0; }
+.outcomes li { padding: 8px 0; border-bottom: 1px solid var(--sea-line); }
+.outcomes .who { display: flex; align-items: center; gap: 10px; font-weight: 700; margin-bottom: 6px; }
+.seg { display: grid; grid-template-columns: repeat(3, 1fr); border: 1.5px solid var(--sea-line); border-radius: 10px; overflow: hidden; }
+.seg button { border: 0; background: transparent; padding: 8px 4px; min-height: 40px; font-size: 15px; }
+.seg button + button { border-left: 1.5px solid var(--sea-line); }
+.seg button[aria-pressed="true"][data-s="w"] { background: var(--gold); color: #1b1400; font-weight: 700; }
+.seg button[aria-pressed="true"][data-s="a"] { background: var(--ink); color: var(--sea); font-weight: 700; }
+.seg button[aria-pressed="true"][data-s="o"] { background: var(--down); color: #fff; font-weight: 700; }
+
+.elim { list-style: none; margin: 0; padding: 0; counter-reset: e; }
+.elim li { display: grid; grid-template-columns: 30px auto 1fr auto auto; gap: 8px; align-items: center; padding: 6px 0; }
+.elim li::before { counter-increment: e; content: counter(e) "°"; font: 800 22px/1 var(--display); color: var(--ink-soft); }
+.icon-btn { border: 1.5px solid var(--sea-line); background: transparent; border-radius: 8px; width: 40px; height: 40px; display: grid; place-items: center; }
+.icon-btn svg { width: 18px; height: 18px; }
+.icon-btn:disabled { opacity: .3; cursor: default; }
+
+.preview { list-style: none; margin: 0; padding: 0; }
+.preview li { display: flex; justify-content: space-between; padding: 4px 0; }
+
+/* Dettaglio giocatore */
+.p-head { display: flex; align-items: center; gap: 14px; }
+.p-head .nm { font: 800 34px/1 var(--display); overflow-wrap: anywhere; }
+.p-elo { display: flex; align-items: baseline; gap: 10px; margin: 14px 0 6px; }
+.p-elo b { font: 800 64px/.9 var(--display); }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px 8px; margin: 12px 0 16px; }
+.stats div b { display: block; font: 800 26px/1 var(--display); }
+.stats div span { font-size: 13.5px; color: var(--ink-soft); }
+.chart { width: 100%; height: 150px; display: block; }
+.chart .base { stroke: var(--sea-line); stroke-dasharray: 4 4; }
+.chart .line { fill: none; stroke: var(--ink); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+.chart .dot { fill: var(--red); }
+.chart text { fill: var(--ink-soft); font: 12px var(--body); }
+.recent { list-style: none; margin: 0; padding: 0; }
+.recent li { display: flex; justify-content: space-between; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--sea-line); font-size: 15px; }
+.admin-box { margin-top: 20px; padding-top: 14px; border-top: 2px solid var(--ink); }
+.admin-box .add-player { margin-bottom: 10px; }
+
+.toast {
+  position: fixed; left: 50%; transform: translateX(-50%);
+  bottom: calc(var(--nav-h) + env(safe-area-inset-bottom) + 84px);
+  background: var(--ink); color: var(--sea); padding: 10px 16px; border-radius: 10px;
+  font-weight: 700; z-index: 20; max-width: calc(100vw - 32px);
+}
+.toast[hidden] { display: none; }
+@media (prefers-reduced-motion: no-preference) {
+  .toast:not([hidden]) { animation: pop .18s ease-out; }
+  @keyframes pop { from { opacity: 0; transform: translate(-50%, 8px); } }
+}
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+</style>
+</head>
+<body>
+
+<header class="wrap top">
+  <h1>Classifica Risiko</h1>
+  <button class="auth-btn" id="btnAccesso" type="button">Accedi</button>
+</header>
+<div class="wrap" id="avvisi"></div>
+
+<main class="wrap">
+  <section class="view" id="vista-classifica" aria-labelledby="scheda-classifica"></section>
+  <section class="view" id="vista-partite" aria-labelledby="scheda-partite" hidden></section>
+  <section class="view" id="vista-giocatori" aria-labelledby="scheda-giocatori" hidden></section>
+  <section class="view" id="vista-storico" aria-labelledby="scheda-storico" hidden></section>
+</main>
+
+<button class="fab" id="btnNuovaPartita" type="button" hidden>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+  Nuova partita
+</button>
+
+<nav class="tabs" aria-label="Sezioni">
+  <div class="wrap">
+    <button type="button" id="scheda-classifica" data-scheda="classifica" aria-current="page">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 20h18M5 20V12h4v8M10 20V6h4v14M15 20v-6h4v6"/></svg>
+      Classifica
+    </button>
+    <button type="button" id="scheda-partite" data-scheda="partite">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="9" cy="9" r="1.3" fill="currentColor"/><circle cx="15" cy="15" r="1.3" fill="currentColor"/><circle cx="15" cy="9" r="1.3" fill="currentColor"/><circle cx="9" cy="15" r="1.3" fill="currentColor"/></svg>
+      Partite
+    </button>
+    <button type="button" id="scheda-giocatori" data-scheda="giocatori">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5"/><path d="M16 4.8a3.3 3.3 0 0 1 0 6.4M18 14.8c2 .7 3.2 2.4 3.5 5.2"/></svg>
+      Giocatori
+    </button>
+    <button type="button" id="scheda-storico" data-scheda="storico">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>
+      Storico
+    </button>
+  </div>
+</nav>
+
+<div class="toast" id="notifica" role="status" aria-live="polite" hidden></div>
+
+<dialog id="finestraAccesso" aria-labelledby="titoloAccesso">
+  <form class="sheet" id="moduloAccesso">
+    <h2 id="titoloAccesso">Accedi</h2>
+    <p class="hint">Solo chi è nella lista degli admin può registrare partite. Gli account si creano dalla console Firebase.</p>
+    <div class="field"><label for="campoEmail">Email</label><input type="email" id="campoEmail" autocomplete="username" required></div>
+    <div class="field"><label for="campoPassword">Password</label><input type="password" id="campoPassword" autocomplete="current-password" required></div>
+    <p class="err-msg" id="erroreAccesso"></p>
+    <div class="actions">
+      <button class="btn ghost" type="button" data-chiudi>Annulla</button>
+      <button class="btn red" type="submit" id="btnEntra">Entra</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="finestraPartita" aria-labelledby="titoloPartita">
+  <form class="sheet" id="moduloPartita">
+    <h2 id="titoloPartita">Nuova partita</h2>
+    <div class="row2">
+      <div class="field"><label for="campoData">Data</label><input type="date" id="campoData" required></div>
+      <div class="field"><label for="campoNota">Nota</label><input type="text" id="campoNota" maxlength="120" placeholder="Facoltativa"></div>
+    </div>
+    <div class="field">
+      <span class="lbl">Chi ha giocato</span>
+      <div class="chips" id="sceltaGiocatori"></div>
+    </div>
+    <div id="esitiPartita"></div>
+    <p class="err-msg" id="errorePartita"></p>
+    <div class="actions">
+      <button class="btn ghost" type="button" data-chiudi>Annulla</button>
+      <button class="btn red" type="submit" id="btnSalvaPartita">Salva partita</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="finestraGiocatore" aria-labelledby="titoloGiocatore">
+  <div class="sheet" id="contenutoGiocatore"></div>
+</dialog>
+
+<dialog id="finestraConferma" aria-labelledby="titoloConferma">
+  <form class="sheet" method="dialog">
+    <h2 id="titoloConferma"></h2>
+    <p id="testoConferma"></p>
+    <div class="actions">
+      <button class="btn ghost" value="no">Annulla</button>
+      <button class="btn red" value="si" id="btnConferma"></button>
+    </div>
+  </form>
+</dialog>
+
+<script type="module">
+// ===== Configurazione Firebase (progetto risiko-scoreboard) =====
+const configFirebase = {
+  apiKey: "AIzaSyC-6MTxUwWXFDWO6tpqrmWc1shDZdCkj9g",
+  authDomain: "risiko-scoreboard.firebaseapp.com",
+  projectId: "risiko-scoreboard",
+  storageBucket: "risiko-scoreboard.firebasestorage.app",
+  messagingSenderId: "352568649936",
+  appId: "1:352568649936:web:40c1145aa2c22f3cb2d6d5",
+  measurementId: "G-NZ8VXEYSH4"
+};
+const versioneFirebase = "10.12.2";
+
+// ===== Regole del punteggio =====
+const eloIniziale = 1000;
+const kPrimePartite = 40;     // K finché un giocatore è "nuovo"
+const kDopo = 20;             // K quando il punteggio si è assestato
+const partiteDaNuovo = 10;    // quante partite si resta "nuovi"
+const partiteMinime = 5;      // partite per entrare in classifica
+
+// Segnaposto per "ora del server": al salvataggio diventa serverTimestamp()
+const oraServer = { segnaposto: "ora" };
+
+// Colori delle pedine (sfondo, testo), in ordine di assegnazione
+const coloriArmate = [
+  ["#c8352b", "#fff"], ["#2457a6", "#fff"], ["#e2b42b", "#1b1400"], ["#2e7d4f", "#fff"],
+  ["#6b3fa0", "#fff"], ["#23262b", "#fff"], ["#d9702a", "#fff"], ["#1f8a8a", "#fff"],
+  ["#c2457e", "#fff"], ["#7a5230", "#fff"]
+];
+const ordinali = ["primo", "secondo", "terzo", "quarto", "quinto", "sesto", "settimo", "ottavo", "nono", "decimo"];
+
+const etichetteAzioni = {
+  partita_aggiunta: "Nuova partita",
+  partita_modificata: "Partita modificata",
+  partita_eliminata: "Partita eliminata",
+  partita_ripristinata: "Partita ripristinata",
+  giocatore_aggiunto: "Nuovo giocatore",
+  giocatore_rinominato: "Giocatore rinominato",
+  giocatore_nascosto: "Giocatore tolto dal gruppo",
+  giocatore_riattivato: "Giocatore riattivato"
+};
+
+
+// ===== Piccoli aiuti =====
+function trova(selettore, dove = document) {
+  return dove.querySelector(selettore);
+}
+
+function pulisciHtml(testo) {
+  const sostituzioni = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+  return String(testo ?? "").replace(/[&<>"']/g, carattere => sostituzioni[carattere]);
+}
+
+// Firestore restituisce Timestamp; qui ci servono millisecondi
+function inMillisecondi(momento) {
+  if (!momento) return Date.now();
+  if (typeof momento === "number") return momento;
+  if (momento.toMillis) return momento.toMillis();
+  return Date.now();
+}
+
+function dataDiOggi() {
+  const oggi = new Date();
+  oggi.setMinutes(oggi.getMinutes() - oggi.getTimezoneOffset());
+  return oggi.toISOString().slice(0, 10);
+}
+
+function daStringaAData(dataIso) {
+  const [anno, mese, giorno] = dataIso.split("-").map(Number);
+  return new Date(anno, mese - 1, giorno);
+}
+
+function formattaData(dataIso) {
+  return daStringaAData(dataIso).toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "long", year: "numeric" });
+}
+
+function formattaDataBreve(dataIso) {
+  return daStringaAData(dataIso).toLocaleDateString("it-IT", { day: "numeric", month: "short", year: "2-digit" });
+}
+
+function formattaMomento(momento) {
+  return new Date(inMillisecondi(momento)).toLocaleString("it-IT", {
+    day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit"
+  });
+}
+
+function conSegno(variazione) {
+  const arrotondata = Math.round(variazione);
+  if (arrotondata > 0) return "+" + arrotondata;
+  if (arrotondata < 0) return "−" + Math.abs(arrotondata);
+  return "±0";
+}
+
+function classeVariazione(variazione) {
+  const arrotondata = Math.round(variazione);
+  if (arrotondata > 0) return "up";
+  if (arrotondata < 0) return "down";
+  return "zero";
+}
+
+// ["A", "B", "C"] → "A, B e C"
+function elencaNomi(nomi) {
+  if (nomi.length <= 1) return nomi[0] || "";
+  return nomi.slice(0, -1).join(", ") + " e " + nomi[nomi.length - 1];
+}
+
+
+// ===== Stato dell'applicazione =====
+const stato = {
+  giocatori: [],
+  partite: [],
+  storico: [],
+  utente: null,
+  limiteStorico: 100,
+  schedaAttiva: "classifica",
+  mostraEliminate: false,
+  erroreCaricamento: null
+};
+let archivio = null;
+let smettiDiAscoltareStorico = null;
+let calcolo = null;
+
+
+// ===== Collegamento a Firebase =====
+async function collegaFirebase() {
+  const indirizzoBase = `https://www.gstatic.com/firebasejs/${versioneFirebase}/`;
+  const [moduloApp, firestore, autenticazione] = await Promise.all([
+    import(indirizzoBase + "firebase-app.js"),
+    import(indirizzoBase + "firebase-firestore.js"),
+    import(indirizzoBase + "firebase-auth.js")
+  ]);
+
+  const app = moduloApp.initializeApp(configFirebase);
+  const database = firestore.getFirestore(app);
+  const auth = autenticazione.getAuth(app);
+  let utenteCorrente = null;
+
+  function leggiDocumenti(istantanea) {
+    return istantanea.docs.map(documento => ({
+      id: documento.id,
+      ...documento.data({ serverTimestamps: "estimate" })
+    }));
+  }
+
+  function preparaDati(dati) {
+    const pronti = {};
+    for (const [campo, valore] of Object.entries(dati)) {
+      pronti[campo] = valore === oraServer ? firestore.serverTimestamp() : valore;
+    }
+    return pronti;
+  }
+
+  return {
+    ascoltaGiocatori(quandoCambia, quandoErrore) {
+      return firestore.onSnapshot(firestore.collection(database, "players"),
+        istantanea => quandoCambia(leggiDocumenti(istantanea)), quandoErrore);
+    },
+
+    ascoltaPartite(quandoCambia, quandoErrore) {
+      return firestore.onSnapshot(firestore.collection(database, "games"),
+        istantanea => quandoCambia(leggiDocumenti(istantanea)), quandoErrore);
+    },
+
+    ascoltaStorico(quante, quandoCambia, quandoErrore) {
+      const richiesta = firestore.query(
+        firestore.collection(database, "log"),
+        firestore.orderBy("at", "desc"),
+        firestore.limit(quante)
+      );
+      return firestore.onSnapshot(richiesta, istantanea => quandoCambia(leggiDocumenti(istantanea)), quandoErrore);
+    },
+
+    nuovoId(raccolta) {
+      return firestore.doc(firestore.collection(database, raccolta)).id;
+    },
+
+    // Salva tutte le operazioni e la voce di storico insieme: o tutto o niente
+    async salva(operazioni, voceStorico) {
+      const lotto = firestore.writeBatch(database);
+      for (const operazione of operazioni) {
+        const riferimento = firestore.doc(database, operazione.raccolta, operazione.id);
+        if (operazione.unisci) {
+          lotto.set(riferimento, preparaDati(operazione.dati), { merge: true });
+        } else {
+          lotto.set(riferimento, preparaDati(operazione.dati));
+        }
+      }
+      lotto.set(firestore.doc(firestore.collection(database, "log")), {
+        ...voceStorico,
+        by: utenteCorrente.email,
+        byName: utenteCorrente.nome,
+        at: firestore.serverTimestamp()
+      });
+      await lotto.commit();
+    },
+
+    quandoCambiaUtente(callback) {
+      autenticazione.onAuthStateChanged(auth, async utenteFirebase => {
+        if (!utenteFirebase) {
+          utenteCorrente = null;
+          callback(null);
+          return;
+        }
+        const email = (utenteFirebase.email || "").toLowerCase();
+        let datiAdmin = null;
+        try {
+          const documentoAdmin = await firestore.getDoc(firestore.doc(database, "admins", email));
+          datiAdmin = documentoAdmin.exists() ? documentoAdmin.data() : null;
+        } catch (errore) {
+          datiAdmin = null;
+        }
+        utenteCorrente = { email, nome: datiAdmin?.nome || email, eAdmin: Boolean(datiAdmin) };
+        callback(utenteCorrente);
+      });
+    },
+
+    entra(email, password) {
+      return autenticazione.signInWithEmailAndPassword(auth, email, password);
+    },
+
+    esci() {
+      return autenticazione.signOut(auth);
+    }
+  };
+}
+
+
+// ===== Calcolo dell'Elo =====
+
+// Ogni esito è { p: idGiocatore, s: "w" | "a" | "o", o: ordine di eliminazione }.
+// Posizione: 1 chi vince, 2 i sopravvissuti, poi gli eliminati (chi esce prima sta più in basso).
+function assegnaPosizioni(esiti) {
+  const quantiEliminati = esiti.filter(esito => esito.s === "o").length;
+  return esiti.map(esito => {
+    let posizione;
+    if (esito.s === "w") posizione = 1;
+    else if (esito.s === "a") posizione = 2;
+    else posizione = 2 + (quantiEliminati - esito.o + 1);
+    return { p: esito.p, s: esito.s, o: esito.s === "o" ? esito.o : null, pos: posizione };
+  });
+}
+
+// Ordine cronologico: prima la data, poi l'ora di inserimento
+function confrontaPartite(primaPartita, secondaPartita) {
+  if (primaPartita.date !== secondaPartita.date) return primaPartita.date < secondaPartita.date ? -1 : 1;
+  return inMillisecondi(primaPartita.createdAt) - inMillisecondi(secondaPartita.createdAt);
+}
+
+function calcolaElo(giocatori, partite) {
+  const statistiche = {};
+  for (const giocatore of giocatori) {
+    statistiche[giocatore.id] = {
+      elo: eloIniziale, partite: 0, vittorie: 0, sopravvissuto: 0, eliminato: 0,
+      sommaPosizioni: 0, massimo: eloIniziale, andamento: [eloIniziale], ultimaVariazione: null, cronologia: []
+    };
+  }
+
+  const variazioniPerPartita = {};
+  const partiteValide = partite.filter(partita => !partita.deleted).sort(confrontaPartite);
+  const numeroPartita = {};
+
+  for (const partita of partiteValide) {
+    const esiti = (partita.results || []).filter(esito => statistiche[esito.p]);
+    const numeroGiocatori = esiti.length;
+    if (numeroGiocatori < 2) continue;
+    numeroPartita[partita.id] = Object.keys(numeroPartita).length + 1;
+
+    // Gli Elo di prima della partita: tutti i confronti usano questi
+    const eloPrima = {};
+    for (const esito of esiti) eloPrima[esito.p] = statistiche[esito.p].elo;
+
+    const variazioni = {};
+    for (const esito of esiti) {
+      const k = statistiche[esito.p].partite < partiteDaNuovo ? kPrimePartite : kDopo;
+      let somma = 0;
+      for (const avversario of esiti) {
+        if (avversario === esito) continue;
+        let reale = 0;
+        if (esito.pos < avversario.pos) reale = 1;
+        else if (esito.pos === avversario.pos) reale = 0.5;
+        const atteso = 1 / (1 + Math.pow(10, (eloPrima[avversario.p] - eloPrima[esito.p]) / 400));
+        somma += reale - atteso;
+      }
+      variazioni[esito.p] = k / (numeroGiocatori - 1) * somma;
+    }
+
+    variazioniPerPartita[partita.id] = {};
+    for (const esito of esiti) {
+      const s = statistiche[esito.p];
+      s.elo += variazioni[esito.p];
+      s.partite += 1;
+      s.sommaPosizioni += esito.pos;
+      if (esito.s === "w") s.vittorie += 1;
+      else if (esito.s === "a") s.sopravvissuto += 1;
+      else s.eliminato += 1;
+      s.massimo = Math.max(s.massimo, s.elo);
+      s.andamento.push(s.elo);
+      s.ultimaVariazione = variazioni[esito.p];
+      s.cronologia.push({ idPartita: partita.id, variazione: variazioni[esito.p], s: esito.s, o: esito.o });
+      variazioniPerPartita[partita.id][esito.p] = variazioni[esito.p];
+    }
+  }
+
+  const perElo = (primo, secondo) => statistiche[secondo.id].elo - statistiche[primo.id].elo;
+  const inClassifica = giocatori.filter(g => statistiche[g.id].partite >= partiteMinime).sort(perElo);
+  const inProva = giocatori.filter(g => statistiche[g.id].partite > 0 && statistiche[g.id].partite < partiteMinime).sort(perElo);
+
+  return { statistiche, variazioniPerPartita, inClassifica, inProva, numeroPartita };
+}
+
+
+// ===== Giocatori e partite =====
+function trovaGiocatore(id) {
+  return stato.giocatori.find(giocatore => giocatore.id === id);
+}
+
+function nomeGiocatore(id) {
+  return trovaGiocatore(id)?.name ?? "Giocatore rimosso";
+}
+
+function pedina(id, taglia = "") {
+  const giocatore = trovaGiocatore(id);
+  const [sfondo, testo] = coloriArmate[(giocatore?.color ?? 0) % coloriArmate.length];
+  const iniziale = (giocatore?.name || "?").trim().charAt(0).toUpperCase();
+  return `<span class="token ${taglia}" style="--c:${sfondo};--t:${testo}" aria-hidden="true">${pulisciHtml(iniziale)}</span>`;
+}
+
+function descriviEsito(esito, breve = false) {
+  if (esito.s === "w") return "vince";
+  if (esito.s === "a") return "sopravvive";
+  if (breve) return `eliminato ${esito.o}°`;
+  return `eliminato per ${ordinali[esito.o - 1] || esito.o + "°"}`;
+}
+
+function ordinaPerPosizione(esiti) {
+  return esiti.slice().sort((primo, secondo) => primo.pos - secondo.pos);
+}
+
+function descriviPartita(esiti, nomeDi = nomeGiocatore) {
+  const vincitori = esiti.filter(esito => esito.s === "w").map(esito => nomeDi(esito.p));
+  const sopravvissuti = esiti.filter(esito => esito.s === "a").map(esito => nomeDi(esito.p));
+  const eliminati = esiti.filter(esito => esito.s === "o").sort((a, b) => a.o - b.o).map(esito => nomeDi(esito.p));
+
+  const parti = [];
+  if (vincitori.length) parti.push("vince " + vincitori[0]);
+  if (sopravvissuti.length === 1) parti.push("sopravvive " + sopravvissuti[0]);
+  if (sopravvissuti.length > 1) parti.push("sopravvivono " + elencaNomi(sopravvissuti));
+  if (eliminati.length === 1) parti.push("eliminato " + eliminati[0]);
+  if (eliminati.length > 1) parti.push("eliminati nell'ordine " + eliminati.join(", "));
+  return parti.join("; ");
+}
+
+// Copia leggibile della partita da conservare nello storico (con i nomi di quel momento)
+function fotografiaPartita(partita) {
+  return {
+    data: partita.date,
+    nota: partita.note || "",
+    risultati: ordinaPerPosizione(partita.results).map(esito => ({
+      nome: nomeGiocatore(esito.p),
+      esito: esito.s === "w" ? "vince" : esito.s === "a" ? "sopravvive" : "eliminato",
+      ordine: esito.o ?? null
+    }))
+  };
+}
+
+function testoFotografia(fotografia) {
+  if (!fotografia) return "";
+  if (fotografia.risultati) {
+    const codici = { vince: "w", sopravvive: "a", eliminato: "o" };
+    const esiti = fotografia.risultati.map((risultato, indice) => ({ p: indice, s: codici[risultato.esito], o: risultato.ordine }));
+    const nota = fotografia.nota ? `, nota: "${fotografia.nota}"` : "";
+    return `${formattaData(fotografia.data)}${nota}. ${descriviPartita(esiti, indice => fotografia.risultati[indice].nome)}.`;
+  }
+  if (fotografia.nome) {
+    return fotografia.nome + (fotografia.attivo === false ? " (fuori dal gruppo)" : "");
+  }
+  return "";
+}
+
+
+// ===== Notifiche, errori e salvataggio =====
+let timerNotifica;
+function mostraNotifica(messaggio) {
+  const notifica = trova("#notifica");
+  notifica.textContent = messaggio;
+  notifica.hidden = false;
+  clearTimeout(timerNotifica);
+  timerNotifica = setTimeout(() => { notifica.hidden = true; }, 2600);
+}
+
+function messaggioErrore(errore) {
+  const codice = errore?.code || "";
+  if (codice.includes("permission-denied")) return "Salvataggio rifiutato: il tuo account non è nella lista degli admin.";
+  if (codice.includes("unavailable") || codice.includes("network")) return "Connessione assente: riprova quando sei online.";
+  return `Salvataggio non riuscito (${codice || errore?.message || "errore"}).`;
+}
+
+async function salva(operazioni, voceStorico, messaggioOk) {
+  try {
+    await archivio.salva(operazioni, voceStorico);
+    mostraNotifica(messaggioOk);
+    return true;
+  } catch (errore) {
+    mostraNotifica(messaggioErrore(errore));
+    return false;
+  }
+}
+
+
+// ===== Disegno delle viste =====
+function disegnaAvvisi() {
+  const avvisi = [];
+  if (stato.erroreCaricamento) {
+    avvisi.push(`<div class="notice err">${pulisciHtml(stato.erroreCaricamento)}</div>`);
+  }
+  if (stato.utente && !stato.utente.eAdmin) {
+    avvisi.push(`<div class="notice">Sei entrato come ${pulisciHtml(stato.utente.email)}, ma questo indirizzo non è tra gli admin: puoi solo guardare. Aggiungilo alla raccolta admins in Firestore.</div>`);
+  }
+  trova("#avvisi").innerHTML = avvisi.join("");
+}
+
+function disegna() {
+  calcolo = calcolaElo(stato.giocatori, stato.partite);
+  disegnaAvvisi();
+
+  const btnAccesso = trova("#btnAccesso");
+  btnAccesso.textContent = stato.utente ? stato.utente.nome : "Accedi";
+  btnAccesso.setAttribute("aria-label", stato.utente ? `Account ${stato.utente.nome}: esci` : "Accedi");
+  trova("#btnNuovaPartita").hidden = !stato.utente?.eAdmin || stato.schedaAttiva === "storico";
+
+  for (const scheda of ["classifica", "partite", "giocatori", "storico"]) {
+    trova("#vista-" + scheda).hidden = stato.schedaAttiva !== scheda;
+    const pulsante = trova("#scheda-" + scheda);
+    if (stato.schedaAttiva === scheda) pulsante.setAttribute("aria-current", "page");
+    else pulsante.removeAttribute("aria-current");
+  }
+
+  const viste = { classifica: vistaClassifica, partite: vistaPartite, giocatori: vistaGiocatori, storico: vistaStorico };
+  viste[stato.schedaAttiva]();
+}
+
+function vistaClassifica() {
+  const contenitore = trova("#vista-classifica");
+  const { statistiche, inClassifica, inProva } = calcolo;
+
+  if (!inClassifica.length && !inProva.length) {
+    const invito = stato.utente?.eAdmin
+      ? "Aggiungi i giocatori nella scheda Giocatori, poi registra la prima partita con Nuova partita."
+      : "Accedi come admin per registrare la prima partita.";
+    contenitore.innerHTML = `<div class="empty"><strong>Nessuna partita ancora.</strong>${invito}</div>`;
+    return;
+  }
+
+  let html = "";
+  if (inClassifica.length) {
+    const primo = inClassifica[0];
+    const s = statistiche[primo.id];
+    const ultima = s.ultimaVariazione != null
+      ? `, <span class="delta ${classeVariazione(s.ultimaVariazione)}">${conSegno(s.ultimaVariazione)}</span> nell'ultima partita`
+      : "";
+    html += `
+      <div class="leader">
+        ${pedina(primo.id, "big")}
+        <div>
+          <div class="who"><button type="button" data-giocatore="${primo.id}">${pulisciHtml(primo.name)}</button></div>
+          <div class="muted small">${s.partite} partite, ${s.vittorie} ${s.vittorie === 1 ? "vittoria" : "vittorie"}</div>
+        </div>
+        <div class="score"><b>${Math.round(s.elo)}</b><span>punti Elo${ultima}</span></div>
+      </div>`;
+
+    const tuttiGliElo = inClassifica.map(giocatore => statistiche[giocatore.id].elo);
+    const eloMinimo = Math.min(...tuttiGliElo) - 20;
+    const eloMassimo = Math.max(...tuttiGliElo);
+    const righe = inClassifica.slice(1).map((giocatore, indice) => rigaClassifica(giocatore, indice + 2, eloMinimo, eloMassimo));
+    html += `<ol class="ranks" start="2" aria-label="Classifica">${righe.join("")}</ol>`;
+  } else {
+    html += `<div class="empty"><strong>Classifica in arrivo.</strong>Si entra in classifica dopo ${partiteMinime} partite: intanto ecco chi è in prova.</div>`;
+  }
+
+  if (inProva.length) {
+    html += `
+      <div class="trial">
+        <h2>In prova</h2>
+        <p class="muted small">Meno di ${partiteMinime} partite: il punteggio si sta ancora assestando.</p>
+        <ol class="ranks" aria-label="Giocatori in prova">${inProva.map(giocatore => rigaClassifica(giocatore, null)).join("")}</ol>
+      </div>`;
+  }
+  contenitore.innerHTML = html;
+
+  function rigaClassifica(giocatore, posizione, eloMinimo, eloMassimo) {
+    const s = statistiche[giocatore.id];
+    const percentuale = Math.round(s.vittorie / s.partite * 100);
+    let barra = "";
+    if (posizione) {
+      const larghezza = Math.max(4, Math.round((s.elo - eloMinimo) / Math.max(1, eloMassimo - eloMinimo) * 100));
+      barra = `<span class="front" aria-hidden="true"><i style="width:${larghezza}%"></i></span>`;
+    }
+    const variazione = s.ultimaVariazione != null
+      ? `<span class="delta ${classeVariazione(s.ultimaVariazione)}">${conSegno(s.ultimaVariazione)}</span>`
+      : "";
+    return `
+      <li class="rank">
+        <span class="n">${posizione ?? ""}</span>
+        ${pedina(giocatore.id)}
+        <div class="main">
+          <button class="name" type="button" data-giocatore="${giocatore.id}">${pulisciHtml(giocatore.name)}</button>
+          <span class="sub">${s.partite} partite, ${s.vittorie} ${s.vittorie === 1 ? "vittoria" : "vittorie"} (${percentuale}%)</span>
+          ${barra}
+        </div>
+        <div class="elo"><b>${Math.round(s.elo)}</b>${variazione}</div>
+      </li>`;
+  }
+}
+
+function schedaPartita(partita) {
+  const variazioni = calcolo.variazioniPerPartita[partita.id] || {};
+  const titolo = partita.deleted ? "Eliminata" : "Partita " + calcolo.numeroPartita[partita.id];
+
+  const righe = ordinaPerPosizione(partita.results || []).map(esito => {
+    const variazione = variazioni[esito.p];
+    const punti = variazione != null
+      ? `<span class="delta ${classeVariazione(variazione)}">${conSegno(variazione)}</span>`
+      : "<span></span>";
+    return `
+      <li class="${esito.s === "w" ? "win" : ""}">
+        ${pedina(esito.p, "sm")}
+        <span><span class="nm">${pulisciHtml(nomeGiocatore(esito.p))}</span> <span class="out">${descriviEsito(esito)}</span></span>
+        ${punti}
+      </li>`;
+  });
+
+  let azioni = "";
+  if (stato.utente?.eAdmin) {
+    azioni = partita.deleted
+      ? `<button class="btn quiet" type="button" data-ripristina="${partita.id}">Ripristina</button>`
+      : `<button class="btn quiet" type="button" data-modifica="${partita.id}">Modifica</button>
+         <button class="btn quiet" type="button" data-elimina="${partita.id}">Elimina</button>`;
+    azioni = `<div class="game-actions">${azioni}</div>`;
+  }
+
+  return `
+    <article class="game${partita.deleted ? " deleted" : ""}">
+      <header><span class="num">${titolo}</span><span class="muted small">${pulisciHtml(formattaData(partita.date))}</span></header>
+      ${partita.deleted ? `<span class="tag">eliminata, non conta nel punteggio</span>` : ""}
+      ${partita.note ? `<p class="note">${pulisciHtml(partita.note)}</p>` : ""}
+      <ol class="result">${righe.join("")}</ol>
+      ${azioni}
+    </article>`;
+}
+
+function vistaPartite() {
+  const contenitore = trova("#vista-partite");
+  const valide = stato.partite.filter(partita => !partita.deleted).sort(confrontaPartite).reverse();
+  const eliminate = stato.partite.filter(partita => partita.deleted).sort(confrontaPartite).reverse();
+
+  if (!valide.length && !eliminate.length) {
+    const invito = stato.utente?.eAdmin
+      ? "Usa Nuova partita per aggiungere la prima."
+      : "Le partite appariranno qui appena un admin le registra.";
+    contenitore.innerHTML = `<div class="empty"><strong>Nessuna partita registrata.</strong>${invito}</div>`;
+    return;
+  }
+
+  let html = `<h2>${valide.length} ${valide.length === 1 ? "partita" : "partite"}</h2>`;
+  html += valide.map(schedaPartita).join("");
+  if (eliminate.length) {
+    const testo = `${stato.mostraEliminate ? "Nascondi" : "Mostra"} le partite eliminate (${eliminate.length})`;
+    html += `<button class="btn quiet toggle-deleted" type="button" id="btnMostraEliminate">${testo}</button>`;
+    if (stato.mostraEliminate) html += eliminate.map(schedaPartita).join("");
+  }
+  contenitore.innerHTML = html;
+
+  trova("#btnMostraEliminate")?.addEventListener("click", () => {
+    stato.mostraEliminate = !stato.mostraEliminate;
+    disegna();
+  });
+}
+
+function vistaGiocatori() {
+  const contenitore = trova("#vista-giocatori");
+  const { statistiche } = calcolo;
+  const attivi = stato.giocatori
+    .filter(giocatore => giocatore.active !== false)
+    .sort((a, b) => statistiche[b.id].elo - statistiche[a.id].elo || a.name.localeCompare(b.name));
+  const nonAttivi = stato.giocatori
+    .filter(giocatore => giocatore.active === false)
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  let html = `<h2>Giocatori</h2>`;
+  if (stato.utente?.eAdmin) {
+    html += `
+      <form class="add-player" id="moduloNuovoGiocatore">
+        <label class="sr" for="campoNuovoNome">Nome del giocatore</label>
+        <input type="text" id="campoNuovoNome" maxlength="40" placeholder="Nome del nuovo giocatore" autocomplete="off">
+        <button class="btn red" type="submit">Aggiungi</button>
+      </form>`;
+  }
+  if (!stato.giocatori.length) {
+    const invito = stato.utente?.eAdmin ? "Scrivi un nome qui sopra per aggiungere il primo." : "Un admin deve aggiungere i giocatori.";
+    html += `<div class="empty"><strong>Nessun giocatore.</strong>${invito}</div>`;
+  }
+
+  const voceElenco = giocatore => `
+    <li><button type="button" data-giocatore="${giocatore.id}">
+      ${pedina(giocatore.id)}
+      <span><span class="pn">${pulisciHtml(giocatore.name)}</span><br><span class="muted small">${statistiche[giocatore.id].partite} partite</span></span>
+      <span class="pe">${Math.round(statistiche[giocatore.id].elo)}</span>
+    </button></li>`;
+
+  html += `<ul class="plist">${attivi.map(voceElenco).join("")}</ul>`;
+  if (nonAttivi.length) {
+    html += `
+      <h2 style="font-size:22px">Non più nel gruppo</h2>
+      <p class="muted small">Non compaiono tra i giocatori di una nuova partita, ma le loro partite restano valide.</p>
+      <ul class="plist">${nonAttivi.map(voceElenco).join("")}</ul>`;
+  }
+  contenitore.innerHTML = html;
+
+  trova("#moduloNuovoGiocatore")?.addEventListener("submit", aggiungiGiocatore);
+}
+
+async function aggiungiGiocatore(evento) {
+  evento.preventDefault();
+  const campo = trova("#campoNuovoNome");
+  const nome = campo.value.trim().replace(/\s+/g, " ");
+  if (!nome) return;
+  if (stato.giocatori.some(giocatore => giocatore.name.toLowerCase() === nome.toLowerCase())) {
+    mostraNotifica(`C'è già un giocatore chiamato ${nome}`);
+    return;
+  }
+
+  // Primo colore libero; se sono tutti usati si ricomincia
+  const coloriUsati = new Set(stato.giocatori.map(giocatore => giocatore.color));
+  let colore = coloriArmate.findIndex((_, indice) => !coloriUsati.has(indice));
+  if (colore < 0) colore = stato.giocatori.length % coloriArmate.length;
+
+  const id = archivio.nuovoId("players");
+  const salvato = await salva(
+    [{ raccolta: "players", id, dati: { name: nome, color: colore, active: true, createdAt: oraServer } }],
+    { action: "giocatore_aggiunto", target: id, summary: `Aggiunto il giocatore ${nome}`, before: null, after: { nome } },
+    `${nome} aggiunto`
+  );
+  if (salvato) campo.value = "";
+}
+
+function vistaStorico() {
+  const contenitore = trova("#vista-storico");
+  if (!stato.storico.length) {
+    contenitore.innerHTML = `
+      <h2>Storico</h2>
+      <div class="empty"><strong>Ancora nessuna azione.</strong>Ogni partita aggiunta, modificata o eliminata comparirà qui, con chi l'ha fatto e quando.</div>`;
+    return;
+  }
+
+  const voci = stato.storico.map(voce => {
+    let dettagli = "";
+    if (voce.before || voce.after) {
+      const prima = voce.before ? `<div><b>Prima</b>${pulisciHtml(testoFotografia(voce.before))}</div>` : "";
+      const dopo = voce.after ? `<div><b>Dopo</b>${pulisciHtml(testoFotografia(voce.after))}</div>` : "";
+      dettagli = `<details><summary>Dettagli</summary><div class="diff">${prima}${dopo}</div></details>`;
+    }
+    return `
+      <li>
+        <div class="what">${pulisciHtml(etichetteAzioni[voce.action] || voce.action)}</div>
+        <div>${pulisciHtml(voce.summary || "")}</div>
+        <div class="when">${pulisciHtml(voce.byName || voce.by)} (${pulisciHtml(voce.by)}), ${pulisciHtml(formattaMomento(voce.at))}</div>
+        ${dettagli}
+      </li>`;
+  });
+
+  const altre = stato.storico.length >= stato.limiteStorico
+    ? `<button class="btn ghost" type="button" id="btnStoricoVecchio" style="margin-top:14px">Mostra azioni più vecchie</button>`
+    : "";
+  contenitore.innerHTML = `
+    <h2>Storico</h2>
+    <p class="muted small">Ogni modifica resta registrata e nessuno può cancellarla.</p>
+    <ul class="log">${voci.join("")}</ul>
+    ${altre}`;
+
+  trova("#btnStoricoVecchio")?.addEventListener("click", () => {
+    stato.limiteStorico += 100;
+    ascoltaStorico();
+  });
+}
+
+
+// ===== Scheda del giocatore =====
+function graficoElo(andamento) {
+  if (andamento.length < 2) return `<p class="muted small">Il grafico compare dopo la prima partita.</p>`;
+
+  const larghezza = 600, altezza = 150, margine = 26;
+  const minimo = Math.min(eloIniziale, ...andamento) - 10;
+  const massimo = Math.max(eloIniziale, ...andamento) + 10;
+  const x = indice => margine + indice * (larghezza - margine * 2) / (andamento.length - 1);
+  const y = valore => altezza - 18 - (valore - minimo) / (massimo - minimo) * (altezza - 34);
+  const punti = andamento.map((valore, indice) => `${x(indice).toFixed(1)},${y(valore).toFixed(1)}`).join(" ");
+  const ultimo = andamento[andamento.length - 1];
+
+  return `
+    <svg class="chart" viewBox="0 0 ${larghezza} ${altezza}" preserveAspectRatio="none" role="img" aria-label="Andamento Elo da ${eloIniziale} a ${Math.round(ultimo)}">
+      <line class="base" x1="${margine}" x2="${larghezza - margine}" y1="${y(eloIniziale)}" y2="${y(eloIniziale)}" vector-effect="non-scaling-stroke"/>
+      <polyline class="line" points="${punti}" vector-effect="non-scaling-stroke"/>
+      <circle class="dot" cx="${x(andamento.length - 1)}" cy="${y(ultimo)}" r="4.5"/>
+    </svg>
+    <div class="muted small" style="display:flex;justify-content:space-between"><span>inizio, ${eloIniziale}</span><span>oggi, ${Math.round(ultimo)}</span></div>`;
+}
+
+function apriGiocatore(id) {
+  const giocatore = trovaGiocatore(id);
+  if (!giocatore) return;
+  const s = calcolo.statistiche[id];
+  const posizione = calcolo.inClassifica.findIndex(g => g.id === id);
+  const partitePerId = Object.fromEntries(stato.partite.map(partita => [partita.id, partita]));
+  const ultimePartite = s.cronologia.slice().reverse().slice(0, 12);
+
+  let sottotitolo = "nessuna partita";
+  if (posizione >= 0) sottotitolo = `${posizione + 1}° in classifica`;
+  else if (s.partite) sottotitolo = `in prova, ${s.partite} di ${partiteMinime} partite`;
+  if (giocatore.active === false) sottotitolo += ", fuori dal gruppo";
+
+  const mediaPosizione = s.partite ? (s.sommaPosizioni / s.partite).toFixed(1).replace(".", ",") : "–";
+  const percentuale = s.partite ? Math.round(s.vittorie / s.partite * 100) : 0;
+
+  let elencoUltime = "";
+  if (ultimePartite.length) {
+    const righe = ultimePartite.map(voce => `
+      <li>
+        <span>${pulisciHtml(formattaDataBreve(partitePerId[voce.idPartita].date))}, ${descriviEsito(voce)}</span>
+        <span class="delta ${classeVariazione(voce.variazione)}">${conSegno(voce.variazione)}</span>
+      </li>`);
+    elencoUltime = `<h3>Ultime partite</h3><ul class="recent">${righe.join("")}</ul>`;
+  }
+
+  let strumentiAdmin = "";
+  if (stato.utente?.eAdmin) {
+    strumentiAdmin = `
+      <div class="admin-box">
+        <form class="add-player" id="moduloRinomina">
+          <label class="sr" for="campoRinomina">Nuovo nome</label>
+          <input type="text" id="campoRinomina" maxlength="40" value="${pulisciHtml(giocatore.name)}">
+          <button class="btn" type="submit">Rinomina</button>
+        </form>
+        <button class="btn ghost" type="button" id="btnCambiaGruppo">${giocatore.active === false ? "Rimetti nel gruppo" : "Togli dal gruppo"}</button>
+      </div>`;
+  }
+
+  trova("#contenutoGiocatore").innerHTML = `
+    <div class="p-head">
+      ${pedina(id, "big")}
+      <div>
+        <div class="nm" id="titoloGiocatore" tabindex="-1" autofocus>${pulisciHtml(giocatore.name)}</div>
+        <div class="muted small">${sottotitolo}</div>
+      </div>
+    </div>
+    <div class="p-elo"><b>${Math.round(s.elo)}</b><span class="muted">punti Elo, massimo ${Math.round(s.massimo)}</span></div>
+    ${graficoElo(s.andamento)}
+    <div class="stats">
+      <div><b>${s.partite}</b><span>partite</span></div>
+      <div><b>${s.vittorie}</b><span>vittorie</span></div>
+      <div><b>${percentuale}%</b><span>vittorie su partite</span></div>
+      <div><b>${s.sopravvissuto}</b><span>da sopravvissuto</span></div>
+      <div><b>${s.eliminato}</b><span>da eliminato</span></div>
+      <div><b>${mediaPosizione}</b><span>posizione media</span></div>
+    </div>
+    ${elencoUltime}
+    ${strumentiAdmin}
+    <div class="actions"><button class="btn ghost" type="button" data-chiudi>Chiudi</button></div>`;
+
+  const finestra = trova("#finestraGiocatore");
+
+  trova("#moduloRinomina")?.addEventListener("submit", async evento => {
+    evento.preventDefault();
+    const nuovoNome = trova("#campoRinomina").value.trim().replace(/\s+/g, " ");
+    if (!nuovoNome || nuovoNome === giocatore.name) return;
+    if (stato.giocatori.some(g => g.id !== id && g.name.toLowerCase() === nuovoNome.toLowerCase())) {
+      mostraNotifica(`C'è già un giocatore chiamato ${nuovoNome}`);
+      return;
+    }
+    const salvato = await salva(
+      [{ raccolta: "players", id, unisci: true, dati: { name: nuovoNome } }],
+      { action: "giocatore_rinominato", target: id, summary: `${giocatore.name} ora si chiama ${nuovoNome}`,
+        before: { nome: giocatore.name }, after: { nome: nuovoNome } },
+      "Nome cambiato"
+    );
+    if (salvato) finestra.close();
+  });
+
+  trova("#btnCambiaGruppo")?.addEventListener("click", async () => {
+    const rientra = giocatore.active === false;
+    const salvato = await salva(
+      [{ raccolta: "players", id, unisci: true, dati: { active: rientra } }],
+      {
+        action: rientra ? "giocatore_riattivato" : "giocatore_nascosto",
+        target: id,
+        summary: rientra ? `${giocatore.name} rimesso nel gruppo` : `${giocatore.name} tolto dal gruppo`,
+        before: { nome: giocatore.name, attivo: !rientra },
+        after: { nome: giocatore.name, attivo: rientra }
+      },
+      rientra ? "Rimesso nel gruppo" : "Tolto dal gruppo"
+    );
+    if (salvato) finestra.close();
+  });
+
+  if (!finestra.open) finestra.showModal();
+}
+
+
+// ===== Modulo nuova partita / modifica =====
+let bozza = null;
+
+function apriPartita(idPartita) {
+  const partita = idPartita ? stato.partite.find(p => p.id === idPartita) : null;
+
+  if (partita) {
+    bozza = {
+      id: idPartita,
+      data: partita.date,
+      nota: partita.note || "",
+      scelti: ordinaPerPosizione(partita.results).map(esito => esito.p),
+      esiti: Object.fromEntries(partita.results.map(esito => [esito.p, esito.s])),
+      ordineEliminati: partita.results.filter(esito => esito.s === "o").sort((a, b) => a.o - b.o).map(esito => esito.p)
+    };
+  } else {
+    bozza = { id: null, data: dataDiOggi(), nota: "", scelti: [], esiti: {}, ordineEliminati: [] };
+  }
+
+  trova("#titoloPartita").textContent = partita ? `Modifica partita ${calcolo.numeroPartita[idPartita] ?? ""}`.trim() : "Nuova partita";
+  trova("#btnSalvaPartita").textContent = partita ? "Salva modifiche" : "Salva partita";
+  trova("#campoData").value = bozza.data;
+  trova("#campoNota").value = bozza.nota;
+  trova("#errorePartita").textContent = "";
+  disegnaBozza();
+  trova("#finestraPartita").showModal();
+}
+
+function esitiDellaBozza() {
+  const esiti = bozza.scelti.map(id => ({
+    p: id,
+    s: bozza.esiti[id],
+    o: bozza.esiti[id] === "o" ? bozza.ordineEliminati.indexOf(id) + 1 : null
+  }));
+  return assegnaPosizioni(esiti);
+}
+
+function problemaDellaBozza() {
+  if (bozza.scelti.length < 2) return "Scegli almeno 2 giocatori.";
+  const vincitori = bozza.scelti.filter(id => bozza.esiti[id] === "w").length;
+  if (vincitori === 0) return "Indica chi ha vinto.";
+  if (vincitori > 1) return "Può vincere una sola persona.";
+  if (!bozza.data) return "Inserisci la data.";
+  return "";
+}
+
+function disegnaBozza() {
+  // Nella scelta compaiono i giocatori del gruppo, più chi era già nella partita che si modifica
+  const disponibili = stato.giocatori
+    .filter(giocatore => giocatore.active !== false || bozza.scelti.includes(giocatore.id))
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  trova("#sceltaGiocatori").innerHTML = disponibili.length
+    ? disponibili.map(giocatore => `
+        <button type="button" class="chip" data-scegli="${giocatore.id}" aria-pressed="${bozza.scelti.includes(giocatore.id)}">
+          ${pedina(giocatore.id, "sm")}${pulisciHtml(giocatore.name)}
+        </button>`).join("")
+    : `<p class="muted">Prima aggiungi i giocatori nella scheda Giocatori.</p>`;
+
+  let html = "";
+  if (bozza.scelti.length) {
+    const opzioni = [["w", "Vince"], ["a", "Sopravvive"], ["o", "Eliminato"]];
+    const righe = bozza.scelti.map(id => `
+      <li>
+        <div class="who">${pedina(id, "sm")}${pulisciHtml(nomeGiocatore(id))}</div>
+        <div class="seg" role="group" aria-label="Esito di ${pulisciHtml(nomeGiocatore(id))}">
+          ${opzioni.map(([codice, etichetta]) => `<button type="button" data-esito-di="${id}" data-esito="${codice}" data-s="${codice}" aria-pressed="${bozza.esiti[id] === codice}">${etichetta}</button>`).join("")}
+        </div>
+      </li>`);
+    html += `<div class="field"><span class="lbl">Come è finita</span><ul class="outcomes">${righe.join("")}</ul></div>`;
+  }
+
+  if (bozza.ordineEliminati.length) {
+    const freccia = percorso => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="${percorso}"/></svg>`;
+    const ultimoIndice = bozza.ordineEliminati.length - 1;
+    const righe = bozza.ordineEliminati.map((id, indice) => `
+      <li>
+        ${pedina(id, "sm")}<span>${pulisciHtml(nomeGiocatore(id))}</span>
+        <button type="button" class="icon-btn" data-su="${indice}" ${indice === 0 ? "disabled" : ""} aria-label="Sposta ${pulisciHtml(nomeGiocatore(id))} prima">${freccia("M6 15l6-6 6 6")}</button>
+        <button type="button" class="icon-btn" data-giu="${indice}" ${indice === ultimoIndice ? "disabled" : ""} aria-label="Sposta ${pulisciHtml(nomeGiocatore(id))} dopo">${freccia("M6 9l6 6 6-6")}</button>
+      </li>`);
+    html += `
+      <div class="field">
+        <span class="lbl">Ordine di eliminazione</span>
+        <p class="hint">In alto chi è uscito per primo. Si riempie nell'ordine in cui tocchi Eliminato; usa le frecce per correggere.</p>
+        <ol class="elim">${righe.join("")}</ol>
+      </div>`;
+  }
+
+  // Anteprima dei punti: ricalcolo tutto come se la partita fosse già salvata
+  const problema = problemaDellaBozza();
+  if (!problema) {
+    const esiti = esitiDellaBozza();
+    const partitaOriginale = bozza.id ? stato.partite.find(p => p.id === bozza.id) : null;
+    const partitaProva = {
+      id: bozza.id || "anteprima",
+      date: bozza.data,
+      results: esiti,
+      deleted: false,
+      createdAt: partitaOriginale ? partitaOriginale.createdAt : Date.now() + 1e9
+    };
+    const altrePartite = stato.partite.filter(p => p.id !== bozza.id);
+    const variazioni = calcolaElo(stato.giocatori, [...altrePartite, partitaProva]).variazioniPerPartita[partitaProva.id] || {};
+    const righe = ordinaPerPosizione(esiti).map(esito => {
+      const variazione = variazioni[esito.p] || 0;
+      return `<li><span>${pulisciHtml(nomeGiocatore(esito.p))}, ${descriviEsito(esito, true)}</span><span class="delta ${classeVariazione(variazione)}">${conSegno(variazione)}</span></li>`;
+    });
+    html += `<div class="field"><span class="lbl">Punti Elo di questa partita</span><ul class="preview">${righe.join("")}</ul></div>`;
+  }
+
+  trova("#esitiPartita").innerHTML = html;
+  trova("#btnSalvaPartita").disabled = Boolean(problema);
+  trova("#errorePartita").textContent = bozza.scelti.length ? problema : "";
+}
+
+trova("#moduloPartita").addEventListener("click", evento => {
+  const pulsante = evento.target.closest("button");
+  if (!pulsante) return;
+  const dati = pulsante.dataset;
+
+  if (dati.scegli) {
+    const id = dati.scegli;
+    if (bozza.scelti.includes(id)) {
+      bozza.scelti = bozza.scelti.filter(x => x !== id);
+      bozza.ordineEliminati = bozza.ordineEliminati.filter(x => x !== id);
+      delete bozza.esiti[id];
+    } else {
+      bozza.scelti.push(id);
+      bozza.esiti[id] = "a";
+    }
+  } else if (dati.esitoDi) {
+    const id = dati.esitoDi;
+    const esito = dati.esito;
+    // Un solo vincitore: chi vinceva prima torna sopravvissuto
+    if (esito === "w") {
+      for (const altro of bozza.scelti) {
+        if (bozza.esiti[altro] === "w") bozza.esiti[altro] = "a";
+      }
+    }
+    bozza.esiti[id] = esito;
+    bozza.ordineEliminati = bozza.ordineEliminati.filter(x => x !== id);
+    if (esito === "o") bozza.ordineEliminati.push(id);
+  } else if (dati.su) {
+    const i = Number(dati.su);
+    [bozza.ordineEliminati[i - 1], bozza.ordineEliminati[i]] = [bozza.ordineEliminati[i], bozza.ordineEliminati[i - 1]];
+  } else if (dati.giu) {
+    const i = Number(dati.giu);
+    [bozza.ordineEliminati[i + 1], bozza.ordineEliminati[i]] = [bozza.ordineEliminati[i], bozza.ordineEliminati[i + 1]];
+  } else {
+    return;
+  }
+  disegnaBozza();
+});
+
+trova("#campoData").addEventListener("input", evento => {
+  bozza.data = evento.target.value;
+  disegnaBozza();
+});
+
+trova("#campoNota").addEventListener("input", evento => {
+  bozza.nota = evento.target.value;
+});
+
+trova("#moduloPartita").addEventListener("submit", async evento => {
+  evento.preventDefault();
+  const problema = problemaDellaBozza();
+  if (problema) {
+    trova("#errorePartita").textContent = problema;
+    return;
+  }
+
+  const esiti = esitiDellaBozza();
+  const nuovaVersione = { date: bozza.data, note: bozza.nota.trim(), results: esiti };
+  const riassunto = `Partita del ${formattaDataBreve(bozza.data)}: ${descriviPartita(esiti)}`;
+  const btnSalva = trova("#btnSalvaPartita");
+  btnSalva.disabled = true;
+
+  let salvato;
+  if (!bozza.id) {
+    const id = archivio.nuovoId("games");
+    salvato = await salva(
+      [{ raccolta: "games", id, dati: {
+        ...nuovaVersione, deleted: false,
+        createdAt: oraServer, createdBy: stato.utente.email,
+        updatedAt: oraServer, updatedBy: stato.utente.email
+      } }],
+      { action: "partita_aggiunta", target: id, summary: riassunto, before: null, after: fotografiaPartita(nuovaVersione) },
+      "Partita salvata"
+    );
+  } else {
+    const versionePrecedente = stato.partite.find(p => p.id === bozza.id);
+    salvato = await salva(
+      [{ raccolta: "games", id: bozza.id, unisci: true, dati: { ...nuovaVersione, updatedAt: oraServer, updatedBy: stato.utente.email } }],
+      { action: "partita_modificata", target: bozza.id, summary: riassunto,
+        before: fotografiaPartita(versionePrecedente), after: fotografiaPartita(nuovaVersione) },
+      "Modifiche salvate"
+    );
+  }
+
+  btnSalva.disabled = false;
+  if (salvato) trova("#finestraPartita").close();
+});
+
+
+// ===== Finestra di conferma =====
+function chiediConferma(titolo, testo, testoPulsante) {
+  return new Promise(risolvi => {
+    const finestra = trova("#finestraConferma");
+    trova("#titoloConferma").textContent = titolo;
+    trova("#testoConferma").textContent = testo;
+    trova("#btnConferma").textContent = testoPulsante;
+    finestra.addEventListener("close", () => risolvi(finestra.returnValue === "si"), { once: true });
+    finestra.returnValue = "";
+    finestra.showModal();
+  });
+}
+
+
+// ===== Clic in tutta la pagina =====
+document.addEventListener("click", async evento => {
+  const pulsante = evento.target.closest("button");
+  if (!pulsante) return;
+  const dati = pulsante.dataset;
+
+  if (dati.chiudi !== undefined) {
+    pulsante.closest("dialog").close();
+  } else if (dati.scheda) {
+    stato.schedaAttiva = dati.scheda;
+    disegna();
+    window.scrollTo(0, 0);
+  } else if (dati.giocatore) {
+    apriGiocatore(dati.giocatore);
+  } else if (dati.modifica) {
+    apriPartita(dati.modifica);
+  } else if (dati.elimina) {
+    const partita = stato.partite.find(p => p.id === dati.elimina);
+    const conferma = await chiediConferma(
+      "Eliminare la partita?",
+      `La partita del ${formattaDataBreve(partita.date)} smetterà di contare nel punteggio. Resta nello storico e si può ripristinare.`,
+      "Elimina"
+    );
+    if (!conferma) return;
+    salva(
+      [{ raccolta: "games", id: partita.id, unisci: true, dati: { deleted: true, updatedAt: oraServer, updatedBy: stato.utente.email } }],
+      { action: "partita_eliminata", target: partita.id,
+        summary: `Partita del ${formattaDataBreve(partita.date)}: ${descriviPartita(partita.results)}`,
+        before: fotografiaPartita(partita), after: null },
+      "Partita eliminata"
+    );
+  } else if (dati.ripristina) {
+    const partita = stato.partite.find(p => p.id === dati.ripristina);
+    salva(
+      [{ raccolta: "games", id: partita.id, unisci: true, dati: { deleted: false, updatedAt: oraServer, updatedBy: stato.utente.email } }],
+      { action: "partita_ripristinata", target: partita.id,
+        summary: `Partita del ${formattaDataBreve(partita.date)}: ${descriviPartita(partita.results)}`,
+        before: null, after: fotografiaPartita(partita) },
+      "Partita ripristinata"
+    );
+  }
+});
+
+trova("#btnNuovaPartita").addEventListener("click", () => apriPartita(null));
+
+
+// ===== Accesso =====
+trova("#btnAccesso").addEventListener("click", async () => {
+  if (stato.utente) {
+    const conferma = await chiediConferma("Uscire?", `Sei entrato come ${stato.utente.email}.`, "Esci");
+    if (conferma) await archivio.esci();
+    return;
+  }
+  trova("#erroreAccesso").textContent = "";
+  trova("#finestraAccesso").showModal();
+  trova("#campoEmail").focus();
+});
+
+trova("#moduloAccesso").addEventListener("submit", async evento => {
+  evento.preventDefault();
+  const btnEntra = trova("#btnEntra");
+  const erroreAccesso = trova("#erroreAccesso");
+  btnEntra.disabled = true;
+  erroreAccesso.textContent = "";
+
+  try {
+    await archivio.entra(trova("#campoEmail").value.trim(), trova("#campoPassword").value);
+    trova("#campoPassword").value = "";
+    trova("#finestraAccesso").close();
+  } catch (errore) {
+    const codice = errore?.code || "";
+    if (codice.includes("too-many")) erroreAccesso.textContent = "Troppi tentativi: riprova tra qualche minuto.";
+    else if (codice.includes("network")) erroreAccesso.textContent = "Connessione assente: riprova quando sei online.";
+    else if (codice.includes("unauthorized-domain")) erroreAccesso.textContent = "Questo sito non è tra i domini autorizzati in Firebase Authentication.";
+    else erroreAccesso.textContent = "Email o password non corretti.";
+  }
+  btnEntra.disabled = false;
+});
+
+
+// ===== Avvio =====
+function ascoltaStorico() {
+  if (smettiDiAscoltareStorico) smettiDiAscoltareStorico();
+  smettiDiAscoltareStorico = archivio.ascoltaStorico(stato.limiteStorico, voci => {
+    stato.storico = voci;
+    disegna();
+  }, gestisciErroreLettura);
+}
+
+function gestisciErroreLettura(errore) {
+  const codice = errore?.code || "";
+  stato.erroreCaricamento = codice.includes("permission-denied")
+    ? "Non riesco a leggere i dati: controlla di aver pubblicato le regole Firestore."
+    : `Non riesco a leggere i dati (${codice || errore?.message || "errore"}).`;
+  disegna();
+}
+
+async function avvia() {
+  disegna();
+  try {
+    archivio = await collegaFirebase();
+  } catch (errore) {
+    stato.erroreCaricamento = "Non riesco a collegarmi a Firebase: controlla la connessione e riprova.";
+    disegna();
+    return;
+  }
+
+  archivio.ascoltaGiocatori(giocatori => {
+    stato.giocatori = giocatori;
+    disegna();
+  }, gestisciErroreLettura);
+
+  archivio.ascoltaPartite(partite => {
+    stato.partite = partite;
+    disegna();
+  }, gestisciErroreLettura);
+
+  ascoltaStorico();
+
+  archivio.quandoCambiaUtente(utente => {
+    stato.utente = utente;
+    disegna();
+  });
+}
+
+avvia();
+</script>
+</body>
+</html>
