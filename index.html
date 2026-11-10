@@ -7,6 +7,9 @@
 <meta name="theme-color" content="#0f1e26" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Risiko">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icona-192.png">
+<link rel="apple-touch-icon" href="icona-180.png">
 <title>Classifica Risiko</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -288,6 +291,77 @@ dialog::backdrop { background: rgba(10, 20, 28, .55); }
   @keyframes pop { from { opacity: 0; transform: translate(-50%, 8px); } }
 }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+/* Stagioni */
+.barra-stagione { display: flex; gap: 8px; align-items: center; margin-bottom: 4px; }
+.barra-stagione[hidden] { display: none; }
+.barra-stagione select { flex: 1; min-width: 0; }
+select {
+  padding: 9px 12px; border: 1.5px solid var(--sea-line); border-radius: 10px;
+  background: var(--paper); min-height: 44px; max-width: 100%;
+}
+.albo { margin-top: 26px; }
+.lista-albo, .lista-numeri, .premi { list-style: none; margin: 0; padding: 0; }
+.lista-albo li { display: grid; grid-template-columns: 1fr auto auto; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--sea-line); }
+.nome-stagione { font-weight: 700; }
+.campione, .link-giocatore { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-weight: 700; }
+.campione:focus-visible, .link-giocatore:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.link-giocatore { margin-top: 4px; }
+.elo-campione { font: 800 24px/1 var(--display); color: var(--gold); }
+
+/* Colori delle armate */
+.pallino {
+  display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: var(--c);
+  margin-left: 6px; vertical-align: middle; box-shadow: 0 0 0 1.5px var(--paper), 0 0 0 2.5px var(--sea-line);
+}
+.pallino.grande { width: 20px; height: 20px; margin: 0 10px 0 0; }
+.colori { display: flex; gap: 10px; margin-top: 8px; }
+.colore-armata { width: 30px; height: 30px; border-radius: 50%; border: 0; background: var(--c); padding: 0; opacity: .55; }
+.colore-armata[aria-pressed="true"] { opacity: 1; box-shadow: 0 0 0 3px var(--paper), 0 0 0 5px var(--ink); }
+
+/* Eliminato da */
+.elim li { row-gap: 6px; }
+.eliminato-da { grid-column: 2 / -1; display: flex; align-items: center; gap: 8px; font-size: 15px; color: var(--ink-soft); }
+.eliminato-da select { flex: 1; min-height: 40px; padding: 6px 10px; color: var(--ink); }
+
+/* Pronostico */
+.preview li { gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--sea-line); }
+.pronostico { display: flex; gap: 12px; align-items: baseline; white-space: nowrap; }
+
+/* Numeri */
+.lista-numeri li { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--sea-line); }
+.titolo-record { font-size: 14px; color: var(--ink-soft); }
+.valore-record { text-align: right; }
+.valore-record b { display: block; font: 800 28px/1 var(--display); }
+.riga-colore { display: flex; align-items: center; font-weight: 700; }
+.grafico-tutti { height: 220px; margin-bottom: 6px; }
+.linea-giocatore { fill: none; stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+.linea-giocatore.attenuata { opacity: .15; }
+.linea-giocatore.spessa { stroke-width: 4.5; }
+.scelta-sfida { display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: center; }
+.punteggio-sfida { display: flex; justify-content: center; align-items: center; gap: 18px; margin: 18px 0 6px; }
+.punteggio-sfida span { display: flex; align-items: center; gap: 12px; }
+.punteggio-sfida b { font: 800 56px/1 var(--display); }
+.trattino { font: 800 40px/1 var(--display); color: var(--ink-soft); }
+.centrato { text-align: center; }
+
+/* Premi e rivalità */
+.premi { display: grid; gap: 8px; }
+.premi li { background: var(--sea); border-radius: 10px; padding: 8px 12px; }
+.premi b { display: block; }
+.premi span { font-size: 14px; color: var(--ink-soft); }
+.rivalita li span:last-child { display: flex; align-items: center; gap: 8px; }
+
+/* Varie */
+.tabs .wrap { grid-template-columns: repeat(5, 1fr); }
+.tabs button { font-size: 12px; }
+.spazio-sopra { margin-top: 18px; }
+.riga-agli-estremi { display: flex; justify-content: space-between; }
+.titolo-piccolo { font-size: 22px; }
+.blocco-password { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--sea-line); }
+.blocco-password h3 { margin-bottom: 10px; }
+.anteprima-immagine { width: 100%; border-radius: 12px; display: block; }
+.btn[hidden] { display: none; }
 </style>
 </head>
 <body>
@@ -297,11 +371,13 @@ dialog::backdrop { background: rgba(10, 20, 28, .55); }
   <button class="auth-btn" id="btnAccesso" type="button">Accedi</button>
 </header>
 <div class="wrap" id="avvisi"></div>
+<div class="wrap barra-stagione" id="barraStagione"></div>
 
 <main class="wrap">
   <section class="view" id="vista-classifica" aria-labelledby="scheda-classifica"></section>
   <section class="view" id="vista-partite" aria-labelledby="scheda-partite" hidden></section>
   <section class="view" id="vista-giocatori" aria-labelledby="scheda-giocatori" hidden></section>
+  <section class="view" id="vista-numeri" aria-labelledby="scheda-numeri" hidden></section>
   <section class="view" id="vista-storico" aria-labelledby="scheda-storico" hidden></section>
 </main>
 
@@ -323,6 +399,10 @@ dialog::backdrop { background: rgba(10, 20, 28, .55); }
     <button type="button" id="scheda-giocatori" data-scheda="giocatori">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5"/><path d="M16 4.8a3.3 3.3 0 0 1 0 6.4M18 14.8c2 .7 3.2 2.4 3.5 5.2"/></svg>
       Giocatori
+    </button>
+    <button type="button" id="scheda-numeri" data-scheda="numeri">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l5-6 4 4 8-9"/><path d="M15 6h5v5"/></svg>
+      Numeri
     </button>
     <button type="button" id="scheda-storico" data-scheda="storico">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>
@@ -347,6 +427,25 @@ dialog::backdrop { background: rgba(10, 20, 28, .55); }
   </form>
 </dialog>
 
+<dialog id="finestraAccount" aria-labelledby="titoloAccount">
+  <div class="sheet">
+    <h2 id="titoloAccount" tabindex="-1" autofocus></h2>
+    <p class="muted" id="emailAccount"></p>
+    <form id="moduloPassword" class="blocco-password">
+      <h3>Cambia password</h3>
+      <div class="field"><label for="campoPasswordAttuale">Password attuale</label><input type="password" id="campoPasswordAttuale" autocomplete="current-password" required></div>
+      <div class="field"><label for="campoNuovaPassword">Nuova password</label><input type="password" id="campoNuovaPassword" autocomplete="new-password" minlength="6" required></div>
+      <div class="field"><label for="campoRipetiPassword">Ripeti la nuova password</label><input type="password" id="campoRipetiPassword" autocomplete="new-password" minlength="6" required></div>
+      <p class="err-msg" id="errorePassword"></p>
+      <button class="btn" type="submit" id="btnCambiaPassword">Cambia password</button>
+    </form>
+    <div class="actions">
+      <button class="btn ghost" type="button" id="btnEsci">Esci</button>
+      <button class="btn red" type="button" data-chiudi>Chiudi</button>
+    </div>
+  </div>
+</dialog>
+
 <dialog id="finestraPartita" aria-labelledby="titoloPartita">
   <form class="sheet" id="moduloPartita">
     <h2 id="titoloPartita">Nuova partita</h2>
@@ -359,12 +458,44 @@ dialog::backdrop { background: rgba(10, 20, 28, .55); }
       <div class="chips" id="sceltaGiocatori"></div>
     </div>
     <div id="esitiPartita"></div>
+    <div class="field">
+      <label for="campoObiettivo">Obiettivo del vincitore</label>
+      <input type="text" id="campoObiettivo" maxlength="80" list="obiettiviSuggeriti" placeholder="Facoltativo, per esempio Asia e Africa" autocomplete="off">
+      <datalist id="obiettiviSuggeriti"></datalist>
+    </div>
+    <div id="anteprimaPunti"></div>
     <p class="err-msg" id="errorePartita"></p>
     <div class="actions">
       <button class="btn ghost" type="button" data-chiudi>Annulla</button>
       <button class="btn red" type="submit" id="btnSalvaPartita">Salva partita</button>
     </div>
   </form>
+</dialog>
+
+<dialog id="finestraStagione" aria-labelledby="titoloStagione">
+  <form class="sheet" id="moduloStagione">
+    <h2 id="titoloStagione">Nuova stagione</h2>
+    <p class="hint">Tutti ripartono da 1000. Le partite dalla data di inizio in poi contano per la nuova stagione; quelle prima restano nella stagione vecchia e si possono sempre rivedere.</p>
+    <div class="field"><label for="campoNomeStagione">Nome</label><input type="text" id="campoNomeStagione" maxlength="40" required></div>
+    <div class="field"><label for="campoInizioStagione">Inizia dal</label><input type="date" id="campoInizioStagione" required></div>
+    <p class="err-msg" id="erroreStagione"></p>
+    <div class="actions">
+      <button class="btn ghost" type="button" data-chiudi>Annulla</button>
+      <button class="btn red" type="submit" id="btnSalvaStagione">Inizia la stagione</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="finestraCondividi" aria-labelledby="titoloCondividi">
+  <div class="sheet">
+    <h2 id="titoloCondividi">Condividi la partita</h2>
+    <img id="anteprimaImmagine" class="anteprima-immagine" alt="">
+    <div class="actions">
+      <button class="btn ghost" type="button" data-chiudi>Chiudi</button>
+      <button class="btn ghost" type="button" id="btnScaricaImmagine">Scarica</button>
+      <button class="btn red" type="button" id="btnCondividiImmagine">Condividi</button>
+    </div>
+  </div>
 </dialog>
 
 <dialog id="finestraGiocatore" aria-labelledby="titoloGiocatore">
@@ -405,12 +536,32 @@ const partiteMinime = 5;      // partite per entrare in classifica
 // Segnaposto per "ora del server": al salvataggio diventa serverTimestamp()
 const oraServer = { segnaposto: "ora" };
 
-// Colori delle pedine (sfondo, testo), in ordine di assegnazione
-const coloriArmate = [
+// La prima stagione esiste sempre e parte "dall'inizio dei tempi"
+const primaStagione = { id: "iniziale", name: "Stagione 1", start: "0000-01-01" };
+
+// Colori delle pedine dei giocatori (sfondo, testo), in ordine di assegnazione
+const coloriPedine = [
   ["#c8352b", "#fff"], ["#2457a6", "#fff"], ["#e2b42b", "#1b1400"], ["#2e7d4f", "#fff"],
   ["#6b3fa0", "#fff"], ["#23262b", "#fff"], ["#d9702a", "#fff"], ["#1f8a8a", "#fff"],
   ["#c2457e", "#fff"], ["#7a5230", "#fff"]
 ];
+
+// Colori delle armate del gioco
+const coloriArmate = [
+  { id: "rosso", nome: "rosso", sfondo: "#c8352b" },
+  { id: "blu", nome: "blu", sfondo: "#2457a6" },
+  { id: "giallo", nome: "giallo", sfondo: "#e2b42b" },
+  { id: "verde", nome: "verde", sfondo: "#2e7d4f" },
+  { id: "viola", nome: "viola", sfondo: "#6b3fa0" },
+  { id: "nero", nome: "nero", sfondo: "#23262b" }
+];
+
+const obiettiviComuni = [
+  "Asia e Africa", "Asia e Sud America", "Nord America e Africa", "Nord America e Oceania",
+  "Europa, Sud America e un terzo continente", "Europa, Oceania e un terzo continente",
+  "24 territori", "18 territori con almeno 2 armate", "Distruggere un'armata"
+];
+
 const ordinali = ["primo", "secondo", "terzo", "quarto", "quinto", "sesto", "settimo", "ottavo", "nono", "decimo"];
 
 const etichetteAzioni = {
@@ -421,7 +572,8 @@ const etichetteAzioni = {
   giocatore_aggiunto: "Nuovo giocatore",
   giocatore_rinominato: "Giocatore rinominato",
   giocatore_nascosto: "Giocatore tolto dal gruppo",
-  giocatore_riattivato: "Giocatore riattivato"
+  giocatore_riattivato: "Giocatore riattivato",
+  stagione_iniziata: "Nuova stagione"
 };
 
 
@@ -482,10 +634,27 @@ function classeVariazione(variazione) {
   return "zero";
 }
 
+function percentuale(parte, totale) {
+  return totale ? Math.round(parte / totale * 100) : 0;
+}
+
 // ["A", "B", "C"] → "A, B e C"
 function elencaNomi(nomi) {
   if (nomi.length <= 1) return nomi[0] || "";
   return nomi.slice(0, -1).join(", ") + " e " + nomi[nomi.length - 1];
+}
+
+function trovaColoreArmata(id) {
+  return coloriArmate.find(colore => colore.id === id) || null;
+}
+
+// La chiave con il numero più alto in { chiave: numero }
+function piuFrequente(conteggi) {
+  let migliore = null;
+  for (const [chiave, volte] of Object.entries(conteggi)) {
+    if (!migliore || volte > migliore.volte) migliore = { chiave, volte };
+  }
+  return migliore;
 }
 
 
@@ -493,16 +662,22 @@ function elencaNomi(nomi) {
 const stato = {
   giocatori: [],
   partite: [],
+  stagioni: [],
   storico: [],
   utente: null,
   limiteStorico: 100,
   schedaAttiva: "classifica",
+  stagioneScelta: null,       // null = la stagione in corso, "sempre" = tutte
   mostraEliminate: false,
+  giocatoreEvidenziato: null, // nel grafico di tutti
+  testaATesta: { primo: null, secondo: null },
   erroreCaricamento: null
 };
 let archivio = null;
 let smettiDiAscoltareStorico = null;
 let calcolo = null;
+let calcoliPerStagione = new Map();
+let richiestaInstallazione = null;
 
 
 // ===== Collegamento a Firebase =====
@@ -534,16 +709,15 @@ async function collegaFirebase() {
     return pronti;
   }
 
-  return {
-    ascoltaGiocatori(quandoCambia, quandoErrore) {
-      return firestore.onSnapshot(firestore.collection(database, "players"),
-        istantanea => quandoCambia(leggiDocumenti(istantanea)), quandoErrore);
-    },
+  function ascoltaRaccolta(nome, quandoCambia, quandoErrore) {
+    return firestore.onSnapshot(firestore.collection(database, nome),
+      istantanea => quandoCambia(leggiDocumenti(istantanea)), quandoErrore);
+  }
 
-    ascoltaPartite(quandoCambia, quandoErrore) {
-      return firestore.onSnapshot(firestore.collection(database, "games"),
-        istantanea => quandoCambia(leggiDocumenti(istantanea)), quandoErrore);
-    },
+  return {
+    ascoltaGiocatori: (quandoCambia, quandoErrore) => ascoltaRaccolta("players", quandoCambia, quandoErrore),
+    ascoltaPartite: (quandoCambia, quandoErrore) => ascoltaRaccolta("games", quandoCambia, quandoErrore),
+    ascoltaStagioni: (quandoCambia, quandoErrore) => ascoltaRaccolta("seasons", quandoCambia, quandoErrore),
 
     ascoltaStorico(quante, quandoCambia, quandoErrore) {
       const richiesta = firestore.query(
@@ -604,14 +778,64 @@ async function collegaFirebase() {
 
     esci() {
       return autenticazione.signOut(auth);
+    },
+
+    // Firebase chiede di confermare la password attuale prima di cambiarla
+    async cambiaPassword(passwordAttuale, nuovaPassword) {
+      const utenteFirebase = auth.currentUser;
+      const credenziale = autenticazione.EmailAuthProvider.credential(utenteFirebase.email, passwordAttuale);
+      await autenticazione.reauthenticateWithCredential(utenteFirebase, credenziale);
+      await autenticazione.updatePassword(utenteFirebase, nuovaPassword);
     }
   };
 }
 
 
+// ===== Stagioni =====
+function elencoStagioni() {
+  const create = stato.stagioni.slice().sort((prima, seconda) =>
+    prima.start.localeCompare(seconda.start) || inMillisecondi(prima.createdAt) - inMillisecondi(seconda.createdAt));
+  return [primaStagione, ...create];
+}
+
+function stagioneDiUnaData(dataIso, stagioni = elencoStagioni()) {
+  let trovata = stagioni[0];
+  for (const stagione of stagioni) {
+    if (stagione.start <= dataIso) trovata = stagione;
+  }
+  return trovata;
+}
+
+function idStagioneVisibile() {
+  const stagioni = elencoStagioni();
+  if (stato.stagioneScelta === "sempre") return "sempre";
+  if (stagioni.some(stagione => stagione.id === stato.stagioneScelta)) return stato.stagioneScelta;
+  return stagioni[stagioni.length - 1].id;
+}
+
+function nomeStagione(idStagione) {
+  if (idStagione === "sempre") return "Tutte le stagioni";
+  return elencoStagioni().find(stagione => stagione.id === idStagione)?.name ?? "";
+}
+
+function partiteDellaStagione(idStagione, partite = stato.partite) {
+  if (idStagione === "sempre") return partite;
+  const stagioni = elencoStagioni();
+  return partite.filter(partita => stagioneDiUnaData(partita.date, stagioni).id === idStagione);
+}
+
+// Il calcolo di una stagione si fa una volta per ogni disegno della pagina
+function calcoloDi(idStagione) {
+  if (!calcoliPerStagione.has(idStagione)) {
+    calcoliPerStagione.set(idStagione, calcolaElo(stato.giocatori, partiteDellaStagione(idStagione)));
+  }
+  return calcoliPerStagione.get(idStagione);
+}
+
+
 // ===== Calcolo dell'Elo =====
 
-// Ogni esito è { p: idGiocatore, s: "w" | "a" | "o", o: ordine di eliminazione }.
+// Ogni esito è { p: giocatore, s: "w" | "a" | "o", o: ordine di eliminazione, k: chi l'ha eliminato, c: colore }.
 // Posizione: 1 chi vince, 2 i sopravvissuti, poi gli eliminati (chi esce prima sta più in basso).
 function assegnaPosizioni(esiti) {
   const quantiEliminati = esiti.filter(esito => esito.s === "o").length;
@@ -620,7 +844,14 @@ function assegnaPosizioni(esiti) {
     if (esito.s === "w") posizione = 1;
     else if (esito.s === "a") posizione = 2;
     else posizione = 2 + (quantiEliminati - esito.o + 1);
-    return { p: esito.p, s: esito.s, o: esito.s === "o" ? esito.o : null, pos: posizione };
+    return {
+      p: esito.p,
+      s: esito.s,
+      o: esito.s === "o" ? esito.o : null,
+      k: esito.s === "o" ? (esito.k ?? null) : null,
+      c: esito.c ?? null,
+      pos: posizione
+    };
   });
 }
 
@@ -635,19 +866,23 @@ function calcolaElo(giocatori, partite) {
   for (const giocatore of giocatori) {
     statistiche[giocatore.id] = {
       elo: eloIniziale, partite: 0, vittorie: 0, sopravvissuto: 0, eliminato: 0,
-      sommaPosizioni: 0, massimo: eloIniziale, andamento: [eloIniziale], ultimaVariazione: null, cronologia: []
+      sommaPosizioni: 0, massimo: eloIniziale, andamento: [eloIniziale], ultimaVariazione: null,
+      eliminazioniFatte: 0, eliminatoDa: {}, haEliminato: {},
+      serieAttuale: 0, serieMigliore: 0, cronologia: []
     };
   }
 
   const variazioniPerPartita = {};
-  const partiteValide = partite.filter(partita => !partita.deleted).sort(confrontaPartite);
+  const eloDopoPerPartita = {};
   const numeroPartita = {};
+  const partiteInOrdine = [];
+  const partiteValide = partite.filter(partita => !partita.deleted).sort(confrontaPartite);
 
   for (const partita of partiteValide) {
     const esiti = (partita.results || []).filter(esito => statistiche[esito.p]);
     const numeroGiocatori = esiti.length;
     if (numeroGiocatori < 2) continue;
-    numeroPartita[partita.id] = Object.keys(numeroPartita).length + 1;
+    numeroPartita[partita.id] = partiteInOrdine.length + 1;
 
     // Gli Elo di prima della partita: tutti i confronti usano questi
     const eloPrima = {};
@@ -668,28 +903,176 @@ function calcolaElo(giocatori, partite) {
       variazioni[esito.p] = k / (numeroGiocatori - 1) * somma;
     }
 
-    variazioniPerPartita[partita.id] = {};
+    const eloDopo = {};
     for (const esito of esiti) {
       const s = statistiche[esito.p];
+      const altriElo = esiti.filter(altro => altro !== esito).map(altro => eloPrima[altro.p]);
+      const eliminazioniInPartita = esiti.filter(altro => altro.k === esito.p).length;
+
       s.elo += variazioni[esito.p];
       s.partite += 1;
       s.sommaPosizioni += esito.pos;
       if (esito.s === "w") s.vittorie += 1;
       else if (esito.s === "a") s.sopravvissuto += 1;
       else s.eliminato += 1;
+
+      if (esito.s === "w") {
+        s.serieAttuale += 1;
+        s.serieMigliore = Math.max(s.serieMigliore, s.serieAttuale);
+      } else {
+        s.serieAttuale = 0;
+      }
+
+      if (esito.s === "o" && esito.k && statistiche[esito.k]) {
+        const uccisore = statistiche[esito.k];
+        uccisore.eliminazioniFatte += 1;
+        uccisore.haEliminato[esito.p] = (uccisore.haEliminato[esito.p] || 0) + 1;
+        s.eliminatoDa[esito.k] = (s.eliminatoDa[esito.k] || 0) + 1;
+      }
+
       s.massimo = Math.max(s.massimo, s.elo);
       s.andamento.push(s.elo);
       s.ultimaVariazione = variazioni[esito.p];
-      s.cronologia.push({ idPartita: partita.id, variazione: variazioni[esito.p], s: esito.s, o: esito.o });
-      variazioniPerPartita[partita.id][esito.p] = variazioni[esito.p];
+      s.cronologia.push({
+        idPartita: partita.id,
+        data: partita.date,
+        variazione: variazioni[esito.p],
+        elo: s.elo,
+        s: esito.s,
+        o: esito.o,
+        eliminazioni: eliminazioniInPartita,
+        eraIlPiuBasso: numeroGiocatori >= 3 && eloPrima[esito.p] < Math.min(...altriElo)
+      });
+      eloDopo[esito.p] = s.elo;
     }
+
+    variazioniPerPartita[partita.id] = variazioni;
+    eloDopoPerPartita[partita.id] = eloDopo;
+    partiteInOrdine.push({ partita, esiti, eloPrima, eloDopo, variazioni });
   }
 
   const perElo = (primo, secondo) => statistiche[secondo.id].elo - statistiche[primo.id].elo;
   const inClassifica = giocatori.filter(g => statistiche[g.id].partite >= partiteMinime).sort(perElo);
   const inProva = giocatori.filter(g => statistiche[g.id].partite > 0 && statistiche[g.id].partite < partiteMinime).sort(perElo);
 
-  return { statistiche, variazioniPerPartita, inClassifica, inProva, numeroPartita };
+  return { statistiche, variazioniPerPartita, eloDopoPerPartita, numeroPartita, partiteInOrdine, inClassifica, inProva };
+}
+
+// Probabilità di vincere secondo l'Elo: ognuno pesa 10^(Elo/400)
+function probabilitaDiVittoria(eloDeiGiocatori) {
+  const pesi = Object.fromEntries(Object.entries(eloDeiGiocatori).map(([id, elo]) => [id, Math.pow(10, elo / 400)]));
+  const totale = Object.values(pesi).reduce((somma, peso) => somma + peso, 0);
+  return Object.fromEntries(Object.entries(pesi).map(([id, peso]) => [id, peso / totale]));
+}
+
+
+// ===== Premi, record e confronti =====
+
+// Quante volte la condizione si avvera N partite di fila (le serie non si sovrappongono)
+function contaSerie(voci, condizione, lunghezza) {
+  let serie = 0;
+  let volte = 0;
+  for (const voce of voci) {
+    if (condizione(voce)) {
+      serie += 1;
+      if (serie === lunghezza) {
+        volte += 1;
+        serie = 0;
+      }
+    } else {
+      serie = 0;
+    }
+  }
+  return volte;
+}
+
+function premiDelGiocatore(s) {
+  const voci = s.cronologia;
+  const premi = [];
+  const aggiungi = (nome, descrizione, volte) => {
+    if (volte > 0) premi.push({ nome, descrizione, volte });
+  };
+  aggiungi("Prima vittoria", "Ha vinto almeno una partita", s.vittorie > 0 ? 1 : 0);
+  aggiungi("Tris", "3 vittorie di fila", contaSerie(voci, voce => voce.s === "w", 3));
+  aggiungi("Sopravvissuto seriale", "5 partite di fila senza essere eliminato", contaSerie(voci, voce => voce.s !== "o", 5));
+  aggiungi("Ammazzagiganti", "Ha vinto partendo con l'Elo più basso del tavolo", voci.filter(voce => voce.s === "w" && voce.eraIlPiuBasso).length);
+  aggiungi("Boia", "Ha eliminato almeno 2 giocatori nella stessa partita", voci.filter(voce => voce.eliminazioni >= 2).length);
+  aggiungi("Kamikaze", "Eliminato per primo 3 partite di fila", contaSerie(voci, voce => voce.s === "o" && voce.o === 1, 3));
+  aggiungi("Veterano", "Almeno 25 partite giocate", s.partite >= 25 ? 1 : 0);
+  return premi;
+}
+
+function calcolaRecord(calcoloStagione) {
+  let eloPiuAlto = null;
+  let saltoPiuGrande = null;
+  let crolloPiuGrande = null;
+
+  for (const voce of calcoloStagione.partiteInOrdine) {
+    for (const esito of voce.esiti) {
+      const elo = voce.eloDopo[esito.p];
+      const variazione = voce.variazioni[esito.p];
+      if (!eloPiuAlto || elo > eloPiuAlto.valore) eloPiuAlto = { chi: esito.p, valore: elo, data: voce.partita.date };
+      if (!saltoPiuGrande || variazione > saltoPiuGrande.valore) saltoPiuGrande = { chi: esito.p, valore: variazione, data: voce.partita.date };
+      if (!crolloPiuGrande || variazione < crolloPiuGrande.valore) crolloPiuGrande = { chi: esito.p, valore: variazione, data: voce.partita.date };
+    }
+  }
+
+  let serieMigliore = null;
+  let boia = null;
+  for (const [id, s] of Object.entries(calcoloStagione.statistiche)) {
+    if (s.serieMigliore > 0 && (!serieMigliore || s.serieMigliore > serieMigliore.valore)) serieMigliore = { chi: id, valore: s.serieMigliore };
+    if (s.eliminazioniFatte > 0 && (!boia || s.eliminazioniFatte > boia.valore)) boia = { chi: id, valore: s.eliminazioniFatte };
+  }
+
+  const record = [];
+  if (eloPiuAlto) record.push({ titolo: "Elo più alto", chi: eloPiuAlto.chi, valore: Math.round(eloPiuAlto.valore), dettaglio: formattaDataBreve(eloPiuAlto.data) });
+  if (serieMigliore) record.push({ titolo: "Più vittorie di fila", chi: serieMigliore.chi, valore: serieMigliore.valore, dettaglio: serieMigliore.valore === 1 ? "vittoria" : "vittorie" });
+  if (saltoPiuGrande && saltoPiuGrande.valore > 0) record.push({ titolo: "Salto più grande", chi: saltoPiuGrande.chi, valore: conSegno(saltoPiuGrande.valore), dettaglio: formattaDataBreve(saltoPiuGrande.data) });
+  if (crolloPiuGrande && crolloPiuGrande.valore < 0) record.push({ titolo: "Crollo più grande", chi: crolloPiuGrande.chi, valore: conSegno(crolloPiuGrande.valore), dettaglio: formattaDataBreve(crolloPiuGrande.data) });
+  if (boia) record.push({ titolo: "Più eliminazioni", chi: boia.chi, valore: boia.valore, dettaglio: boia.valore === 1 ? "giocatore eliminato" : "giocatori eliminati" });
+  return record;
+}
+
+function confrontaTestaATesta(calcoloStagione, idPrimo, idSecondo) {
+  const risultato = { insieme: 0, davantiPrimo: 0, davantiSecondo: 0, pari: 0, primoEliminaSecondo: 0, secondoEliminaPrimo: 0 };
+  for (const voce of calcoloStagione.partiteInOrdine) {
+    const esitoPrimo = voce.esiti.find(esito => esito.p === idPrimo);
+    const esitoSecondo = voce.esiti.find(esito => esito.p === idSecondo);
+    if (!esitoPrimo || !esitoSecondo) continue;
+    risultato.insieme += 1;
+    if (esitoPrimo.pos < esitoSecondo.pos) risultato.davantiPrimo += 1;
+    else if (esitoPrimo.pos > esitoSecondo.pos) risultato.davantiSecondo += 1;
+    else risultato.pari += 1;
+    if (esitoSecondo.k === idPrimo) risultato.primoEliminaSecondo += 1;
+    if (esitoPrimo.k === idSecondo) risultato.secondoEliminaPrimo += 1;
+  }
+  return risultato;
+}
+
+function statisticheColori(calcoloStagione) {
+  const conteggi = Object.fromEntries(coloriArmate.map(colore => [colore.id, { partite: 0, vittorie: 0 }]));
+  for (const voce of calcoloStagione.partiteInOrdine) {
+    for (const esito of voce.esiti) {
+      if (!esito.c || !conteggi[esito.c]) continue;
+      conteggi[esito.c].partite += 1;
+      if (esito.s === "w") conteggi[esito.c].vittorie += 1;
+    }
+  }
+  return coloriArmate
+    .map(colore => ({ ...colore, ...conteggi[colore.id] }))
+    .filter(colore => colore.partite > 0)
+    .sort((a, b) => percentuale(b.vittorie, b.partite) - percentuale(a.vittorie, a.partite) || b.partite - a.partite);
+}
+
+function statisticheObiettivi(calcoloStagione) {
+  const conteggi = {};
+  for (const voce of calcoloStagione.partiteInOrdine) {
+    const obiettivo = (voce.partita.objective || "").trim();
+    if (obiettivo) conteggi[obiettivo] = (conteggi[obiettivo] || 0) + 1;
+  }
+  return Object.entries(conteggi)
+    .map(([obiettivo, vittorie]) => ({ obiettivo, vittorie }))
+    .sort((a, b) => b.vittorie - a.vittorie || a.obiettivo.localeCompare(b.obiettivo));
 }
 
 
@@ -702,36 +1085,54 @@ function nomeGiocatore(id) {
   return trovaGiocatore(id)?.name ?? "Giocatore rimosso";
 }
 
+function colorePedina(id) {
+  return coloriPedine[(trovaGiocatore(id)?.color ?? 0) % coloriPedine.length];
+}
+
 function pedina(id, taglia = "") {
-  const giocatore = trovaGiocatore(id);
-  const [sfondo, testo] = coloriArmate[(giocatore?.color ?? 0) % coloriArmate.length];
-  const iniziale = (giocatore?.name || "?").trim().charAt(0).toUpperCase();
+  const [sfondo, testo] = colorePedina(id);
+  const iniziale = (trovaGiocatore(id)?.name || "?").trim().charAt(0).toUpperCase();
   return `<span class="token ${taglia}" style="--c:${sfondo};--t:${testo}" aria-hidden="true">${pulisciHtml(iniziale)}</span>`;
+}
+
+function pallinoArmata(idColore) {
+  const colore = trovaColoreArmata(idColore);
+  if (!colore) return "";
+  return `<span class="pallino" style="--c:${colore.sfondo}" title="armata ${colore.nome}" aria-label="armata ${colore.nome}"></span>`;
 }
 
 function descriviEsito(esito, breve = false) {
   if (esito.s === "w") return "vince";
   if (esito.s === "a") return "sopravvive";
   if (breve) return `eliminato ${esito.o}°`;
-  return `eliminato per ${ordinali[esito.o - 1] || esito.o + "°"}`;
+  const da = esito.k ? ` da ${nomeGiocatore(esito.k)}` : "";
+  return `eliminato per ${ordinali[esito.o - 1] || esito.o + "°"}${da}`;
 }
 
 function ordinaPerPosizione(esiti) {
   return esiti.slice().sort((primo, secondo) => primo.pos - secondo.pos);
 }
 
-function descriviPartita(esiti, nomeDi = nomeGiocatore) {
-  const vincitori = esiti.filter(esito => esito.s === "w").map(esito => nomeDi(esito.p));
-  const sopravvissuti = esiti.filter(esito => esito.s === "a").map(esito => nomeDi(esito.p));
-  const eliminati = esiti.filter(esito => esito.s === "o").sort((a, b) => a.o - b.o).map(esito => nomeDi(esito.p));
-
+// eliminati: [{ nome, da }] nell'ordine in cui sono usciti
+function componiRiassunto(vincitore, sopravvissuti, eliminati) {
   const parti = [];
-  if (vincitori.length) parti.push("vince " + vincitori[0]);
+  if (vincitore) parti.push("vince " + vincitore);
   if (sopravvissuti.length === 1) parti.push("sopravvive " + sopravvissuti[0]);
   if (sopravvissuti.length > 1) parti.push("sopravvivono " + elencaNomi(sopravvissuti));
-  if (eliminati.length === 1) parti.push("eliminato " + eliminati[0]);
-  if (eliminati.length > 1) parti.push("eliminati nell'ordine " + eliminati.join(", "));
+  const nomiEliminati = eliminati.map(eliminato => eliminato.da ? `${eliminato.nome} (da ${eliminato.da})` : eliminato.nome);
+  if (nomiEliminati.length === 1) parti.push("eliminato " + nomiEliminati[0]);
+  if (nomiEliminati.length > 1) parti.push("eliminati nell'ordine " + nomiEliminati.join(", "));
   return parti.join("; ");
+}
+
+function descriviPartita(esiti) {
+  const vincitore = esiti.find(esito => esito.s === "w");
+  return componiRiassunto(
+    vincitore ? nomeGiocatore(vincitore.p) : "",
+    esiti.filter(esito => esito.s === "a").map(esito => nomeGiocatore(esito.p)),
+    esiti.filter(esito => esito.s === "o").sort((a, b) => a.o - b.o)
+      .map(esito => ({ nome: nomeGiocatore(esito.p), da: esito.k ? nomeGiocatore(esito.k) : null }))
+  );
 }
 
 // Copia leggibile della partita da conservare nello storico (con i nomi di quel momento)
@@ -739,10 +1140,13 @@ function fotografiaPartita(partita) {
   return {
     data: partita.date,
     nota: partita.note || "",
+    obiettivo: partita.objective || "",
     risultati: ordinaPerPosizione(partita.results).map(esito => ({
       nome: nomeGiocatore(esito.p),
       esito: esito.s === "w" ? "vince" : esito.s === "a" ? "sopravvive" : "eliminato",
-      ordine: esito.o ?? null
+      ordine: esito.o ?? null,
+      eliminatoDa: esito.k ? nomeGiocatore(esito.k) : null,
+      colore: esito.c ?? null
     }))
   };
 }
@@ -750,14 +1154,22 @@ function fotografiaPartita(partita) {
 function testoFotografia(fotografia) {
   if (!fotografia) return "";
   if (fotografia.risultati) {
-    const codici = { vince: "w", sopravvive: "a", eliminato: "o" };
-    const esiti = fotografia.risultati.map((risultato, indice) => ({ p: indice, s: codici[risultato.esito], o: risultato.ordine }));
-    const nota = fotografia.nota ? `, nota: "${fotografia.nota}"` : "";
-    return `${formattaData(fotografia.data)}${nota}. ${descriviPartita(esiti, indice => fotografia.risultati[indice].nome)}.`;
+    const risultati = fotografia.risultati;
+    const vincitore = risultati.find(r => r.esito === "vince");
+    const riassunto = componiRiassunto(
+      vincitore?.nome || "",
+      risultati.filter(r => r.esito === "sopravvive").map(r => r.nome),
+      risultati.filter(r => r.esito === "eliminato").sort((a, b) => a.ordine - b.ordine).map(r => ({ nome: r.nome, da: r.eliminatoDa }))
+    );
+    const colori = risultati.filter(r => r.colore).map(r => `${r.nome} ${r.colore}`);
+    let testo = `${formattaData(fotografia.data)}. ${riassunto}.`;
+    if (fotografia.obiettivo) testo += ` Obiettivo: ${fotografia.obiettivo}.`;
+    if (colori.length) testo += ` Armate: ${colori.join(", ")}.`;
+    if (fotografia.nota) testo += ` Nota: "${fotografia.nota}".`;
+    return testo;
   }
-  if (fotografia.nome) {
-    return fotografia.nome + (fotografia.attivo === false ? " (fuori dal gruppo)" : "");
-  }
+  if (fotografia.inizio) return `${fotografia.nome}, dal ${formattaData(fotografia.inizio)}`;
+  if (fotografia.nome) return fotografia.nome + (fotografia.attivo === false ? " (fuori dal gruppo)" : "");
   return "";
 }
 
@@ -800,42 +1212,73 @@ function disegnaAvvisi() {
   if (stato.utente && !stato.utente.eAdmin) {
     avvisi.push(`<div class="notice">Sei entrato come ${pulisciHtml(stato.utente.email)}, ma questo indirizzo non è tra gli admin: puoi solo guardare. Aggiungilo alla raccolta admins in Firestore.</div>`);
   }
+  if (richiestaInstallazione) {
+    avvisi.push(`<div class="notice">Puoi installare la classifica come app, con la sua icona nella schermata Home.
+      <br><button class="btn ghost" type="button" id="btnInstalla">Installa</button> <button class="btn quiet" type="button" id="btnNonOra">Non ora</button></div>`);
+  }
   trova("#avvisi").innerHTML = avvisi.join("");
 }
 
+let ultimaBarraStagione = "";
+function disegnaBarraStagione() {
+  const barra = trova("#barraStagione");
+  barra.hidden = stato.schedaAttiva === "storico";
+  const stagioni = elencoStagioni();
+  const scelta = idStagioneVisibile();
+  const opzioni = stagioni.slice().reverse().map((stagione, indice) => {
+    const etichetta = indice === 0 ? `${stagione.name} (in corso)` : stagione.name;
+    return `<option value="${pulisciHtml(stagione.id)}" ${stagione.id === scelta ? "selected" : ""}>${pulisciHtml(etichetta)}</option>`;
+  });
+  opzioni.push(`<option value="sempre" ${scelta === "sempre" ? "selected" : ""}>Tutte le stagioni</option>`);
+
+  const html = `
+    <label class="sr" for="sceltaStagione">Stagione da vedere</label>
+    <select id="sceltaStagione">${opzioni.join("")}</select>
+    ${stato.utente?.eAdmin ? `<button class="btn ghost" type="button" id="btnNuovaStagione">Nuova stagione</button>` : ""}`;
+
+  // Ridisegno solo se cambia qualcosa, così il menu non si chiude mentre lo si usa
+  if (html !== ultimaBarraStagione) {
+    barra.innerHTML = html;
+    ultimaBarraStagione = html;
+  }
+}
+
 function disegna() {
-  calcolo = calcolaElo(stato.giocatori, stato.partite);
+  calcoliPerStagione = new Map();
+  calcolo = calcoloDi(idStagioneVisibile());
   disegnaAvvisi();
+  disegnaBarraStagione();
 
   const btnAccesso = trova("#btnAccesso");
   btnAccesso.textContent = stato.utente ? stato.utente.nome : "Accedi";
-  btnAccesso.setAttribute("aria-label", stato.utente ? `Account ${stato.utente.nome}: esci` : "Accedi");
-  trova("#btnNuovaPartita").hidden = !stato.utente?.eAdmin || stato.schedaAttiva === "storico";
+  btnAccesso.setAttribute("aria-label", stato.utente ? `Il tuo account, ${stato.utente.nome}` : "Accedi");
+  trova("#btnNuovaPartita").hidden = !stato.utente?.eAdmin || ["storico", "numeri"].includes(stato.schedaAttiva);
 
-  for (const scheda of ["classifica", "partite", "giocatori", "storico"]) {
+  for (const scheda of ["classifica", "partite", "giocatori", "numeri", "storico"]) {
     trova("#vista-" + scheda).hidden = stato.schedaAttiva !== scheda;
     const pulsante = trova("#scheda-" + scheda);
     if (stato.schedaAttiva === scheda) pulsante.setAttribute("aria-current", "page");
     else pulsante.removeAttribute("aria-current");
   }
 
-  const viste = { classifica: vistaClassifica, partite: vistaPartite, giocatori: vistaGiocatori, storico: vistaStorico };
+  const viste = { classifica: vistaClassifica, partite: vistaPartite, giocatori: vistaGiocatori, numeri: vistaNumeri, storico: vistaStorico };
   viste[stato.schedaAttiva]();
 }
 
 function vistaClassifica() {
   const contenitore = trova("#vista-classifica");
   const { statistiche, inClassifica, inProva } = calcolo;
+  let html = "";
 
   if (!inClassifica.length && !inProva.length) {
-    const invito = stato.utente?.eAdmin
-      ? "Aggiungi i giocatori nella scheda Giocatori, poi registra la prima partita con Nuova partita."
-      : "Accedi come admin per registrare la prima partita.";
-    contenitore.innerHTML = `<div class="empty"><strong>Nessuna partita ancora.</strong>${invito}</div>`;
-    return;
+    const stagioneVuotaMaNonLaPrima = stato.partite.some(partita => !partita.deleted) && idStagioneVisibile() !== "sempre";
+    let invito;
+    if (stagioneVuotaMaNonLaPrima) invito = `${nomeStagione(idStagioneVisibile())} non ha ancora partite: tutti ripartono da ${eloIniziale}.`;
+    else if (stato.utente?.eAdmin) invito = "Aggiungi i giocatori nella scheda Giocatori, poi registra la prima partita con Nuova partita.";
+    else invito = "Accedi come admin per registrare la prima partita.";
+    html += `<div class="empty"><strong>Nessuna partita ancora.</strong>${invito}</div>`;
   }
 
-  let html = "";
   if (inClassifica.length) {
     const primo = inClassifica[0];
     const s = statistiche[primo.id];
@@ -857,7 +1300,7 @@ function vistaClassifica() {
     const eloMassimo = Math.max(...tuttiGliElo);
     const righe = inClassifica.slice(1).map((giocatore, indice) => rigaClassifica(giocatore, indice + 2, eloMinimo, eloMassimo));
     html += `<ol class="ranks" start="2" aria-label="Classifica">${righe.join("")}</ol>`;
-  } else {
+  } else if (inProva.length) {
     html += `<div class="empty"><strong>Classifica in arrivo.</strong>Si entra in classifica dopo ${partiteMinime} partite: intanto ecco chi è in prova.</div>`;
   }
 
@@ -869,11 +1312,12 @@ function vistaClassifica() {
         <ol class="ranks" aria-label="Giocatori in prova">${inProva.map(giocatore => rigaClassifica(giocatore, null)).join("")}</ol>
       </div>`;
   }
+
+  html += alboDOro();
   contenitore.innerHTML = html;
 
   function rigaClassifica(giocatore, posizione, eloMinimo, eloMassimo) {
     const s = statistiche[giocatore.id];
-    const percentuale = Math.round(s.vittorie / s.partite * 100);
     let barra = "";
     if (posizione) {
       const larghezza = Math.max(4, Math.round((s.elo - eloMinimo) / Math.max(1, eloMassimo - eloMinimo) * 100));
@@ -888,12 +1332,33 @@ function vistaClassifica() {
         ${pedina(giocatore.id)}
         <div class="main">
           <button class="name" type="button" data-giocatore="${giocatore.id}">${pulisciHtml(giocatore.name)}</button>
-          <span class="sub">${s.partite} partite, ${s.vittorie} ${s.vittorie === 1 ? "vittoria" : "vittorie"} (${percentuale}%)</span>
+          <span class="sub">${s.partite} partite, ${s.vittorie} ${s.vittorie === 1 ? "vittoria" : "vittorie"} (${percentuale(s.vittorie, s.partite)}%)</span>
           ${barra}
         </div>
         <div class="elo"><b>${Math.round(s.elo)}</b>${variazione}</div>
       </li>`;
   }
+}
+
+// Vincitori delle stagioni già concluse
+function alboDOro() {
+  const stagioni = elencoStagioni();
+  const concluse = stagioni.slice(0, -1).reverse();
+  if (!concluse.length) return "";
+  const righe = concluse.map(stagione => {
+    const campione = calcoloDi(stagione.id).inClassifica[0];
+    if (!campione) {
+      return `<li><span class="nome-stagione">${pulisciHtml(stagione.name)}</span><span class="muted small">nessuno con ${partiteMinime} partite</span></li>`;
+    }
+    const elo = Math.round(calcoloDi(stagione.id).statistiche[campione.id].elo);
+    return `
+      <li>
+        <span class="nome-stagione">${pulisciHtml(stagione.name)}</span>
+        <button type="button" class="campione" data-giocatore="${campione.id}">${pedina(campione.id, "sm")}${pulisciHtml(campione.name)}</button>
+        <span class="elo-campione">${elo}</span>
+      </li>`;
+  });
+  return `<div class="albo"><h2>Albo d'oro</h2><ul class="lista-albo">${righe.join("")}</ul></div>`;
 }
 
 function schedaPartita(partita) {
@@ -908,40 +1373,42 @@ function schedaPartita(partita) {
     return `
       <li class="${esito.s === "w" ? "win" : ""}">
         ${pedina(esito.p, "sm")}
-        <span><span class="nm">${pulisciHtml(nomeGiocatore(esito.p))}</span> <span class="out">${descriviEsito(esito)}</span></span>
+        <span><span class="nm">${pulisciHtml(nomeGiocatore(esito.p))}</span>${pallinoArmata(esito.c)} <span class="out">${pulisciHtml(descriviEsito(esito))}</span></span>
         ${punti}
       </li>`;
   });
 
   let azioni = "";
+  if (!partita.deleted) azioni += `<button class="btn quiet" type="button" data-condividi="${partita.id}">Condividi</button>`;
   if (stato.utente?.eAdmin) {
-    azioni = partita.deleted
+    azioni += partita.deleted
       ? `<button class="btn quiet" type="button" data-ripristina="${partita.id}">Ripristina</button>`
       : `<button class="btn quiet" type="button" data-modifica="${partita.id}">Modifica</button>
          <button class="btn quiet" type="button" data-elimina="${partita.id}">Elimina</button>`;
-    azioni = `<div class="game-actions">${azioni}</div>`;
   }
 
   return `
     <article class="game${partita.deleted ? " deleted" : ""}">
       <header><span class="num">${titolo}</span><span class="muted small">${pulisciHtml(formattaData(partita.date))}</span></header>
       ${partita.deleted ? `<span class="tag">eliminata, non conta nel punteggio</span>` : ""}
-      ${partita.note ? `<p class="note">${pulisciHtml(partita.note)}</p>` : ""}
+      ${partita.objective ? `<p class="note">Obiettivo: ${pulisciHtml(partita.objective)}</p>` : ""}
+      ${partita.note ? `<p class="note muted">${pulisciHtml(partita.note)}</p>` : ""}
       <ol class="result">${righe.join("")}</ol>
-      ${azioni}
+      ${azioni ? `<div class="game-actions">${azioni}</div>` : ""}
     </article>`;
 }
 
 function vistaPartite() {
   const contenitore = trova("#vista-partite");
-  const valide = stato.partite.filter(partita => !partita.deleted).sort(confrontaPartite).reverse();
-  const eliminate = stato.partite.filter(partita => partita.deleted).sort(confrontaPartite).reverse();
+  const delPeriodo = partiteDellaStagione(idStagioneVisibile());
+  const valide = delPeriodo.filter(partita => !partita.deleted).sort(confrontaPartite).reverse();
+  const eliminate = delPeriodo.filter(partita => partita.deleted).sort(confrontaPartite).reverse();
 
   if (!valide.length && !eliminate.length) {
     const invito = stato.utente?.eAdmin
       ? "Usa Nuova partita per aggiungere la prima."
       : "Le partite appariranno qui appena un admin le registra.";
-    contenitore.innerHTML = `<div class="empty"><strong>Nessuna partita registrata.</strong>${invito}</div>`;
+    contenitore.innerHTML = `<div class="empty"><strong>Nessuna partita in questa stagione.</strong>${invito}</div>`;
     return;
   }
 
@@ -953,11 +1420,6 @@ function vistaPartite() {
     if (stato.mostraEliminate) html += eliminate.map(schedaPartita).join("");
   }
   contenitore.innerHTML = html;
-
-  trova("#btnMostraEliminate")?.addEventListener("click", () => {
-    stato.mostraEliminate = !stato.mostraEliminate;
-    disegna();
-  });
 }
 
 function vistaGiocatori() {
@@ -994,13 +1456,11 @@ function vistaGiocatori() {
   html += `<ul class="plist">${attivi.map(voceElenco).join("")}</ul>`;
   if (nonAttivi.length) {
     html += `
-      <h2 style="font-size:22px">Non più nel gruppo</h2>
+      <h2 class="titolo-piccolo">Non più nel gruppo</h2>
       <p class="muted small">Non compaiono tra i giocatori di una nuova partita, ma le loro partite restano valide.</p>
       <ul class="plist">${nonAttivi.map(voceElenco).join("")}</ul>`;
   }
   contenitore.innerHTML = html;
-
-  trova("#moduloNuovoGiocatore")?.addEventListener("submit", aggiungiGiocatore);
 }
 
 async function aggiungiGiocatore(evento) {
@@ -1015,8 +1475,8 @@ async function aggiungiGiocatore(evento) {
 
   // Primo colore libero; se sono tutti usati si ricomincia
   const coloriUsati = new Set(stato.giocatori.map(giocatore => giocatore.color));
-  let colore = coloriArmate.findIndex((_, indice) => !coloriUsati.has(indice));
-  if (colore < 0) colore = stato.giocatori.length % coloriArmate.length;
+  let colore = coloriPedine.findIndex((_, indice) => !coloriUsati.has(indice));
+  if (colore < 0) colore = stato.giocatori.length % coloriPedine.length;
 
   const id = archivio.nuovoId("players");
   const salvato = await salva(
@@ -1027,6 +1487,136 @@ async function aggiungiGiocatore(evento) {
   if (salvato) campo.value = "";
 }
 
+
+// ===== Scheda Numeri =====
+function vistaNumeri() {
+  const contenitore = trova("#vista-numeri");
+  if (!calcolo.partiteInOrdine.length) {
+    contenitore.innerHTML = `<h2>Numeri</h2><div class="empty"><strong>Ancora niente da contare.</strong>Grafici, record e confronti compaiono dopo la prima partita della stagione.</div>`;
+    return;
+  }
+
+  let html = `<h2>Andamento di tutti</h2>${graficoDiTutti()}`;
+
+  const record = calcolaRecord(calcolo);
+  html += `<h2>Record</h2><ul class="lista-numeri">${record.map(voce => `
+    <li>
+      <span><span class="titolo-record">${voce.titolo}</span><br>
+        <button type="button" class="link-giocatore" data-giocatore="${voce.chi}">${pedina(voce.chi, "sm")}${pulisciHtml(nomeGiocatore(voce.chi))}</button></span>
+      <span class="valore-record"><b>${voce.valore}</b><span class="muted small">${pulisciHtml(voce.dettaglio)}</span></span>
+    </li>`).join("")}</ul>`;
+
+  html += sezioneTestaATesta();
+
+  const colori = statisticheColori(calcolo);
+  html += `<h2>Colori delle armate</h2>`;
+  html += colori.length
+    ? `<ul class="lista-numeri">${colori.map(colore => `
+        <li>
+          <span class="riga-colore"><span class="pallino grande" style="--c:${colore.sfondo}"></span>${colore.nome}</span>
+          <span class="valore-record"><b>${percentuale(colore.vittorie, colore.partite)}%</b><span class="muted small">${colore.vittorie} ${colore.vittorie === 1 ? "vittoria" : "vittorie"} su ${colore.partite}</span></span>
+        </li>`).join("")}</ul>`
+    : `<p class="muted">Segna il colore delle armate quando registri una partita per scoprire quale porta fortuna.</p>`;
+
+  const obiettivi = statisticheObiettivi(calcolo);
+  html += `<h2>Obiettivi vincenti</h2>`;
+  html += obiettivi.length
+    ? `<ul class="lista-numeri">${obiettivi.map(voce => `
+        <li><span>${pulisciHtml(voce.obiettivo)}</span><span class="valore-record"><b>${voce.vittorie}</b><span class="muted small">${voce.vittorie === 1 ? "vittoria" : "vittorie"}</span></span></li>`).join("")}</ul>`
+    : `<p class="muted">Segna l'obiettivo del vincitore per vedere quali si completano più spesso.</p>`;
+
+  contenitore.innerHTML = html;
+}
+
+function graficoDiTutti() {
+  const giocatoriConPartite = stato.giocatori.filter(giocatore => calcolo.statistiche[giocatore.id].partite > 0);
+  const serie = Object.fromEntries(giocatoriConPartite.map(giocatore => [giocatore.id, [eloIniziale]]));
+
+  // Chi non gioca una partita mantiene l'Elo che aveva
+  for (const voce of calcolo.partiteInOrdine) {
+    for (const giocatore of giocatoriConPartite) {
+      const linea = serie[giocatore.id];
+      linea.push(voce.eloDopo[giocatore.id] ?? linea[linea.length - 1]);
+    }
+  }
+
+  const tuttiIValori = Object.values(serie).flat();
+  const minimo = Math.min(...tuttiIValori) - 10;
+  const massimo = Math.max(...tuttiIValori) + 10;
+  const larghezza = 600, altezza = 220, margine = 14;
+  const passi = calcolo.partiteInOrdine.length;
+  const x = indice => margine + indice * (larghezza - margine * 2) / Math.max(1, passi);
+  const y = valore => altezza - margine - (valore - minimo) / (massimo - minimo) * (altezza - margine * 2);
+  const evidenziato = stato.giocatoreEvidenziato;
+
+  const linee = giocatoriConPartite.map(giocatore => {
+    const punti = serie[giocatore.id].map((valore, indice) => `${x(indice).toFixed(1)},${y(valore).toFixed(1)}`).join(" ");
+    const attenuata = evidenziato && evidenziato !== giocatore.id ? " attenuata" : "";
+    const spessa = evidenziato === giocatore.id ? " spessa" : "";
+    return `<polyline class="linea-giocatore${attenuata}${spessa}" points="${punti}" style="stroke:${colorePedina(giocatore.id)[0]}" vector-effect="non-scaling-stroke"/>`;
+  });
+  // La linea evidenziata va disegnata per ultima, sopra le altre
+  if (evidenziato) {
+    const indice = giocatoriConPartite.findIndex(giocatore => giocatore.id === evidenziato);
+    if (indice >= 0) linee.push(linee.splice(indice, 1)[0]);
+  }
+
+  const legenda = giocatoriConPartite.map(giocatore => `
+    <button type="button" class="chip" data-evidenzia="${giocatore.id}" aria-pressed="${evidenziato === giocatore.id}">
+      ${pedina(giocatore.id, "sm")}${pulisciHtml(giocatore.name)}
+    </button>`).join("");
+
+  return `
+    <svg class="chart grafico-tutti" viewBox="0 0 ${larghezza} ${altezza}" preserveAspectRatio="none" role="img" aria-label="Andamento dell'Elo di tutti i giocatori, partita dopo partita">
+      <line class="base" x1="${margine}" x2="${larghezza - margine}" y1="${y(eloIniziale)}" y2="${y(eloIniziale)}" vector-effect="non-scaling-stroke"/>
+      ${linee.join("")}
+    </svg>
+    <p class="muted small">Da sinistra a destra, una partita dopo l'altra. Tocca un nome per evidenziarlo.</p>
+    <div class="chips">${legenda}</div>`;
+}
+
+function sezioneTestaATesta() {
+  const conPartite = stato.giocatori
+    .filter(giocatore => calcolo.statistiche[giocatore.id].partite > 0)
+    .sort((a, b) => a.name.localeCompare(b.name));
+  if (conPartite.length < 2) return "";
+
+  // Di base confronto i primi due in classifica
+  const ordinati = [...calcolo.inClassifica, ...calcolo.inProva];
+  let { primo, secondo } = stato.testaATesta;
+  if (!conPartite.some(g => g.id === primo)) primo = ordinati[0]?.id;
+  if (!conPartite.some(g => g.id === secondo) || secondo === primo) secondo = ordinati.find(g => g.id !== primo)?.id;
+  stato.testaATesta = { primo, secondo };
+
+  const menu = (id, scelto) => `<select id="${id}" aria-label="Giocatore da confrontare">${conPartite.map(giocatore =>
+    `<option value="${giocatore.id}" ${giocatore.id === scelto ? "selected" : ""}>${pulisciHtml(giocatore.name)}</option>`).join("")}</select>`;
+
+  const confronto = confrontaTestaATesta(calcolo, primo, secondo);
+  let dettaglio;
+  if (!confronto.insieme) {
+    dettaglio = `<p class="muted">Non hanno ancora giocato insieme in questa stagione.</p>`;
+  } else {
+    const eliminazioni = [];
+    if (confronto.primoEliminaSecondo) eliminazioni.push(`${pulisciHtml(nomeGiocatore(primo))} ha eliminato ${pulisciHtml(nomeGiocatore(secondo))} ${confronto.primoEliminaSecondo} ${confronto.primoEliminaSecondo === 1 ? "volta" : "volte"}`);
+    if (confronto.secondoEliminaPrimo) eliminazioni.push(`${pulisciHtml(nomeGiocatore(secondo))} ha eliminato ${pulisciHtml(nomeGiocatore(primo))} ${confronto.secondoEliminaPrimo} ${confronto.secondoEliminaPrimo === 1 ? "volta" : "volte"}`);
+    dettaglio = `
+      <div class="punteggio-sfida">
+        <span>${pedina(primo)}<b>${confronto.davantiPrimo}</b></span>
+        <span class="trattino">–</span>
+        <span><b>${confronto.davantiSecondo}</b>${pedina(secondo)}</span>
+      </div>
+      <p class="muted small centrato">Volte in cui uno è arrivato davanti all'altro, su ${confronto.insieme} ${confronto.insieme === 1 ? "partita" : "partite"} insieme${confronto.pari ? `, ${confronto.pari} alla pari` : ""}.</p>
+      ${eliminazioni.length ? `<p class="centrato">${eliminazioni.join(". ")}.</p>` : ""}`;
+  }
+
+  return `
+    <h2>Testa a testa</h2>
+    <div class="scelta-sfida">${menu("sfidaPrimo", primo)}<span class="muted">contro</span>${menu("sfidaSecondo", secondo)}</div>
+    ${dettaglio}`;
+}
+
+
+// ===== Storico =====
 function vistaStorico() {
   const contenitore = trova("#vista-storico");
   if (!stato.storico.length) {
@@ -1053,18 +1643,13 @@ function vistaStorico() {
   });
 
   const altre = stato.storico.length >= stato.limiteStorico
-    ? `<button class="btn ghost" type="button" id="btnStoricoVecchio" style="margin-top:14px">Mostra azioni più vecchie</button>`
+    ? `<button class="btn ghost spazio-sopra" type="button" id="btnStoricoVecchio">Mostra azioni più vecchie</button>`
     : "";
   contenitore.innerHTML = `
     <h2>Storico</h2>
     <p class="muted small">Ogni modifica resta registrata e nessuno può cancellarla.</p>
     <ul class="log">${voci.join("")}</ul>
     ${altre}`;
-
-  trova("#btnStoricoVecchio")?.addEventListener("click", () => {
-    stato.limiteStorico += 100;
-    ascoltaStorico();
-  });
 }
 
 
@@ -1086,7 +1671,7 @@ function graficoElo(andamento) {
       <polyline class="line" points="${punti}" vector-effect="non-scaling-stroke"/>
       <circle class="dot" cx="${x(andamento.length - 1)}" cy="${y(ultimo)}" r="4.5"/>
     </svg>
-    <div class="muted small" style="display:flex;justify-content:space-between"><span>inizio, ${eloIniziale}</span><span>oggi, ${Math.round(ultimo)}</span></div>`;
+    <div class="muted small riga-agli-estremi"><span>inizio, ${eloIniziale}</span><span>oggi, ${Math.round(ultimo)}</span></div>`;
 }
 
 function apriGiocatore(id) {
@@ -1094,25 +1679,36 @@ function apriGiocatore(id) {
   if (!giocatore) return;
   const s = calcolo.statistiche[id];
   const posizione = calcolo.inClassifica.findIndex(g => g.id === id);
-  const partitePerId = Object.fromEntries(stato.partite.map(partita => [partita.id, partita]));
   const ultimePartite = s.cronologia.slice().reverse().slice(0, 12);
 
   let sottotitolo = "nessuna partita";
   if (posizione >= 0) sottotitolo = `${posizione + 1}° in classifica`;
   else if (s.partite) sottotitolo = `in prova, ${s.partite} di ${partiteMinime} partite`;
+  sottotitolo += `, ${nomeStagione(idStagioneVisibile())}`;
   if (giocatore.active === false) sottotitolo += ", fuori dal gruppo";
 
   const mediaPosizione = s.partite ? (s.sommaPosizioni / s.partite).toFixed(1).replace(".", ",") : "–";
-  const percentuale = s.partite ? Math.round(s.vittorie / s.partite * 100) : 0;
+
+  const premi = premiDelGiocatore(s);
+  const elencoPremi = premi.length
+    ? `<ul class="premi">${premi.map(premio => `
+        <li><b>${premio.nome}${premio.volte > 1 ? ` ×${premio.volte}` : ""}</b><span>${premio.descrizione}</span></li>`).join("")}</ul>`
+    : `<p class="muted small">Nessun premio ancora in questa stagione.</p>`;
+
+  const rivalita = [];
+  const bestiaNera = piuFrequente(s.eliminatoDa);
+  const vittimaPreferita = piuFrequente(s.haEliminato);
+  if (bestiaNera) rivalita.push(`<li><span>Bestia nera</span><span>${pedina(bestiaNera.chiave, "sm")}${pulisciHtml(nomeGiocatore(bestiaNera.chiave))}, ${bestiaNera.volte} ${bestiaNera.volte === 1 ? "eliminazione" : "eliminazioni"}</span></li>`);
+  if (vittimaPreferita) rivalita.push(`<li><span>Vittima preferita</span><span>${pedina(vittimaPreferita.chiave, "sm")}${pulisciHtml(nomeGiocatore(vittimaPreferita.chiave))}, ${vittimaPreferita.volte} ${vittimaPreferita.volte === 1 ? "volta" : "volte"}</span></li>`);
 
   let elencoUltime = "";
   if (ultimePartite.length) {
     const righe = ultimePartite.map(voce => `
       <li>
-        <span>${pulisciHtml(formattaDataBreve(partitePerId[voce.idPartita].date))}, ${descriviEsito(voce)}</span>
+        <span>${pulisciHtml(formattaDataBreve(voce.data))}, ${descriviEsito(voce)}</span>
         <span class="delta ${classeVariazione(voce.variazione)}">${conSegno(voce.variazione)}</span>
       </li>`);
-    elencoUltime = `<h3>Ultime partite</h3><ul class="recent">${righe.join("")}</ul>`;
+    elencoUltime = `<h3 class="spazio-sopra">Ultime partite</h3><ul class="recent">${righe.join("")}</ul>`;
   }
 
   let strumentiAdmin = "";
@@ -1133,7 +1729,7 @@ function apriGiocatore(id) {
       ${pedina(id, "big")}
       <div>
         <div class="nm" id="titoloGiocatore" tabindex="-1" autofocus>${pulisciHtml(giocatore.name)}</div>
-        <div class="muted small">${sottotitolo}</div>
+        <div class="muted small">${pulisciHtml(sottotitolo)}</div>
       </div>
     </div>
     <div class="p-elo"><b>${Math.round(s.elo)}</b><span class="muted">punti Elo, massimo ${Math.round(s.massimo)}</span></div>
@@ -1141,11 +1737,17 @@ function apriGiocatore(id) {
     <div class="stats">
       <div><b>${s.partite}</b><span>partite</span></div>
       <div><b>${s.vittorie}</b><span>vittorie</span></div>
-      <div><b>${percentuale}%</b><span>vittorie su partite</span></div>
+      <div><b>${percentuale(s.vittorie, s.partite)}%</b><span>vittorie su partite</span></div>
       <div><b>${s.sopravvissuto}</b><span>da sopravvissuto</span></div>
       <div><b>${s.eliminato}</b><span>da eliminato</span></div>
       <div><b>${mediaPosizione}</b><span>posizione media</span></div>
+      <div><b>${s.eliminazioniFatte}</b><span>avversari eliminati</span></div>
+      <div><b>${s.serieMigliore}</b><span>vittorie di fila, record</span></div>
+      <div><b>${s.serieAttuale}</b><span>vittorie di fila, ora</span></div>
     </div>
+    <h3>Premi</h3>
+    ${elencoPremi}
+    ${rivalita.length ? `<h3 class="spazio-sopra">Rivalità</h3><ul class="recent rivalita">${rivalita.join("")}</ul>` : ""}
     ${elencoUltime}
     ${strumentiAdmin}
     <div class="actions"><button class="btn ghost" type="button" data-chiudi>Chiudi</button></div>`;
@@ -1196,33 +1798,57 @@ function apriPartita(idPartita) {
   const partita = idPartita ? stato.partite.find(p => p.id === idPartita) : null;
 
   if (partita) {
+    const esiti = partita.results;
     bozza = {
       id: idPartita,
       data: partita.date,
       nota: partita.note || "",
-      scelti: ordinaPerPosizione(partita.results).map(esito => esito.p),
-      esiti: Object.fromEntries(partita.results.map(esito => [esito.p, esito.s])),
-      ordineEliminati: partita.results.filter(esito => esito.s === "o").sort((a, b) => a.o - b.o).map(esito => esito.p)
+      obiettivo: partita.objective || "",
+      scelti: ordinaPerPosizione(esiti).map(esito => esito.p),
+      esiti: Object.fromEntries(esiti.map(esito => [esito.p, esito.s])),
+      ordineEliminati: esiti.filter(esito => esito.s === "o").sort((a, b) => a.o - b.o).map(esito => esito.p),
+      uccisoDa: Object.fromEntries(esiti.filter(esito => esito.k).map(esito => [esito.p, esito.k])),
+      coloreDi: Object.fromEntries(esiti.filter(esito => esito.c).map(esito => [esito.p, esito.c]))
     };
   } else {
-    bozza = { id: null, data: dataDiOggi(), nota: "", scelti: [], esiti: {}, ordineEliminati: [] };
+    bozza = { id: null, data: dataDiOggi(), nota: "", obiettivo: "", scelti: [], esiti: {}, ordineEliminati: [], uccisoDa: {}, coloreDi: {} };
   }
 
-  trova("#titoloPartita").textContent = partita ? `Modifica partita ${calcolo.numeroPartita[idPartita] ?? ""}`.trim() : "Nuova partita";
+  trova("#titoloPartita").textContent = partita ? "Modifica partita" : "Nuova partita";
   trova("#btnSalvaPartita").textContent = partita ? "Salva modifiche" : "Salva partita";
   trova("#campoData").value = bozza.data;
   trova("#campoNota").value = bozza.nota;
+  trova("#campoObiettivo").value = bozza.obiettivo;
   trova("#errorePartita").textContent = "";
+
+  // Suggerimenti: obiettivi già usati, poi quelli più comuni
+  const giaUsati = stato.partite.map(p => (p.objective || "").trim()).filter(Boolean);
+  const suggerimenti = [...new Set([...giaUsati, ...obiettiviComuni])];
+  trova("#obiettiviSuggeriti").innerHTML = suggerimenti.map(testo => `<option value="${pulisciHtml(testo)}"></option>`).join("");
+
   disegnaBozza();
   trova("#finestraPartita").showModal();
 }
 
+// Chi può aver eliminato un giocatore: chiunque fosse ancora in gioco quando è uscito
+function possibiliUccisori(idEliminato) {
+  const posizioneNellOrdine = bozza.ordineEliminati.indexOf(idEliminato);
+  const eliminatiPrima = new Set(bozza.ordineEliminati.slice(0, posizioneNellOrdine + 1));
+  return bozza.scelti.filter(id => !eliminatiPrima.has(id));
+}
+
 function esitiDellaBozza() {
-  const esiti = bozza.scelti.map(id => ({
-    p: id,
-    s: bozza.esiti[id],
-    o: bozza.esiti[id] === "o" ? bozza.ordineEliminati.indexOf(id) + 1 : null
-  }));
+  const esiti = bozza.scelti.map(id => {
+    const eliminato = bozza.esiti[id] === "o";
+    const uccisore = eliminato && possibiliUccisori(id).includes(bozza.uccisoDa[id]) ? bozza.uccisoDa[id] : null;
+    return {
+      p: id,
+      s: bozza.esiti[id],
+      o: eliminato ? bozza.ordineEliminati.indexOf(id) + 1 : null,
+      k: uccisore,
+      c: bozza.coloreDi[id] || null
+    };
+  });
   return assegnaPosizioni(esiti);
 }
 
@@ -1251,25 +1877,42 @@ function disegnaBozza() {
   let html = "";
   if (bozza.scelti.length) {
     const opzioni = [["w", "Vince"], ["a", "Sopravvive"], ["o", "Eliminato"]];
-    const righe = bozza.scelti.map(id => `
-      <li>
-        <div class="who">${pedina(id, "sm")}${pulisciHtml(nomeGiocatore(id))}</div>
-        <div class="seg" role="group" aria-label="Esito di ${pulisciHtml(nomeGiocatore(id))}">
-          ${opzioni.map(([codice, etichetta]) => `<button type="button" data-esito-di="${id}" data-esito="${codice}" data-s="${codice}" aria-pressed="${bozza.esiti[id] === codice}">${etichetta}</button>`).join("")}
-        </div>
-      </li>`);
-    html += `<div class="field"><span class="lbl">Come è finita</span><ul class="outcomes">${righe.join("")}</ul></div>`;
+    const righe = bozza.scelti.map(id => {
+      const nome = pulisciHtml(nomeGiocatore(id));
+      const pulsantiEsito = opzioni.map(([codice, etichetta]) =>
+        `<button type="button" data-esito-di="${id}" data-esito="${codice}" data-s="${codice}" aria-pressed="${bozza.esiti[id] === codice}">${etichetta}</button>`).join("");
+      const pulsantiColore = coloriArmate.map(colore =>
+        `<button type="button" class="colore-armata" data-colore-di="${id}" data-colore="${colore.id}" style="--c:${colore.sfondo}" aria-pressed="${bozza.coloreDi[id] === colore.id}" aria-label="${nome} con l'armata ${colore.nome}"></button>`).join("");
+      return `
+        <li>
+          <div class="who">${pedina(id, "sm")}${nome}</div>
+          <div class="seg" role="group" aria-label="Esito di ${nome}">${pulsantiEsito}</div>
+          <div class="colori" role="group" aria-label="Colore dell'armata di ${nome}, facoltativo">${pulsantiColore}</div>
+        </li>`;
+    });
+    html += `<div class="field"><span class="lbl">Come è finita</span><p class="hint">I pallini sono il colore dell'armata: facoltativo.</p><ul class="outcomes">${righe.join("")}</ul></div>`;
   }
 
   if (bozza.ordineEliminati.length) {
     const freccia = percorso => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="${percorso}"/></svg>`;
     const ultimoIndice = bozza.ordineEliminati.length - 1;
-    const righe = bozza.ordineEliminati.map((id, indice) => `
-      <li>
-        ${pedina(id, "sm")}<span>${pulisciHtml(nomeGiocatore(id))}</span>
-        <button type="button" class="icon-btn" data-su="${indice}" ${indice === 0 ? "disabled" : ""} aria-label="Sposta ${pulisciHtml(nomeGiocatore(id))} prima">${freccia("M6 15l6-6 6 6")}</button>
-        <button type="button" class="icon-btn" data-giu="${indice}" ${indice === ultimoIndice ? "disabled" : ""} aria-label="Sposta ${pulisciHtml(nomeGiocatore(id))} dopo">${freccia("M6 9l6 6 6-6")}</button>
-      </li>`);
+    const righe = bozza.ordineEliminati.map((id, indice) => {
+      const nome = pulisciHtml(nomeGiocatore(id));
+      const candidati = possibiliUccisori(id);
+      const opzioniUccisore = candidati.map(candidato =>
+        `<option value="${candidato}" ${bozza.uccisoDa[id] === candidato ? "selected" : ""}>${pulisciHtml(nomeGiocatore(candidato))}</option>`).join("");
+      return `
+        <li>
+          ${pedina(id, "sm")}<span>${nome}</span>
+          <button type="button" class="icon-btn" data-su="${indice}" ${indice === 0 ? "disabled" : ""} aria-label="Sposta ${nome} prima">${freccia("M6 15l6-6 6 6")}</button>
+          <button type="button" class="icon-btn" data-giu="${indice}" ${indice === ultimoIndice ? "disabled" : ""} aria-label="Sposta ${nome} dopo">${freccia("M6 9l6 6 6-6")}</button>
+          <label class="eliminato-da">da
+            <select data-ucciso="${id}" aria-label="Chi ha eliminato ${nome}">
+              <option value="">non segnato</option>${opzioniUccisore}
+            </select>
+          </label>
+        </li>`;
+    });
     html += `
       <div class="field">
         <span class="lbl">Ordine di eliminazione</span>
@@ -1277,31 +1920,61 @@ function disegnaBozza() {
         <ol class="elim">${righe.join("")}</ol>
       </div>`;
   }
-
-  // Anteprima dei punti: ricalcolo tutto come se la partita fosse già salvata
-  const problema = problemaDellaBozza();
-  if (!problema) {
-    const esiti = esitiDellaBozza();
-    const partitaOriginale = bozza.id ? stato.partite.find(p => p.id === bozza.id) : null;
-    const partitaProva = {
-      id: bozza.id || "anteprima",
-      date: bozza.data,
-      results: esiti,
-      deleted: false,
-      createdAt: partitaOriginale ? partitaOriginale.createdAt : Date.now() + 1e9
-    };
-    const altrePartite = stato.partite.filter(p => p.id !== bozza.id);
-    const variazioni = calcolaElo(stato.giocatori, [...altrePartite, partitaProva]).variazioniPerPartita[partitaProva.id] || {};
-    const righe = ordinaPerPosizione(esiti).map(esito => {
-      const variazione = variazioni[esito.p] || 0;
-      return `<li><span>${pulisciHtml(nomeGiocatore(esito.p))}, ${descriviEsito(esito, true)}</span><span class="delta ${classeVariazione(variazione)}">${conSegno(variazione)}</span></li>`;
-    });
-    html += `<div class="field"><span class="lbl">Punti Elo di questa partita</span><ul class="preview">${righe.join("")}</ul></div>`;
-  }
-
   trova("#esitiPartita").innerHTML = html;
+  disegnaAnteprima();
+}
+
+// Pronostico e punti: ricalcolo la stagione come se la partita fosse già salvata
+function disegnaAnteprima() {
+  const contenitore = trova("#anteprimaPunti");
+  const problema = problemaDellaBozza();
   trova("#btnSalvaPartita").disabled = Boolean(problema);
   trova("#errorePartita").textContent = bozza.scelti.length ? problema : "";
+
+  if (bozza.scelti.length < 2 || !bozza.data) {
+    contenitore.innerHTML = "";
+    return;
+  }
+
+  const esiti = esitiDellaBozza();
+  const partitaOriginale = bozza.id ? stato.partite.find(p => p.id === bozza.id) : null;
+  const partitaDiProva = {
+    id: bozza.id || "anteprima",
+    date: bozza.data,
+    results: esiti,
+    deleted: false,
+    createdAt: partitaOriginale ? partitaOriginale.createdAt : Date.now() + 1e9
+  };
+  const stagione = stagioneDiUnaData(bozza.data);
+  const altrePartite = partiteDellaStagione(stagione.id).filter(p => p.id !== bozza.id);
+  const simulazione = calcolaElo(stato.giocatori, [...altrePartite, partitaDiProva]);
+  const voce = simulazione.partiteInOrdine.find(v => v.partita.id === partitaDiProva.id);
+  if (!voce) {
+    contenitore.innerHTML = "";
+    return;
+  }
+
+  const probabilita = probabilitaDiVittoria(voce.eloPrima);
+  const conEsito = !problema;
+  const righe = ordinaPerPosizione(esiti)
+    .sort((a, b) => conEsito ? a.pos - b.pos : probabilita[b.p] - probabilita[a.p])
+    .map(esito => {
+      const punti = conEsito
+        ? `<span class="delta ${classeVariazione(voce.variazioni[esito.p])}">${conSegno(voce.variazioni[esito.p])}</span>`
+        : "";
+      return `
+        <li>
+          <span>${pulisciHtml(nomeGiocatore(esito.p))}${conEsito ? `, ${descriviEsito(esito, true)}` : ""}</span>
+          <span class="pronostico"><span class="muted small">${Math.round(probabilita[esito.p] * 100)}% di vincere</span>${punti}</span>
+        </li>`;
+    });
+
+  contenitore.innerHTML = `
+    <div class="field">
+      <span class="lbl">${conEsito ? "Pronostico e punti Elo" : "Pronostico"}</span>
+      <p class="hint">Le probabilità di vittoria che l'Elo dava prima di giocare.</p>
+      <ul class="preview">${righe.join("")}</ul>
+    </div>`;
 }
 
 trova("#moduloPartita").addEventListener("click", evento => {
@@ -1315,6 +1988,8 @@ trova("#moduloPartita").addEventListener("click", evento => {
       bozza.scelti = bozza.scelti.filter(x => x !== id);
       bozza.ordineEliminati = bozza.ordineEliminati.filter(x => x !== id);
       delete bozza.esiti[id];
+      delete bozza.uccisoDa[id];
+      delete bozza.coloreDi[id];
     } else {
       bozza.scelti.push(id);
       bozza.esiti[id] = "a";
@@ -1331,6 +2006,19 @@ trova("#moduloPartita").addEventListener("click", evento => {
     bozza.esiti[id] = esito;
     bozza.ordineEliminati = bozza.ordineEliminati.filter(x => x !== id);
     if (esito === "o") bozza.ordineEliminati.push(id);
+    else delete bozza.uccisoDa[id];
+  } else if (dati.coloreDi) {
+    const id = dati.coloreDi;
+    const colore = dati.colore;
+    if (bozza.coloreDi[id] === colore) {
+      delete bozza.coloreDi[id];
+    } else {
+      // Ogni colore lo usa una persona sola
+      for (const [altro, suoColore] of Object.entries(bozza.coloreDi)) {
+        if (suoColore === colore) delete bozza.coloreDi[altro];
+      }
+      bozza.coloreDi[id] = colore;
+    }
   } else if (dati.su) {
     const i = Number(dati.su);
     [bozza.ordineEliminati[i - 1], bozza.ordineEliminati[i]] = [bozza.ordineEliminati[i], bozza.ordineEliminati[i - 1]];
@@ -1343,13 +2031,25 @@ trova("#moduloPartita").addEventListener("click", evento => {
   disegnaBozza();
 });
 
+trova("#moduloPartita").addEventListener("change", evento => {
+  const menu = evento.target.closest("select[data-ucciso]");
+  if (!menu) return;
+  if (menu.value) bozza.uccisoDa[menu.dataset.ucciso] = menu.value;
+  else delete bozza.uccisoDa[menu.dataset.ucciso];
+  disegnaAnteprima();
+});
+
 trova("#campoData").addEventListener("input", evento => {
   bozza.data = evento.target.value;
-  disegnaBozza();
+  disegnaAnteprima();
 });
 
 trova("#campoNota").addEventListener("input", evento => {
   bozza.nota = evento.target.value;
+});
+
+trova("#campoObiettivo").addEventListener("input", evento => {
+  bozza.obiettivo = evento.target.value;
 });
 
 trova("#moduloPartita").addEventListener("submit", async evento => {
@@ -1361,21 +2061,22 @@ trova("#moduloPartita").addEventListener("submit", async evento => {
   }
 
   const esiti = esitiDellaBozza();
-  const nuovaVersione = { date: bozza.data, note: bozza.nota.trim(), results: esiti };
+  const nuovaVersione = { date: bozza.data, note: bozza.nota.trim(), objective: bozza.obiettivo.trim(), results: esiti };
   const riassunto = `Partita del ${formattaDataBreve(bozza.data)}: ${descriviPartita(esiti)}`;
   const btnSalva = trova("#btnSalvaPartita");
   btnSalva.disabled = true;
 
   let salvato;
+  let idSalvata = bozza.id;
   if (!bozza.id) {
-    const id = archivio.nuovoId("games");
+    idSalvata = archivio.nuovoId("games");
     salvato = await salva(
-      [{ raccolta: "games", id, dati: {
+      [{ raccolta: "games", id: idSalvata, dati: {
         ...nuovaVersione, deleted: false,
         createdAt: oraServer, createdBy: stato.utente.email,
         updatedAt: oraServer, updatedBy: stato.utente.email
       } }],
-      { action: "partita_aggiunta", target: id, summary: riassunto, before: null, after: fotografiaPartita(nuovaVersione) },
+      { action: "partita_aggiunta", target: idSalvata, summary: riassunto, before: null, after: fotografiaPartita(nuovaVersione) },
       "Partita salvata"
     );
   } else {
@@ -1389,7 +2090,246 @@ trova("#moduloPartita").addEventListener("submit", async evento => {
   }
 
   btnSalva.disabled = false;
-  if (salvato) trova("#finestraPartita").close();
+  if (!salvato) return;
+  const eraNuova = !bozza.id;
+  trova("#finestraPartita").close();
+
+  // Dopo una partita nuova propongo subito l'immagine da mandare al gruppo
+  if (eraNuova && await attendiPartita(idSalvata)) apriCondivisione(idSalvata, "Partita salvata");
+});
+
+// Aspetta che la partita appena salvata arrivi dal database (di solito è immediato)
+async function attendiPartita(id) {
+  for (let tentativo = 0; tentativo < 30; tentativo++) {
+    if (stato.partite.some(partita => partita.id === id)) return true;
+    await new Promise(risolvi => setTimeout(risolvi, 100));
+  }
+  return false;
+}
+
+
+// ===== Nuova stagione =====
+function apriNuovaStagione() {
+  const stagioni = elencoStagioni();
+  trova("#campoNomeStagione").value = `Stagione ${stagioni.length + 1}`;
+  trova("#campoInizioStagione").value = dataDiOggi();
+  trova("#erroreStagione").textContent = "";
+  trova("#finestraStagione").showModal();
+}
+
+trova("#moduloStagione").addEventListener("submit", async evento => {
+  evento.preventDefault();
+  const nome = trova("#campoNomeStagione").value.trim().replace(/\s+/g, " ");
+  const inizio = trova("#campoInizioStagione").value;
+  const stagioneInCorso = elencoStagioni().at(-1);
+  const errore = trova("#erroreStagione");
+
+  if (!nome || !inizio) {
+    errore.textContent = "Inserisci il nome e la data di inizio.";
+    return;
+  }
+  if (inizio <= stagioneInCorso.start) {
+    errore.textContent = `La data deve essere dopo l'inizio di ${stagioneInCorso.name}.`;
+    return;
+  }
+  if (elencoStagioni().some(stagione => stagione.name.toLowerCase() === nome.toLowerCase())) {
+    errore.textContent = "Esiste già una stagione con questo nome.";
+    return;
+  }
+
+  const id = archivio.nuovoId("seasons");
+  const salvato = await salva(
+    [{ raccolta: "seasons", id, dati: { name: nome, start: inizio, createdAt: oraServer, createdBy: stato.utente.email } }],
+    { action: "stagione_iniziata", target: id, summary: `Inizia ${nome}, dal ${formattaDataBreve(inizio)}`, before: null, after: { nome, inizio } },
+    `${nome} iniziata`
+  );
+  if (salvato) {
+    stato.stagioneScelta = null;
+    trova("#finestraStagione").close();
+  }
+});
+
+
+// ===== Immagine da condividere =====
+function rettangoloArrotondato(contesto, x, y, larghezza, altezza, raggio) {
+  contesto.beginPath();
+  contesto.moveTo(x + raggio, y);
+  contesto.arcTo(x + larghezza, y, x + larghezza, y + altezza, raggio);
+  contesto.arcTo(x + larghezza, y + altezza, x, y + altezza, raggio);
+  contesto.arcTo(x, y + altezza, x, y, raggio);
+  contesto.arcTo(x, y, x + larghezza, y, raggio);
+  contesto.closePath();
+}
+
+async function creaImmaginePartita(partita) {
+  await document.fonts.ready;
+  const stagione = stagioneDiUnaData(partita.date);
+  const calcoloStagione = calcoloDi(stagione.id);
+  const variazioni = calcoloStagione.variazioniPerPartita[partita.id] || {};
+  const eloDopo = calcoloStagione.eloDopoPerPartita[partita.id] || {};
+  const esiti = ordinaPerPosizione(partita.results);
+
+  const fontTitoli = '"Big Shoulders Display", "Arial Narrow", sans-serif';
+  const fontTesto = '"Atkinson Hyperlegible", system-ui, sans-serif';
+  const larghezza = 1080;
+  const altezzaRiga = 124;
+  const inizioRighe = partita.objective ? 360 : 300;
+  const altezza = inizioRighe + esiti.length * altezzaRiga + 120;
+
+  const tela = document.createElement("canvas");
+  tela.width = larghezza;
+  tela.height = altezza;
+  const c = tela.getContext("2d");
+
+  // Sfondo color mare, come il tabellone
+  c.fillStyle = "#d9e6e8";
+  c.fillRect(0, 0, larghezza, altezza);
+
+  c.fillStyle = "#172634";
+  c.font = `800 96px ${fontTitoli}`;
+  c.fillText(`Partita ${calcoloStagione.numeroPartita[partita.id] ?? ""}`, 72, 150);
+  c.fillStyle = "#4d5f6c";
+  c.font = `400 38px ${fontTesto}`;
+  c.fillText(`${formattaData(partita.date)}, ${stagione.name}`, 72, 210);
+  if (partita.objective) {
+    c.fillStyle = "#172634";
+    c.fillText(`Obiettivo: ${partita.objective}`, 72, 270);
+  }
+
+  c.fillStyle = "#172634";
+  c.fillRect(72, inizioRighe - 40, larghezza - 144, 4);
+
+  esiti.forEach((esito, indice) => {
+    const y = inizioRighe + indice * altezzaRiga;
+    const [sfondo, testo] = colorePedina(esito.p);
+
+    rettangoloArrotondato(c, 72, y, 84, 84, 14);
+    c.fillStyle = sfondo;
+    c.fill();
+    c.fillStyle = testo;
+    c.font = `800 52px ${fontTitoli}`;
+    c.textAlign = "center";
+    c.fillText(nomeGiocatore(esito.p).charAt(0).toUpperCase(), 114, y + 62);
+    c.textAlign = "left";
+
+    c.fillStyle = "#172634";
+    c.font = `700 46px ${fontTesto}`;
+    c.fillText(nomeGiocatore(esito.p), 186, y + 40);
+    c.fillStyle = "#4d5f6c";
+    c.font = `400 32px ${fontTesto}`;
+    c.fillText(descriviEsito(esito), 186, y + 84);
+
+    const variazione = variazioni[esito.p] ?? 0;
+    c.textAlign = "right";
+    c.fillStyle = Math.round(variazione) > 0 ? "#23744a" : Math.round(variazione) < 0 ? "#b23a2e" : "#4d5f6c";
+    c.font = `800 64px ${fontTitoli}`;
+    c.fillText(conSegno(variazione), larghezza - 72, y + 52);
+    c.fillStyle = "#4d5f6c";
+    c.font = `400 30px ${fontTesto}`;
+    c.fillText(`ora ${Math.round(eloDopo[esito.p] ?? eloIniziale)}`, larghezza - 72, y + 92);
+    c.textAlign = "left";
+  });
+
+  c.fillStyle = "#c8352b";
+  c.font = `800 44px ${fontTitoli}`;
+  c.fillText("Classifica Risiko", 72, altezza - 56);
+
+  return tela;
+}
+
+let immagineCorrente = null;
+
+async function apriCondivisione(idPartita, titolo = "Condividi la partita") {
+  const partita = stato.partite.find(p => p.id === idPartita);
+  if (!partita) return;
+  const tela = await creaImmaginePartita(partita);
+  const blob = await new Promise(risolvi => tela.toBlob(risolvi, "image/png"));
+  const numero = calcoloDi(stagioneDiUnaData(partita.date).id).numeroPartita[partita.id] ?? "";
+  immagineCorrente = new File([blob], `partita-${numero}-${partita.date}.png`, { type: "image/png" });
+
+  const anteprima = trova("#anteprimaImmagine");
+  if (anteprima.src) URL.revokeObjectURL(anteprima.src);
+  anteprima.src = URL.createObjectURL(blob);
+  anteprima.alt = `Riepilogo della partita: ${descriviPartita(partita.results)}`;
+  trova("#titoloCondividi").textContent = titolo;
+
+  // Se il telefono non sa condividere file, resta solo "Scarica"
+  const puoCondividere = Boolean(navigator.canShare && navigator.canShare({ files: [immagineCorrente] }));
+  trova("#btnCondividiImmagine").hidden = !puoCondividere;
+  trova("#finestraCondividi").showModal();
+}
+
+trova("#btnCondividiImmagine").addEventListener("click", async () => {
+  try {
+    await navigator.share({ files: [immagineCorrente], title: "Partita di Risiko" });
+  } catch (errore) {
+    if (errore?.name !== "AbortError") mostraNotifica("Condivisione non riuscita: prova con Scarica.");
+  }
+});
+
+trova("#btnScaricaImmagine").addEventListener("click", () => {
+  const collegamento = document.createElement("a");
+  collegamento.href = URL.createObjectURL(immagineCorrente);
+  collegamento.download = immagineCorrente.name;
+  collegamento.click();
+  setTimeout(() => URL.revokeObjectURL(collegamento.href), 1000);
+});
+
+
+// ===== Account =====
+function apriAccount() {
+  trova("#titoloAccount").textContent = stato.utente.nome;
+  trova("#emailAccount").textContent = stato.utente.eAdmin
+    ? `${stato.utente.email}, admin`
+    : `${stato.utente.email}, solo lettura`;
+  trova("#moduloPassword").reset();
+  trova("#errorePassword").textContent = "";
+  trova("#finestraAccount").showModal();
+}
+
+trova("#moduloPassword").addEventListener("submit", async evento => {
+  evento.preventDefault();
+  const attuale = trova("#campoPasswordAttuale").value;
+  const nuova = trova("#campoNuovaPassword").value;
+  const ripetuta = trova("#campoRipetiPassword").value;
+  const errore = trova("#errorePassword");
+  errore.textContent = "";
+
+  if (nuova.length < 6) {
+    errore.textContent = "La nuova password deve avere almeno 6 caratteri.";
+    return;
+  }
+  if (nuova !== ripetuta) {
+    errore.textContent = "Le due password nuove non coincidono.";
+    return;
+  }
+  if (nuova === attuale) {
+    errore.textContent = "La nuova password è uguale a quella attuale.";
+    return;
+  }
+
+  const pulsante = trova("#btnCambiaPassword");
+  pulsante.disabled = true;
+  try {
+    await archivio.cambiaPassword(attuale, nuova);
+    trova("#moduloPassword").reset();
+    trova("#finestraAccount").close();
+    mostraNotifica("Password cambiata");
+  } catch (erroreFirebase) {
+    const codice = erroreFirebase?.code || "";
+    if (codice.includes("wrong-password") || codice.includes("invalid-credential")) errore.textContent = "La password attuale non è corretta.";
+    else if (codice.includes("weak-password")) errore.textContent = "La nuova password è troppo debole: usane una più lunga.";
+    else if (codice.includes("too-many")) errore.textContent = "Troppi tentativi: riprova tra qualche minuto.";
+    else if (codice.includes("network")) errore.textContent = "Connessione assente: riprova quando sei online.";
+    else errore.textContent = `Password non cambiata (${codice || "errore"}).`;
+  }
+  pulsante.disabled = false;
+});
+
+trova("#btnEsci").addEventListener("click", async () => {
+  await archivio.esci();
+  trova("#finestraAccount").close();
+  mostraNotifica("Sei uscito");
 });
 
 
@@ -1407,7 +2347,7 @@ function chiediConferma(titolo, testo, testoPulsante) {
 }
 
 
-// ===== Clic in tutta la pagina =====
+// ===== Clic e modifiche in tutta la pagina =====
 document.addEventListener("click", async evento => {
   const pulsante = evento.target.closest("button");
   if (!pulsante) return;
@@ -1421,6 +2361,11 @@ document.addEventListener("click", async evento => {
     window.scrollTo(0, 0);
   } else if (dati.giocatore) {
     apriGiocatore(dati.giocatore);
+  } else if (dati.evidenzia) {
+    stato.giocatoreEvidenziato = stato.giocatoreEvidenziato === dati.evidenzia ? null : dati.evidenzia;
+    disegna();
+  } else if (dati.condividi) {
+    apriCondivisione(dati.condividi);
   } else if (dati.modifica) {
     apriPartita(dati.modifica);
   } else if (dati.elimina) {
@@ -1447,17 +2392,47 @@ document.addEventListener("click", async evento => {
         before: null, after: fotografiaPartita(partita) },
       "Partita ripristinata"
     );
+  } else if (pulsante.id === "btnMostraEliminate") {
+    stato.mostraEliminate = !stato.mostraEliminate;
+    disegna();
+  } else if (pulsante.id === "btnStoricoVecchio") {
+    stato.limiteStorico += 100;
+    ascoltaStorico();
+  } else if (pulsante.id === "btnNuovaStagione") {
+    apriNuovaStagione();
+  } else if (pulsante.id === "btnInstalla") {
+    richiestaInstallazione.prompt();
+    richiestaInstallazione = null;
+    disegna();
+  } else if (pulsante.id === "btnNonOra") {
+    richiestaInstallazione = null;
+    try { localStorage.setItem("installazioneRifiutata", "si"); } catch (errore) { /* niente */ }
+    disegna();
   }
+});
+
+document.addEventListener("change", evento => {
+  const elemento = evento.target;
+  if (elemento.id === "sceltaStagione") {
+    stato.stagioneScelta = elemento.value;
+    disegna();
+  } else if (elemento.id === "sfidaPrimo" || elemento.id === "sfidaSecondo") {
+    stato.testaATesta = { primo: trova("#sfidaPrimo").value, secondo: trova("#sfidaSecondo").value };
+    disegna();
+  }
+});
+
+document.addEventListener("submit", evento => {
+  if (evento.target.id === "moduloNuovoGiocatore") aggiungiGiocatore(evento);
 });
 
 trova("#btnNuovaPartita").addEventListener("click", () => apriPartita(null));
 
 
 // ===== Accesso =====
-trova("#btnAccesso").addEventListener("click", async () => {
+trova("#btnAccesso").addEventListener("click", () => {
   if (stato.utente) {
-    const conferma = await chiediConferma("Uscire?", `Sei entrato come ${stato.utente.email}.`, "Esci");
-    if (conferma) await archivio.esci();
+    apriAccount();
     return;
   }
   trova("#erroreAccesso").textContent = "";
@@ -1487,6 +2462,21 @@ trova("#moduloAccesso").addEventListener("submit", async evento => {
 });
 
 
+// ===== App installabile =====
+window.addEventListener("beforeinstallprompt", evento => {
+  evento.preventDefault();
+  let rifiutata = false;
+  try { rifiutata = localStorage.getItem("installazioneRifiutata") === "si"; } catch (errore) { /* niente */ }
+  if (rifiutata) return;
+  richiestaInstallazione = evento;
+  disegna();
+});
+
+if ("serviceWorker" in navigator && location.protocol === "https:") {
+  navigator.serviceWorker.register("sw.js").catch(() => { /* senza, la pagina funziona lo stesso */ });
+}
+
+
 // ===== Avvio =====
 function ascoltaStorico() {
   if (smettiDiAscoltareStorico) smettiDiAscoltareStorico();
@@ -1499,7 +2489,7 @@ function ascoltaStorico() {
 function gestisciErroreLettura(errore) {
   const codice = errore?.code || "";
   stato.erroreCaricamento = codice.includes("permission-denied")
-    ? "Non riesco a leggere i dati: controlla di aver pubblicato le regole Firestore."
+    ? "Non riesco a leggere i dati: controlla di aver pubblicato le regole Firestore aggiornate."
     : `Non riesco a leggere i dati (${codice || errore?.message || "errore"}).`;
   disegna();
 }
@@ -1521,6 +2511,11 @@ async function avvia() {
 
   archivio.ascoltaPartite(partite => {
     stato.partite = partite;
+    disegna();
+  }, gestisciErroreLettura);
+
+  archivio.ascoltaStagioni(stagioni => {
+    stato.stagioni = stagioni;
     disegna();
   }, gestisciErroreLettura);
 
