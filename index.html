@@ -1087,15 +1087,34 @@ async function collegaFirebase() {
       await lotto.commit();
     },
 
-    // Per le importazioni grandi: Firestore accetta al massimo 500 scritture per volta
-    async salvaInBlocchi(operazioni, quandoAvanza = () => {}) {
-      const dimensioneBlocco = 400;
-      for (let inizio = 0; inizio < operazioni.length; inizio += dimensioneBlocco) {
-        const lotto = firestore.writeBatch(database);
-        for (const operazione of operazioni.slice(inizio, inizio + dimensioneBlocco)) aggiungiAlLotto(lotto, operazione);
-        await lotto.commit();
-        quandoAvanza(Math.min(inizio + dimensioneBlocco, operazioni.length), operazioni.length);
+    // Per le importazioni: un documento per scrittura, dieci alla volta.
+    // Un lotto da centinaia di documenti supera i limiti dei controlli delle regole
+    // e Firestore lo rifiuta tutto come "permesso negato".
+    // Restituisce le operazioni che non sono andate, così si possono riprovare.
+    async salvaUnoAllaVolta(operazioni, quandoAvanza = () => {}) {
+      const nonRiuscite = [];
+      const insieme = 10;
+      for (let inizio = 0; inizio < operazioni.length; inizio += insieme) {
+        const gruppo = operazioni.slice(inizio, inizio + insieme);
+        await Promise.all(gruppo.map(async operazione => {
+          const lotto = firestore.writeBatch(database);
+          aggiungiAlLotto(lotto, operazione);
+          try {
+            await lotto.commit();
+          } catch (errore) {
+            console.warn("Importazione: non riuscito", operazione.raccolta, operazione.id, errore?.code);
+            nonRiuscite.push(operazione);
+          }
+        }));
+        quandoAvanza(Math.min(inizio + insieme, operazioni.length), operazioni.length);
       }
+      return nonRiuscite;
+    },
+
+    // Gli id già presenti in una raccolta della lega: per riprendere un'importazione interrotta
+    async idPresenti(lega, raccolta) {
+      const istantanea = await firestore.getDocs(firestore.collection(database, "leagues", lega, raccolta));
+      return new Set(istantanea.docs.map(documento => documento.id));
     },
 
     // La classifica di prima delle leghe, se questo account ne era admin
@@ -3090,6 +3109,7 @@ let smettiDiAscoltareStorico = null;
 let smettiDiAscoltareRichieste = null;
 let smettiDiAscoltareMieLeghe = null;
 let legaInUscita = null;            // la lega da cui l'utente sta uscendo di sua volontà
+let importazioneInCorso = false;    // la classifica di prima si sta copiando in una lega
 
 function voceLega(id) {
   stato.leghe[id] ??= { info: null, membro: null, richiesta: null, caricata: false };
@@ -3300,11 +3320,14 @@ function disegnaIntestazione() {
   const info = infoLega();
   if (legaApertaPronta() && info) {
     const daAccettare = stato.utente?.eAdmin ? stato.richieste.length : 0;
+    // Un'importazione a metà si segnala con un "!" finché non viene ripresa
+    const importDaFinire = puoRiprendereImportazione() && !importazioneInCorso;
+    const segnale = daAccettare || (importDaFinire ? "!" : "");
     const contenuto = `
-      <button class="titolo-lega" id="btnLega" type="button" aria-label="La lega ${pulisciHtml(info.name)}: membri, inviti e impostazioni${daAccettare ? `, ${daAccettare} da accettare` : ""}">
+      <button class="titolo-lega" id="btnLega" type="button" aria-label="La lega ${pulisciHtml(info.name)}: membri, inviti e impostazioni${daAccettare ? `, ${daAccettare} da accettare` : ""}${importDaFinire ? ", importazione da finire" : ""}">
         <span class="nome-lega">${pulisciHtml(info.name)}</span>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-        ${daAccettare ? `<span class="contatore" aria-hidden="true">${daAccettare}</span>` : ""}
+        ${segnale ? `<span class="contatore" aria-hidden="true">${segnale}</span>` : ""}
       </button>`;
     if (titolo.dataset.contenuto !== contenuto) {
       titolo.innerHTML = contenuto;
@@ -3536,6 +3559,17 @@ function disegnaGestioneLega() {
       <ul class="elenco-membri">${righeMembri.join("")}</ul>
     </div>`;
 
+  if (puoRiprendereImportazione()) {
+    html += `
+      <div class="blocco-lega">
+        <h3>Classifica di prima</h3>
+        <p class="hint">L'importazione non è finita. Riprendila: quello che è già dentro non viene copiato due volte.</p>
+        <button class="btn red" type="button" data-gestione="importa" ${importazioneInCorso ? "disabled" : ""}>
+          ${importazioneInCorso ? "Importazione in corso…" : "Riprendi l'importazione"}
+        </button>
+      </div>`;
+  }
+
   if (eCreatore) {
     html += `
       <div class="blocco-lega">
@@ -3680,6 +3714,8 @@ document.addEventListener("click", async evento => {
     gestisciRichiesta(dati.richiesta, dati.uid);
   } else if (dati.membro) {
     gestisciMembro(dati.membro, dati.uid);
+  } else if (dati.gestione === "importa") {
+    eseguiImportazione(stato.legaAttiva);
   } else if (dati.gestione === "copia") {
     copiaInvito();
   } else if (dati.gestione === "condividi") {
@@ -3764,17 +3800,23 @@ trova("#moduloNuovaLega").addEventListener("submit", async evento => {
   const pulsante = trova("#btnCreaLega");
   pulsante.disabled = true;
   errore.textContent = "";
+  let id;
   try {
-    const id = await creaLega(nome, importa);
-    trova("#finestraNuovaLega").close();
-    apriLega(id);
-    mostraNotifica(importa ? "Lega creata con la classifica di prima" : "Lega creata: invita gli altri dal nome in alto");
+    id = await creaLega(nome, importa);
   } catch (erroreFirebase) {
     errore.textContent = messaggioErrore(erroreFirebase);
+    pulsante.disabled = false;
+    return;
   }
+  // La lega c'è: la apro subito, e se l'importazione si ferma la si riprende da lì
+  trova("#finestraNuovaLega").close();
   pulsante.disabled = false;
+  apriLega(id);
+  if (importa) await eseguiImportazione(id);
+  else mostraNotifica("Lega creata: invita gli altri dal nome in alto");
 });
 
+// Crea solo la lega: l'importazione si fa dopo, così se si ferma la lega resta comunque aperta
 async function creaLega(nome, importa) {
   const { uid, email } = stato.utente;
   const id = archivio.nuovoId("leagues");
@@ -3786,11 +3828,13 @@ async function creaLega(nome, importa) {
     { percorso: `users/${uid}`, unisci: true, dati: { leagues: { aggiungiAElenco: id } } }
   ]);
   await archivio.salva([], { lega: id, action: "lega_creata", target: id, summary: `${stato.utente.nome} crea la lega ${nome}`, before: null, after: null });
-
-  if (importa) await importaVecchiaClassifica(id);
   return id;
 }
 
+const nomiRaccolteImportate = { players: "giocatori", seasons: "stagioni", games: "partite", log: "voci di storico" };
+
+// Copia la classifica di prima nella lega. Si può rilanciare: salta quello che c'è già.
+// Restituisce true se è tutto dentro e l'importazione è chiusa.
 async function importaVecchiaClassifica(id) {
   const vecchia = stato.vecchiaClassifica;
   const copia = (raccolta, documento, extra = {}) => {
@@ -3798,13 +3842,26 @@ async function importaVecchiaClassifica(id) {
     return { lega: id, raccolta, id: idDocumento, dati: { ...dati, ...extra } };
   };
   // Stessi id di prima: le partite puntano ai giocatori per id
-  const operazioni = [
+  const tutte = [
     ...vecchia.giocatori.map(giocatore => copia("players", giocatore)),
     ...vecchia.stagioni.map(stagione => copia("seasons", stagione)),
     ...vecchia.partite.map(partita => copia("games", partita)),
     ...vecchia.storico.map(voce => copia("log", voce, { imported: true }))
   ];
-  await archivio.salvaInBlocchi(operazioni, (fatte, totale) => mostraNotifica(`Importazione: ${fatte} di ${totale}`));
+
+  // Quello che un tentativo precedente ha già copiato non si riscrive (lo storico non si può modificare)
+  const presenti = {};
+  for (const raccolta of Object.keys(nomiRaccolteImportate)) presenti[raccolta] = await archivio.idPresenti(id, raccolta);
+  const daFare = tutte.filter(operazione => !presenti[operazione.raccolta].has(operazione.id));
+
+  const nonRiuscite = await archivio.salvaUnoAllaVolta(daFare, (fatte, totale) => mostraNotifica(`Importazione: ${fatte} di ${totale}`));
+  if (nonRiuscite.length) {
+    // Lascio l'importazione aperta: dal nome della lega si può riprendere
+    const conteggio = {};
+    for (const operazione of nonRiuscite) conteggio[operazione.raccolta] = (conteggio[operazione.raccolta] || 0) + 1;
+    const elenco = Object.entries(conteggio).map(([raccolta, quante]) => `${quante} ${nomiRaccolteImportate[raccolta]}`).join(", ");
+    throw { code: "importazione-incompleta", message: `Non sono entrati: ${elenco}.` };
+  }
 
   // Chiudo l'importazione: da qui in poi nessuno può più aggiungere storico "vecchio"
   await archivio.salva(
@@ -3813,6 +3870,33 @@ async function importaVecchiaClassifica(id) {
       summary: `Importata la classifica di prima: ${vecchia.giocatori.length} giocatori, ${vecchia.partite.length} partite, ${vecchia.stagioni.length} stagioni`,
       before: null, after: null }
   );
+}
+
+// L'importazione con i suoi messaggi: la usano sia la creazione sia "Riprendi l'importazione"
+async function eseguiImportazione(id) {
+  if (importazioneInCorso) return false;
+  importazioneInCorso = true;
+  aggiornaGestioneLegaSeAperta();
+  try {
+    await importaVecchiaClassifica(id);
+    mostraNotifica("Classifica di prima importata");
+    return true;
+  } catch (errore) {
+    const dettaglio = errore?.code === "importazione-incompleta" ? errore.message : messaggioErrore(errore);
+    mostraNotifica(`Importazione non finita. ${dettaglio} Riprendila dal nome della lega.`);
+    return false;
+  } finally {
+    importazioneInCorso = false;
+    aggiornaGestioneLegaSeAperta();
+    disegna();
+  }
+}
+
+// Il creatore può riprendere un'importazione rimasta a metà finché non è chiusa
+function puoRiprendereImportazione() {
+  const vecchia = stato.vecchiaClassifica;
+  return mioRuolo() === "creatore" && infoLega()?.importOpen === true
+    && Boolean(vecchia && (vecchia.giocatori.length || vecchia.partite.length));
 }
 
 
