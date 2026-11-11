@@ -3,7 +3,7 @@
 // prova sempre prima la versione online, e usa la copia salvata solo se manca la connessione.
 // I dati arrivano da Firebase e non passano di qui.
 
-const nomeCache = "classifica-risiko-v2";
+const nomeCache = "classifica-risiko-v3";
 const fileDellApp = ["./", "./index.html", "./manifest.webmanifest", "./icona-192.png", "./icona-512.png"];
 
 self.addEventListener("install", evento => {
@@ -23,8 +23,10 @@ self.addEventListener("fetch", evento => {
   const stessoSito = new URL(richiesta.url).origin === self.location.origin;
   if (richiesta.method !== "GET" || !stessoSito) return;
 
+  // "no-cache": chiede sempre al sito se c'è una versione nuova, invece di fidarsi
+  // della copia del browser (GitHub Pages la tiene per 10 minuti)
   evento.respondWith(
-    fetch(richiesta)
+    fetch(richiesta.url, { cache: "no-cache" })
       .then(risposta => {
         const copia = risposta.clone();
         caches.open(nomeCache).then(cache => cache.put(richiesta, copia));
