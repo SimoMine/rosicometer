@@ -476,9 +476,6 @@ select.largo { width: 100%; }
 .scelta-accesso { grid-template-columns: 1fr 1fr; margin-bottom: 14px; }
 .scelta-accesso[hidden] { display: none; }
 .scelta-accesso button[aria-pressed="true"] { background: var(--ink); color: var(--sea); font-weight: 700; }
-.riga-spunta { display: flex; gap: 10px; align-items: flex-start; margin: 6px 0 4px; }
-.riga-spunta[hidden] { display: none; }
-.riga-spunta input { width: 22px; height: 22px; margin: 2px 0 0; flex: none; accent-color: var(--red); }
 .field[hidden] { display: none; }
 .spazio-sopra-piccolo { margin-top: 8px; }
 .hint.spazio-sopra-piccolo { margin-bottom: 0; }
@@ -966,7 +963,6 @@ const stato = {
   leghe: {},              // id → { info, membro, richiesta, caricata }
   legaAttiva: null,       // id della lega aperta
   legaInvito: null,       // id arrivato con un link d'invito
-  vecchiaClassifica: null, // { giocatori, partite } se c'è una classifica di prima da importare
 
   limiteStorico: 100,
   schedaAttiva: "classifica",
@@ -3162,6 +3158,7 @@ function seguiLega(id) {
     voce.caricata = true;
     if (id === stato.legaAttiva) aggiornaGestioneLegaSeAperta();
     disegna();
+    if (id === stato.legaAttiva) allineaPartecipanti();
   }, () => {
     voce.caricata = true;
     disegna();
@@ -3231,7 +3228,12 @@ function caricaDatiLega() {
   archivio.apriLega(stato.legaAttiva);
   fermaDatiLega();
   ascoltatoriLegaAperta = [
-    archivio.ascoltaGiocatori(giocatori => { stato.giocatori = giocatori; disegna(); }, gestisciErroreLettura),
+    archivio.ascoltaGiocatori(giocatori => {
+      stato.giocatori = giocatori;
+      giocatoriCaricati = true;
+      disegna();
+      allineaPartecipanti();
+    }, gestisciErroreLettura),
     archivio.ascoltaPartite(partite => { stato.partite = partite; disegna(); }, gestisciErroreLettura),
     archivio.ascoltaStagioni(stagioni => { stato.stagioni = stagioni; disegna(); }, gestisciErroreLettura),
     archivio.ascoltaMembri(membri => {
@@ -3265,6 +3267,7 @@ function aggiornaAscoltoRichieste() {
 function fermaDatiLega() {
   ascoltatoriLegaAperta.forEach(funzione => funzione());
   ascoltatoriLegaAperta = [];
+  giocatoriCaricati = false;
   if (smettiDiAscoltareStorico) smettiDiAscoltareStorico();
   smettiDiAscoltareStorico = null;
   if (smettiDiAscoltareRichieste) smettiDiAscoltareRichieste();
@@ -3318,6 +3321,23 @@ function nomiPartecipanti(giocatori) {
 
 function operazionePartecipanti(giocatoriDopo) {
   return { percorso: `leagues/${stato.legaAttiva}`, unisci: true, dati: { participants: nomiPartecipanti(giocatoriDopo) } };
+}
+
+// L'elenco dei partecipanti salvato nella lega (quello che vedono tutti, anche da fuori)
+// può essere rimasto indietro, per esempio in una lega creata con una versione precedente.
+// Quando un admin apre la lega e i giocatori sono caricati, lo rimetto in pari.
+let giocatoriCaricati = false;
+let allineamentoInCorso = false;
+async function allineaPartecipanti() {
+  const info = infoLega();
+  if (!info || !giocatoriCaricati || !stato.utente?.eAdmin || allineamentoInCorso || info.deleting) return;
+  const giusti = nomiPartecipanti(stato.giocatori);
+  if (JSON.stringify(giusti) === JSON.stringify(info.participants ?? [])) return;
+  allineamentoInCorso = true;
+  try {
+    await archivio.salva([operazionePartecipanti(stato.giocatori)]);
+  } catch (errore) { /* riproverà alla prossima apertura */ }
+  allineamentoInCorso = false;
 }
 
 function formattaGiorno(momento) {
@@ -3437,14 +3457,17 @@ function vistaLeghe() {
   } else {
     const righe = ids.map(id => {
       const voce = voceLega(id);
-      const nome = voce.info?.name ?? (voce.caricata ? "Lega non trovata" : "Carico…");
+      const nome = voce.info?.name ?? (voce.caricata ? "Lega eliminata" : "Carico…");
       const ruolo = mioRuolo(id);
       let statoLega;
-      if (ruolo) statoLega = nomiRuoli[ruolo];
+      if (voce.caricata && !voce.info) statoLega = "Il creatore l'ha eliminata";
+      else if (ruolo) statoLega = nomiRuoli[ruolo];
       else if (voce.richiesta) statoLega = "In attesa di essere accettato";
       else statoLega = "Non ne fai più parte";
       const quanti = voce.info?.participants?.length ?? 0;
-      const dettaglio = voce.info ? `${statoLega}, ${quanti} ${quanti === 1 ? "giocatore" : "giocatori"}` : statoLega;
+      // I giocatori sono le persone inserite a mano nella scheda Giocatori, non gli account
+      const testoGiocatori = quanti === 0 ? "nessun giocatore ancora" : `${quanti} ${quanti === 1 ? "giocatore" : "giocatori"}`;
+      const dettaglio = voce.info ? `${statoLega}, ${testoGiocatori}` : statoLega;
       const togli = !ruolo && !voce.richiesta && voce.caricata
         ? `<button class="btn quiet" type="button" data-togli-lega="${id}">Togli dall'elenco</button>` : "";
       return `
@@ -4417,7 +4440,6 @@ function quandoCambiaUtente(utente) {
   stato.autenticazionePronta = true;
   stato.idMieLeghe = [];
   stato.mieLegheCaricate = false;
-  stato.vecchiaClassifica = null;
   stato.legaAttiva = legaVista;
 
   if (utente) {
@@ -4437,7 +4459,7 @@ function quandoCambiaUtente(utente) {
       }
       disegna();
     }, gestisciErroreLettura);
-    caricaVecchiaClassifica();
+    caricaNomeDaVecchiaLista();
   }
   aggiornaLegheSeguite();
   disegna();
