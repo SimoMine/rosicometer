@@ -115,6 +115,11 @@ h3 { font: 700 18px/1.25 var(--body); margin: 0; }
 }
 .leader .who { font: 800 34px/1 var(--display); overflow-wrap: anywhere; }
 .leader .who button { all: unset; cursor: pointer; }
+.leader .corona {
+  --corona-bordo: #7a5c00;
+  display: inline-block; width: .9em; height: .68em; color: var(--gold);
+  margin-left: -.06em; vertical-align: .5em; transform: rotate(22deg); transform-origin: left bottom;
+}
 .leader .score {
   grid-column: 1 / -1; display: flex; align-items: baseline; gap: 10px; margin-top: 8px;
 }
@@ -473,6 +478,12 @@ select.largo { width: 100%; }
 .elenco-membri li > span:first-child { min-width: 0; overflow-wrap: anywhere; }
 .azioni-membro { display: flex; flex-wrap: wrap; gap: 6px; }
 .azioni-membro .btn { min-height: 38px; padding: 6px 12px; font-size: 14px; }
+.btn-google { width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; background: #fff; color: #1f1f1f; border: 1.5px solid #dadce0; font-weight: 600; }
+.btn-google svg { width: 20px; height: 20px; flex: none; }
+.btn-google:disabled { opacity: .6; }
+.separatore-accesso { display: flex; align-items: center; gap: 10px; margin: 14px 0 10px; color: var(--ink-soft); font-size: 14px; }
+.separatore-accesso::before, .separatore-accesso::after { content: ""; flex: 1; border-top: 1.5px solid var(--sea-line); }
+#bloccoGoogle[hidden] { display: none; }
 .scelta-accesso { grid-template-columns: 1fr 1fr; margin-bottom: 14px; }
 .scelta-accesso[hidden] { display: none; }
 .scelta-accesso button[aria-pressed="true"] { background: var(--ink); color: var(--sea); font-weight: 700; }
@@ -550,6 +561,13 @@ select.largo { width: 100%; }
 <dialog id="finestraAccesso" aria-labelledby="titoloAccesso">
   <form class="sheet" id="moduloAccesso" novalidate>
     <h2 id="titoloAccesso" tabindex="-1">Accedi</h2>
+    <div id="bloccoGoogle">
+      <button class="btn btn-google" type="button" id="btnGoogle">
+        <svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.6 5.4 2.6 13.3l7.9 6.2C12.4 13.7 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 2.9-2.2 5.4-4.7 7.1l7.6 5.9c4.4-4.1 6.9-10.1 6.9-17.5z"/><path fill="#FBBC05" d="M10.5 28.5c-.5-1.4-.8-2.9-.8-4.5s.3-3.1.8-4.5l-7.9-6.2C.9 16.6 0 20.2 0 24s.9 7.4 2.6 10.7l7.9-6.2z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.6-5.9c-2.1 1.4-4.9 2.3-8.3 2.3-6.3 0-11.6-4.2-13.5-10l-7.9 6.2C6.6 42.6 14.6 48 24 48z"/></svg>
+        Continua con Google
+      </button>
+      <p class="separatore-accesso"><span>oppure con email e password</span></p>
+    </div>
     <div class="seg scelta-accesso" role="group" aria-label="Accedi o registrati">
       <button type="button" data-modo-accesso="entra" aria-pressed="true">Ho già un account</button>
       <button type="button" data-modo-accesso="registrati" aria-pressed="false">Sono nuovo</button>
@@ -595,6 +613,7 @@ select.largo { width: 100%; }
       <button class="btn" type="submit">Cambia nome</button>
     </form>
     <button class="btn ghost" type="button" id="btnMieLeghe">Le tue leghe</button>
+    <p class="hint blocco-password" id="notaGoogle" hidden>Entri con Google: la password la gestisci dal tuo account Google.</p>
     <form id="moduloPassword" class="blocco-password">
       <h3>Cambia password</h3>
       <div class="field"><label for="campoPasswordAttuale">Password attuale</label><input type="password" id="campoPasswordAttuale" autocomplete="current-password" required></div>
@@ -1144,7 +1163,9 @@ async function collegaFirebase() {
           uid: utenteFirebase.uid,
           email,
           nome: utenteFirebase.displayName || email.split("@")[0],
-          senzaNome: !utenteFirebase.displayName
+          senzaNome: !utenteFirebase.displayName,
+          // Chi entra solo con Google non ha una password da cambiare
+          conPassword: (utenteFirebase.providerData || []).some(fornitore => fornitore.providerId === "password")
         };
         callback(utenteCorrente);
       });
@@ -1154,10 +1175,17 @@ async function collegaFirebase() {
       return autenticazione.signInWithEmailAndPassword(auth, email, password);
     },
 
+    // Si apre la finestra di Google; al ritorno ci pensa onAuthStateChanged
+    entraConGoogle() {
+      const fornitore = new autenticazione.GoogleAuthProvider();
+      fornitore.setCustomParameters({ prompt: "select_account" });
+      return autenticazione.signInWithPopup(auth, fornitore);
+    },
+
     async registrati(nome, email, password) {
       const { user } = await autenticazione.createUserWithEmailAndPassword(auth, email, password);
       await autenticazione.updateProfile(user, { displayName: nome });
-      utenteCorrente = { uid: user.uid, email: email.toLowerCase(), nome };
+      utenteCorrente = { uid: user.uid, email: email.toLowerCase(), nome, senzaNome: false, conPassword: true };
       return utenteCorrente;
     },
 
@@ -1881,6 +1909,15 @@ function disegna() {
   viste[stato.schedaAttiva]();
 }
 
+// La coroncina di chi è in testa, inclinata sopra la fine del nome
+const coronaDelPrimo = `<svg class="corona" viewBox="0 0 40 30" role="img" aria-label="In testa alla classifica">
+    <path d="M4 25 L2 8 L12 15 L20 3 L28 15 L38 8 L36 25 Z" fill="currentColor" stroke="var(--corona-bordo)" stroke-width="2.2" stroke-linejoin="round"/>
+    <rect x="4" y="23" width="32" height="5" rx="1.5" fill="currentColor" stroke="var(--corona-bordo)" stroke-width="2.2"/>
+    <circle cx="2.5" cy="7" r="2.4" fill="currentColor" stroke="var(--corona-bordo)" stroke-width="1.6"/>
+    <circle cx="20" cy="2.8" r="2.4" fill="currentColor" stroke="var(--corona-bordo)" stroke-width="1.6"/>
+    <circle cx="37.5" cy="7" r="2.4" fill="currentColor" stroke="var(--corona-bordo)" stroke-width="1.6"/>
+  </svg>`;
+
 function vistaClassifica() {
   const contenitore = trova("#vista-classifica");
   const { statistiche, inClassifica, inProva } = calcolo;
@@ -1905,7 +1942,7 @@ function vistaClassifica() {
       <div class="leader">
         ${pedina(primo.id, "big")}
         <div>
-          <div class="who"><button type="button" data-giocatore="${primo.id}">${pulisciHtml(primo.name)}</button></div>
+          <div class="who"><button type="button" data-giocatore="${primo.id}">${pulisciHtml(primo.name)}</button>${coronaDelPrimo}</div>
           <div class="muted small">${contaPartite(s.partite)}, ${s.vittorie} ${s.vittorie === 1 ? "vittoria" : "vittorie"}</div>
         </div>
         <div class="score"><b>${Math.round(s.elo)}</b><span>punti Elo${ultima}</span></div>
@@ -3927,6 +3964,8 @@ function apriAccount() {
     ? `${stato.utente.email}. In ${infoLega()?.name ?? "questa lega"} il tuo ruolo è ${nomiRuoli[ruolo].toLowerCase()}.`
     : stato.utente.email;
   trova("#campoCambiaNome").value = stato.utente.nome;
+  trova("#moduloPassword").hidden = !stato.utente.conPassword;
+  trova("#notaGoogle").hidden = stato.utente.conPassword;
   trova("#moduloPassword").reset();
   trova("#errorePassword").textContent = "";
   trova("#finestraAccount").showModal();
@@ -4297,6 +4336,7 @@ function impostaModoAccesso(modo) {
     pulsante.setAttribute("aria-pressed", String(pulsante.dataset.modoAccesso === modo));
   }
   trova(".scelta-accesso").hidden = recupero;
+  trova("#bloccoGoogle").hidden = recupero;
   trova("#rigaNome").hidden = !registrazione;
   trova("#rigaPassword").hidden = recupero;
   trova("#rigaRipetiPassword").hidden = !registrazione;
@@ -4320,8 +4360,32 @@ function messaggioErroreAccesso(errore) {
   if (codice.includes("too-many")) return "Troppi tentativi: riprova tra qualche minuto.";
   if (codice.includes("network")) return "Connessione assente: riprova quando sei online.";
   if (codice.includes("unauthorized-domain")) return "Questo sito non è tra i domini autorizzati in Firebase Authentication.";
+  if (codice.includes("popup-blocked")) return "Il browser ha bloccato la finestra di Google: consenti i popup per questo sito e riprova.";
+  if (codice.includes("account-exists-with-different-credential")) return "C'è già un account con questa email: entra con email e password.";
   return modoAccesso === "entra" ? "Email o password non corretti." : `Operazione non riuscita (${codice || "errore"}).`;
 }
+
+trova("#btnGoogle").addEventListener("click", async () => {
+  const pulsante = trova("#btnGoogle");
+  const erroreAccesso = trova("#erroreAccesso");
+  erroreAccesso.textContent = "";
+  pulsante.disabled = true;
+  try {
+    await archivio.entraConGoogle();
+    trova("#finestraAccesso").close();
+  } catch (errore) {
+    const codice = errore?.code || "";
+    // Chiudere la finestra di Google non è un errore
+    if (codice.includes("popup-closed-by-user") || codice.includes("cancelled-popup-request")) {
+      pulsante.disabled = false;
+      return;
+    }
+    erroreAccesso.textContent = codice.includes("operation-not-allowed")
+      ? "L'accesso con Google non è attivo: attivalo in Firebase, Authentication, Metodo di accesso."
+      : messaggioErroreAccesso(errore);
+  }
+  pulsante.disabled = false;
+});
 
 trova("#btnAccesso").addEventListener("click", () => {
   if (stato.utente) apriAccount();
