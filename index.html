@@ -422,6 +422,14 @@ select {
 
 /* Durata e posta in gioco */
 .seg-durata { grid-template-columns: repeat(3, 1fr); }
+.seg-durata button { display: flex; flex-direction: column; align-items: center; gap: 1px; line-height: 1.15; padding-top: 7px; padding-bottom: 7px; }
+.seg-durata button small { font-size: 12.5px; font-weight: 400; opacity: .8; }
+.scorre-di-lato { overflow-x: auto; }
+.tabella-durate { border-collapse: collapse; font-size: 14px; margin: 4px 0 10px; }
+.tabella-durate th, .tabella-durate td { padding: 3px 10px 3px 0; text-align: right; white-space: nowrap; }
+.tabella-durate th[scope="row"], .tabella-durate thead th:first-child { text-align: left; }
+.tabella-durate thead th { font-weight: 700; border-bottom: 1.5px solid var(--sea-line); }
+.tabella-durate td.media { font-weight: 700; color: var(--ink); }
 /* Tre righe: righe sottili tra le celle, senza doppioni sui bordi */
 .seg-durata button + button { border-left: 0; }
 .seg-durata button:not(:nth-child(3n + 1)) { border-left: 1.5px solid var(--sea-line); }
@@ -743,11 +751,38 @@ const partiteMinime = 5;      // partite per entrare in classifica
 
 // Posta in gioco: il K si moltiplica per il fattore tavolo e per quello della durata.
 // Vale sia per chi guadagna sia per chi perde, così i punti non si gonfiano.
-// Le fasce sono scritte per 3 giocatori, dove una partita media dura 2 ore.
-// Una partita media dura (giocatori − 1) ore, quindi ogni giocatore in più
-// sposta tutte le fasce avanti di un'ora: la partita media prende sempre ×1.
-// Ogni fascia arriva fino ai suoi minuti massimi compresi: 2 h giuste a 3 giocatori valgono ×1.
+// Le fasce di durata sono le stesse per tutti: fino a 1 h, poi ogni mezz'ora, fino a oltre 6 h.
+// Ogni fascia arriva fino ai suoi minuti massimi compresi: 2 h giuste stanno in "1h30–2h".
 const fasceDurata = [
+  { id: "0-60", minutiMinimi: 0, minutiMassimi: 60 },
+  { id: "60-90", minutiMinimi: 60, minutiMassimi: 90 },
+  { id: "90-120", minutiMinimi: 90, minutiMassimi: 120 },
+  { id: "120-150", minutiMinimi: 120, minutiMassimi: 150 },
+  { id: "150-180", minutiMinimi: 150, minutiMassimi: 180 },
+  { id: "180-210", minutiMinimi: 180, minutiMassimi: 210 },
+  { id: "210-240", minutiMinimi: 210, minutiMassimi: 240 },
+  { id: "240-270", minutiMinimi: 240, minutiMassimi: 270 },
+  { id: "270-300", minutiMinimi: 270, minutiMassimi: 300 },
+  { id: "300-330", minutiMinimi: 300, minutiMassimi: 330 },
+  { id: "330-360", minutiMinimi: 330, minutiMassimi: 360 },
+  { id: "360+", minutiMinimi: 360, minutiMassimi: Infinity }
+];
+
+// Il moltiplicatore cambia con il numero di giocatori: un valore per fascia, nello stesso ordine.
+// Una partita media dura (giocatori − 1) ore e prende ×1; ogni giocatore in più
+// sposta i valori avanti di un'ora. Con 2 giocatori vale la riga dei 3.
+const moltiplicatoriDurata = {
+  //  ≤1h  1h30  2h    2h30  3h    3h30  4h    4h30  5h    5h30  6h    >6h
+  3: [0.7, 0.9,  1,    1.25, 1.4,  1.5,  1.7,  1.8,  1.9,  1.9,  1.9,  1.9],
+  4: [0.7, 0.7,  0.7,  0.9,  1,    1.25, 1.4,  1.5,  1.7,  1.8,  1.9,  1.9],
+  5: [0.7, 0.7,  0.7,  0.7,  0.7,  0.9,  1,    1.25, 1.4,  1.5,  1.7,  1.8],
+  6: [0.7, 0.7,  0.7,  0.7,  0.7,  0.7,  0.7,  0.9,  1,    1.25, 1.4,  1.5]
+};
+
+// Fasce delle versioni precedenti: non si scelgono più, ma le partite già salvate
+// tengono il moltiplicatore con cui erano state registrate.
+// Queste si spostavano di un'ora per ogni giocatore oltre il terzo.
+const fasceSpostate = [
   { id: "sotto1h", fattore: 0.7, minutiMinimi: 0, minutiMassimi: 60 },
   { id: "1h", fattore: 0.9, minutiMinimi: 60, minutiMassimi: 90 },
   { id: "1h30", fattore: 1, minutiMinimi: 90, minutiMassimi: 120 },
@@ -758,9 +793,7 @@ const fasceDurata = [
   { id: "4h", fattore: 1.8, minutiMinimi: 240, minutiMassimi: 270 },
   { id: "oltre4h30", fattore: 1.9, minutiMinimi: 270, minutiMassimi: Infinity }
 ];
-const giocatoriDelleFasce = 3;
-// Le fasce di prima: non si scelgono più, ma le partite già salvate con queste
-// tengono il fattore con cui erano state registrate.
+// E queste sono le primissime, a quattro fasce
 const fasceVecchie = [
   { id: "breve", descrizione: "meno di 1 ora", fattore: 0.75, minutiMinimi: 0 },
   { id: "normale", descrizione: "da 1 a 2 ore", fattore: 1, minutiMinimi: 60 },
@@ -1278,24 +1311,32 @@ function assegnaPosizioni(esiti) {
 }
 
 function trovaFascia(idFascia) {
-  return [...fasceDurata, ...fasceVecchie].find(fascia => fascia.id === idFascia) || null;
+  return [...fasceDurata, ...fasceSpostate, ...fasceVecchie].find(fascia => fascia.id === idFascia) || null;
 }
 
-// Di quanti minuti si spostano le fasce: 0 a 3 giocatori, 60 a 4, 180 a 6.
-// Sotto i 3 giocatori resta la tabella da 3.
-function spostamentoFasce(numeroGiocatori) {
-  return 60 * Math.max(0, numeroGiocatori - giocatoriDelleFasce);
+// La riga dei moltiplicatori da usare: sotto i 3 giocatori quella dei 3, sopra i 6 quella dei 6
+function rigaMoltiplicatori(numeroGiocatori) {
+  const tavolo = Math.min(6, Math.max(3, numeroGiocatori || 3));
+  return moltiplicatoriDurata[tavolo];
 }
 
-function fasciaDaMinuti(minuti, numeroGiocatori) {
-  const minutiDaTre = minuti - spostamentoFasce(numeroGiocatori);
-  return fasceDurata.find(fascia => minutiDaTre <= fascia.minutiMassimi);
+function fattoreDurata(fascia, numeroGiocatori) {
+  const posizione = fasceDurata.indexOf(fascia);
+  if (posizione >= 0) return rigaMoltiplicatori(numeroGiocatori)[posizione];
+  return fascia.fattore;  // una fascia delle versioni precedenti
 }
 
-// Inizio e fine veri della fascia per quel tavolo, in minuti
+function fasciaDaMinuti(minuti) {
+  return fasceDurata.find(fascia => minuti <= fascia.minutiMassimi);
+}
+
+// Inizio e fine veri della fascia, in minuti
 function confiniFascia(fascia, numeroGiocatori) {
-  const spostamento = spostamentoFasce(numeroGiocatori);
-  return { da: fascia.minutiMinimi + spostamento, a: fascia.minutiMassimi + spostamento };
+  if (fasceSpostate.includes(fascia)) {
+    const spostamento = 60 * Math.max(0, numeroGiocatori - 3);
+    return { da: fascia.minutiMinimi + spostamento, a: fascia.minutiMassimi + spostamento };
+  }
+  return { da: fascia.minutiMinimi, a: fascia.minutiMassimi ?? Infinity };
 }
 
 // 270 → "4 h 30", 240 → "4 h"; corto: "4h30", "4h"
@@ -1307,16 +1348,16 @@ function scriviOre(minuti, corto = false) {
 }
 
 function descriviFascia(fascia, numeroGiocatori) {
-  if (!fasceDurata.includes(fascia)) return fascia.descrizione;  // una fascia vecchia
+  if (fasceVecchie.includes(fascia)) return fascia.descrizione;
   const { da, a } = confiniFascia(fascia, numeroGiocatori);
-  if (fascia === fasceDurata[0]) return `fino a ${scriviOre(a)}`;
+  if (da === 0) return `fino a ${scriviOre(a)}`;
   if (a === Infinity) return `oltre ${scriviOre(da)}`;
   return `da ${scriviOre(da)} a ${scriviOre(a)}`;
 }
 
-function etichettaFascia(fascia, numeroGiocatori) {
-  const { da, a } = confiniFascia(fascia, numeroGiocatori);
-  if (fascia === fasceDurata[0]) return `≤ ${scriviOre(a, true)}`;
+function etichettaFascia(fascia) {
+  const { da, a } = confiniFascia(fascia);
+  if (da === 0) return `≤ ${scriviOre(a, true)}`;
   if (a === Infinity) return `> ${scriviOre(da, true)}`;
   return `${scriviOre(da, true)}–${scriviOre(a, true)}`;
 }
@@ -1326,10 +1367,7 @@ function durataOltre(partita, minuti) {
   if (partita.minutes) return partita.minutes > minuti;
   const fascia = trovaFascia(partita.duration);
   if (!fascia) return false;
-  const inizio = fasceDurata.includes(fascia)
-    ? confiniFascia(fascia, (partita.results || []).length).da
-    : fascia.minutiMinimi;
-  return inizio >= minuti;
+  return confiniFascia(fascia, (partita.results || []).length).da >= minuti;
 }
 
 // Più avversari al tavolo, più è difficile vincere: con 3 giocatori ×1, con 6 circa ×1,58
@@ -1340,7 +1378,7 @@ function fattoreTavolo(numeroGiocatori) {
 function postaInGioco(numeroGiocatori, idFascia) {
   const fascia = trovaFascia(idFascia);
   const tavolo = fattoreTavolo(numeroGiocatori);
-  const durata = fascia ? fascia.fattore : 1;
+  const durata = fascia ? fattoreDurata(fascia, numeroGiocatori) : 1;
   return { tavolo, durata, fascia, totale: tavolo * durata };
 }
 
@@ -1997,9 +2035,10 @@ function vistaClassifica() {
 // Le regole scritte a partire dalle costanti, così restano sempre vere
 function spiegazionePunti() {
   const tavoli = [3, 4, 5, 6].map(numero => `${numero} giocatori ${formattaFattore(fattoreTavolo(numero))}`);
-  const durate = fasceDurata.map(fascia => `${descriviFascia(fascia, giocatoriDelleFasce)} ${formattaFattore(fascia.fattore)}`);
-  durate.push("non segnata ×1");
-  const fasciaMedia = fasceDurata.find(fascia => fascia.fattore === 1);
+  const tavoliDurata = Object.keys(moltiplicatoriDurata);
+  const righeDurata = fasceDurata.map((fascia, posizione) => `
+    <tr><th scope="row">${etichettaFascia(fascia)}</th>${tavoliDurata.map(tavolo =>
+      `<td${moltiplicatoriDurata[tavolo][posizione] === 1 ? ' class="media"' : ""}>${formattaFattore(moltiplicatoriDurata[tavolo][posizione])}</td>`).join("")}</tr>`).join("");
   const obiettivi = obiettiviStandard.map(obiettivo =>
     `<li>${pulisciHtml(obiettivo.nome)}: ${obiettivo.livello.toLowerCase()}, ${formattaFattore(obiettivo.fattore)}</li>`);
   return `
@@ -2011,10 +2050,15 @@ function spiegazionePunti() {
       <p>La posta in gioco cresce con il tavolo e con la durata, sia per chi guadagna sia per chi perde:</p>
       <ul>
         <li>${tavoli.join(", ")}</li>
-        <li>Durata a ${giocatoriDelleFasce} giocatori: ${durate.join(", ")}</li>
       </ul>
-      <p>Una partita media dura un'ora per ogni giocatore meno uno, quindi ogni giocatore in più
-        sposta tutte le fasce avanti di un'ora: a 6 giocatori ×1 vale ${descriviFascia(fasciaMedia, 6)}.</p>
+      <p>Per la durata il moltiplicatore dipende anche da quanti siete: una partita media dura
+        un'ora per ogni giocatore meno uno e vale ×1 (in evidenza). Durata non segnata: ×1.</p>
+      <div class="scorre-di-lato">
+        <table class="tabella-durate">
+          <thead><tr><th scope="col">Durata</th>${tavoliDurata.map(tavolo => `<th scope="col">${tavolo} gioc.</th>`).join("")}</tr></thead>
+          <tbody>${righeDurata}</tbody>
+        </table>
+      </div>
       <p>Chi vince prende in più il moltiplicatore dell'obiettivo con cui ha vinto; per gli altri non cambia niente.
         Un obiettivo non segnato o fuori lista conta ×1.</p>
       <ul>${obiettivi.join("")}</ul>
@@ -2563,7 +2607,7 @@ function apriPartita(idPartita, tempoCronometrato = null) {
   if (tempoCronometrato != null) {
     const minuti = Math.max(1, Math.round(tempoCronometrato / 60000));
     bozza.minuti = minuti;
-    bozza.durata = fasciaDaMinuti(minuti, bozza.scelti.length).id;
+    bozza.durata = fasciaDaMinuti(minuti).id;
     bozza.daCronometro = true;
     // Una serata che finisce dopo mezzanotte conta per il giorno in cui è iniziata
     bozza.data = dataLocale(cronometro.avviatoIl);
@@ -2614,32 +2658,25 @@ function problemaDellaBozza() {
 
 function disegnaDurata() {
   const numero = bozza.scelti.length;
-  trova("#sceltaDurata").innerHTML = fasceDurata.map(fascia =>
-    `<button type="button" data-durata="${fascia.id}" aria-pressed="${bozza.durata === fascia.id}" aria-label="${descriviFascia(fascia, numero)}, ${formattaFattore(fascia.fattore)}">${etichettaFascia(fascia, numero)}</button>`
+  const riga = rigaMoltiplicatori(numero);
+  // Le fasce restano sempre le stesse: cambia solo il moltiplicatore scritto sotto
+  trova("#sceltaDurata").innerHTML = fasceDurata.map((fascia, posizione) =>
+    `<button type="button" data-durata="${fascia.id}" aria-pressed="${bozza.durata === fascia.id}" aria-label="${descriviFascia(fascia)}, ${formattaFattore(riga[posizione])}">
+      ${etichettaFascia(fascia)}<small>${formattaFattore(riga[posizione])}</small>
+    </button>`
   ).join("");
 
-  const tavolo = Math.max(numero, giocatoriDelleFasce);
-  const media = `A ${tavolo} giocatori una partita media dura ${scriviOre((tavolo - 1) * 60)}.`;
+  const tavolo = Math.min(6, Math.max(3, numero));
+  const perChi = numero >= 3 ? `a ${numero} giocatori` : "a 3 giocatori (scegli chi ha giocato per vedere i vostri)";
   const vecchia = trovaFascia(bozza.durata);
   let testo;
-  if (bozza.minuti) testo = `Dal cronometro: ${formattaMinuti(bozza.minuti)}. ${media}`;
-  else if (vecchia && !fasceDurata.includes(vecchia)) testo = `Salvata con le fasce di prima (${vecchia.descrizione}, ${formattaFattore(vecchia.fattore)}). Scegline una per cambiarla.`;
-  else testo = `Facoltativa. ${media} Più dura rispetto alla media, più punti sono in gioco.`;
-  trova("#testoDurata").textContent = testo;
-}
-
-// Quando cambia il numero di giocatori le fasce si spostano: tengo ferma la durata vera.
-// Col cronometro ricalcolo dai minuti; con una scelta a mano uso il centro della fascia.
-function adeguaDurata(giocatoriPrima) {
-  if (bozza.minuti) {
-    bozza.durata = fasciaDaMinuti(bozza.minuti, bozza.scelti.length).id;
-    return;
+  if (bozza.minuti) testo = `Dal cronometro: ${formattaMinuti(bozza.minuti)}. Moltiplicatori ${perChi}.`;
+  else if (vecchia && !fasceDurata.includes(vecchia)) {
+    testo = `Salvata con le fasce di prima (${descriviFascia(vecchia, numero)}, ${formattaFattore(vecchia.fattore)}). Scegline una per cambiarla.`;
+  } else {
+    testo = `Facoltativa. Moltiplicatori ${perChi}: una partita media dura ${scriviOre((tavolo - 1) * 60)} e vale ×1.`;
   }
-  const fascia = fasceDurata.find(f => f.id === bozza.durata);
-  if (!fascia) return;
-  const { da, a } = confiniFascia(fascia, giocatoriPrima);
-  const centro = a === Infinity ? da + 15 : Math.max(1, (da + a) / 2);
-  bozza.durata = fasciaDaMinuti(centro, bozza.scelti.length).id;
+  trova("#testoDurata").textContent = testo;
 }
 
 function disegnaBozza() {
@@ -2781,7 +2818,6 @@ trova("#moduloPartita").addEventListener("click", evento => {
 
   if (dati.scegli) {
     const id = dati.scegli;
-    const giocatoriPrima = bozza.scelti.length;
     if (bozza.scelti.includes(id)) {
       bozza.scelti = bozza.scelti.filter(x => x !== id);
       bozza.ordineEliminati = bozza.ordineEliminati.filter(x => x !== id);
@@ -2793,7 +2829,6 @@ trova("#moduloPartita").addEventListener("click", evento => {
       bozza.scelti.push(id);
       bozza.esiti[id] = "a";
     }
-    adeguaDurata(giocatoriPrima);
   } else if (dati.esitoDi) {
     const id = dati.esitoDi;
     const esito = dati.esito;
