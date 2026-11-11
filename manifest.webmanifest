@@ -1,7 +1,7 @@
 {
-  "name": "Classifica Risiko",
-  "short_name": "Risiko",
-  "description": "Classifica Elo delle partite di Risiko tra amici",
+  "name": "Rosicometer",
+  "short_name": "Rosicometer",
+  "description": "Classifica Elo delle partite di giochi strategici tra amici",
   "lang": "it",
   "start_url": "./",
   "scope": "./",

@@ -1,9 +1,9 @@
-// Service worker della Classifica Risiko.
+// Service worker di Rosicometer.
 // Serve solo a rendere la pagina installabile e ad aprirla anche senza rete:
 // prova sempre prima la versione online, e usa la copia salvata solo se manca la connessione.
 // I dati arrivano da Firebase e non passano di qui.
 
-const nomeCache = "classifica-risiko-v3";
+const nomeCache = "rosicometer-v1";
 const fileDellApp = ["./", "./index.html", "./manifest.webmanifest", "./icona-192.png", "./icona-512.png"];
 
 self.addEventListener("install", evento => {

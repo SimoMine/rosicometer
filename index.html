@@ -6,11 +6,11 @@
 <meta name="theme-color" content="#d9e6e8" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0f1e26" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Risiko">
+<meta name="apple-mobile-web-app-title" content="Rosicometer">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="icona-192.png">
 <link rel="apple-touch-icon" href="icona-180.png">
-<title>Classifica Risiko</title>
+<title>Rosicometer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Big+Shoulders+Display:wght@600;800&display=swap" rel="stylesheet">
@@ -115,10 +115,12 @@ h3 { font: 700 18px/1.25 var(--body); margin: 0; }
 }
 .leader .who { font: 800 34px/1 var(--display); overflow-wrap: anywhere; }
 .leader .who button { all: unset; cursor: pointer; }
+.pedina-coronata { position: relative; display: inline-block; }
 .leader .corona {
   --corona-bordo: #7a5c00;
-  display: inline-block; width: .9em; height: .68em; color: var(--gold);
-  margin-left: -.06em; vertical-align: .5em; transform: rotate(22deg); transform-origin: left bottom;
+  position: absolute; top: -17px; right: -13px; width: 34px; height: 26px;
+  color: var(--gold); transform: rotate(24deg); pointer-events: none;
+  filter: drop-shadow(0 1px 0 rgba(0, 0, 0, .25));
 }
 .leader .score {
   grid-column: 1 / -1; display: flex; align-items: baseline; gap: 10px; margin-top: 8px;
@@ -503,7 +505,7 @@ select.largo { width: 100%; }
 <body>
 
 <header class="wrap top">
-  <h1 id="titoloPagina">Classifica Risiko</h1>
+  <h1 id="titoloPagina">Rosicometer</h1>
   <button class="auth-btn" id="btnAccesso" type="button">Accedi</button>
 </header>
 <div class="wrap" id="avvisi"></div>
@@ -602,7 +604,7 @@ select.largo { width: 100%; }
   <form class="sheet" id="moduloNuovaLega">
     <h2 id="titoloNuovaLega">Crea una lega</h2>
     <p class="hint">Ne sarai il creatore: potrai nominare gli admin, cedere la lega a qualcun altro o eliminarla. Gli altri non possono eliminarla.</p>
-    <div class="field"><label for="campoNomeLega">Nome della lega</label><input type="text" id="campoNomeLega" maxlength="60" required placeholder="Per esempio Risiko del mercoledì"></div>
+    <div class="field"><label for="campoNomeLega">Nome della lega</label><input type="text" id="campoNomeLega" maxlength="60" required placeholder="Per esempio Strategia del mercoledì"></div>
     <p class="err-msg" id="erroreNuovaLega"></p>
     <div class="actions">
       <button class="btn ghost" type="button" data-chiudi>Annulla</button>
@@ -847,7 +849,7 @@ const coloriArmate = [
   { id: "nero", nome: "nero", sfondo: "#23262b" }
 ];
 
-// I 9 obiettivi di Risiko (i 6 "distruggi le armate" contano come uno), dal più facile al più difficile.
+// I 9 obiettivi standard (i 6 "distruggi le armate" contano come uno), dal più facile al più difficile.
 // Il fattore moltiplica solo i punti di chi vince. Un obiettivo fuori lista conta ×1.
 const obiettiviStandard = [
   { nome: "Nord America e Oceania", livello: "Facile", fattore: 0.8 },
@@ -1947,7 +1949,7 @@ function disegna() {
   viste[stato.schedaAttiva]();
 }
 
-// La coroncina di chi è in testa, inclinata sopra la fine del nome
+// La coroncina di chi è in testa, inclinata a cavallo dell'angolo della sua pedina
 const coronaDelPrimo = `<svg class="corona" viewBox="0 0 40 30" role="img" aria-label="In testa alla classifica">
     <path d="M4 25 L2 8 L12 15 L20 3 L28 15 L38 8 L36 25 Z" fill="currentColor" stroke="var(--corona-bordo)" stroke-width="2.2" stroke-linejoin="round"/>
     <rect x="4" y="23" width="32" height="5" rx="1.5" fill="currentColor" stroke="var(--corona-bordo)" stroke-width="2.2"/>
@@ -1978,9 +1980,9 @@ function vistaClassifica() {
       : "";
     html += `
       <div class="leader">
-        ${pedina(primo.id, "big")}
+        <span class="pedina-coronata">${pedina(primo.id, "big")}${coronaDelPrimo}</span>
         <div>
-          <div class="who"><button type="button" data-giocatore="${primo.id}">${pulisciHtml(primo.name)}</button>${coronaDelPrimo}</div>
+          <div class="who"><button type="button" data-giocatore="${primo.id}">${pulisciHtml(primo.name)}</button></div>
           <div class="muted small">${contaPartite(s.partite)}, ${s.vittorie} ${s.vittorie === 1 ? "vittoria" : "vittorie"}</div>
         </div>
         <div class="score"><b>${Math.round(s.elo)}</b><span>punti Elo${ultima}</span></div>
@@ -3135,7 +3137,7 @@ async function creaImmaginePartita(partita) {
 
   c.fillStyle = "#c8352b";
   c.font = `800 44px ${fontTitoli}`;
-  c.fillText("Classifica Risiko", 72, altezza - 56);
+  c.fillText("Rosicometer", 72, altezza - 56);
 
   return tela;
 }
@@ -3164,7 +3166,7 @@ async function apriCondivisione(idPartita, titolo = "Condividi la partita") {
 
 trova("#btnCondividiImmagine").addEventListener("click", async () => {
   try {
-    await navigator.share({ files: [immagineCorrente], title: "Partita di Risiko" });
+    await navigator.share({ files: [immagineCorrente], title: "Partita di gioco strategico" });
   } catch (errore) {
     if (errore?.name !== "AbortError") mostraNotifica("Condivisione non riuscita: prova con Scarica.");
   }
@@ -3434,7 +3436,7 @@ function disegnaIntestazione() {
       titolo.dataset.contenuto = contenuto;
     }
   } else if (titolo.dataset.contenuto !== "titolo") {
-    titolo.textContent = "Classifica Risiko";
+    titolo.textContent = "Rosicometer";
     titolo.dataset.contenuto = "titolo";
   }
 
@@ -3510,7 +3512,7 @@ function vistaLeghe() {
   if (!stato.utente) {
     contenitore.innerHTML = `
       <div class="benvenuto">
-        <h2>La classifica Elo delle vostre partite di Risiko</h2>
+        <h2>La classifica Elo delle vostre partite di giochi strategici</h2>
         <p>Crea una lega per il tuo gruppo, invita gli amici con un link e registrate le partite: punteggi, statistiche e storico si aggiornano da soli.</p>
         <div class="riga-pulsanti">
           <button class="btn red" type="button" data-azione-lega="registrati">Crea un account</button>
@@ -3780,7 +3782,7 @@ async function copiaInvito() {
 
 async function condividiInvito() {
   try {
-    await navigator.share({ title: infoLega().name, text: `Entra nella lega ${infoLega().name} di Risiko`, url: linkInvito() });
+    await navigator.share({ title: infoLega().name, text: `Entra nella lega ${infoLega().name} su Rosicometer`, url: linkInvito() });
   } catch (errore) {
     if (errore?.name !== "AbortError") copiaInvito();
   }
