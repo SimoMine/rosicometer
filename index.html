@@ -578,12 +578,8 @@ select.largo { width: 100%; }
 <dialog id="finestraNuovaLega" aria-labelledby="titoloNuovaLega">
   <form class="sheet" id="moduloNuovaLega">
     <h2 id="titoloNuovaLega">Crea una lega</h2>
-    <p class="hint">Ne sarai il creatore: potrai nominare gli admin e cedere la lega a qualcun altro. Nessuno potrà eliminarla.</p>
+    <p class="hint">Ne sarai il creatore: potrai nominare gli admin, cedere la lega a qualcun altro o eliminarla. Gli altri non possono eliminarla.</p>
     <div class="field"><label for="campoNomeLega">Nome della lega</label><input type="text" id="campoNomeLega" maxlength="60" required placeholder="Per esempio Risiko del mercoledì"></div>
-    <label class="riga-spunta" id="rigaImporta" hidden>
-      <input type="checkbox" id="spuntaImporta">
-      <span id="testoImporta"></span>
-    </label>
     <p class="err-msg" id="erroreNuovaLega"></p>
     <div class="actions">
       <button class="btn ghost" type="button" data-chiudi>Annulla</button>
@@ -679,6 +675,23 @@ select.largo { width: 100%; }
 
 <dialog id="finestraGiocatore" aria-labelledby="titoloGiocatore">
   <div class="sheet" id="contenutoGiocatore"></div>
+</dialog>
+
+<!-- Eliminare una lega non si annulla: si conferma riscrivendo il nome esatto -->
+<dialog id="finestraEliminaLega" aria-labelledby="titoloEliminaLega">
+  <form class="sheet" id="moduloEliminaLega">
+    <h2 id="titoloEliminaLega">Eliminare la lega?</h2>
+    <p id="testoEliminaLega"></p>
+    <div class="field">
+      <label for="campoConfermaNomeLega" id="etichettaConfermaNomeLega"></label>
+      <input type="text" id="campoConfermaNomeLega" maxlength="60" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+    </div>
+    <p class="err-msg" id="erroreEliminaLega"></p>
+    <div class="actions">
+      <button class="btn ghost" type="button" data-chiudi>Annulla</button>
+      <button class="btn red" type="submit" id="btnEliminaLega" disabled>Elimina per sempre</button>
+    </div>
+  </form>
 </dialog>
 
 <dialog id="finestraConferma" aria-labelledby="titoloConferma">
@@ -1087,7 +1100,7 @@ async function collegaFirebase() {
       await lotto.commit();
     },
 
-    // Per le importazioni: un documento per scrittura, dieci alla volta.
+    // Per i lavori grandi (eliminare una lega): un documento per scrittura, dieci alla volta.
     // Un lotto da centinaia di documenti supera i limiti dei controlli delle regole
     // e Firestore lo rifiuta tutto come "permesso negato".
     // Restituisce le operazioni che non sono andate, così si possono riprovare.
@@ -1102,7 +1115,7 @@ async function collegaFirebase() {
           try {
             await lotto.commit();
           } catch (errore) {
-            console.warn("Importazione: non riuscito", operazione.raccolta, operazione.id, errore?.code);
+            console.warn("Scrittura non riuscita", operazione.percorso || operazione.id, errore?.code);
             nonRiuscite.push(operazione);
           }
         }));
@@ -1111,20 +1124,16 @@ async function collegaFirebase() {
       return nonRiuscite;
     },
 
-    // Gli id già presenti in una raccolta della lega: per riprendere un'importazione interrotta
+    // Gli id dei documenti di una raccolta della lega: servono per eliminarla tutta
     async idPresenti(lega, raccolta) {
       const istantanea = await firestore.getDocs(firestore.collection(database, "leagues", lega, raccolta));
-      return new Set(istantanea.docs.map(documento => documento.id));
+      return [...istantanea.docs.map(documento => documento.id)];
     },
 
-    // La classifica di prima delle leghe, se questo account ne era admin
-    async leggiVecchiaClassifica() {
+    // Il nome che l'account aveva nella vecchia lista degli admin, se c'era
+    async leggiNomeVecchioAdmin() {
       const documentoAdmin = await firestore.getDoc(firestore.doc(database, "admins", utenteCorrente.email));
-      if (!documentoAdmin.exists()) return null;
-      const [giocatori, partite, stagioni, storico] = await Promise.all(["players", "games", "seasons", "log"].map(async nome =>
-        leggiDocumenti(await firestore.getDocs(firestore.collection(database, nome)))));
-      if (!giocatori.length && !partite.length) return null;
-      return { giocatori, partite, stagioni, storico, nomeAdmin: documentoAdmin.data().nome || "" };
+      return documentoAdmin.exists() ? (documentoAdmin.data().nome || "") : "";
     },
 
     quandoCambiaUtente(callback) {
@@ -3109,7 +3118,7 @@ let smettiDiAscoltareStorico = null;
 let smettiDiAscoltareRichieste = null;
 let smettiDiAscoltareMieLeghe = null;
 let legaInUscita = null;            // la lega da cui l'utente sta uscendo di sua volontà
-let importazioneInCorso = false;    // la classifica di prima si sta copiando in una lega
+let legaInEliminazione = null;      // la lega che il creatore sta eliminando
 
 function voceLega(id) {
   stato.leghe[id] ??= { info: null, membro: null, richiesta: null, caricata: false };
@@ -3183,6 +3192,8 @@ function aggiornaLegheSeguite() {
 
 function quandoCambiaMembro(id) {
   const voce = voceLega(id);
+  // Mentre il creatore la elimina non serve avvisarlo che "non fa più parte" della lega
+  if (id === legaInEliminazione) return;
   if (id === stato.legaAttiva) {
     if (voce.membro && !ascoltatoriLegaAperta.length) {
       caricaDatiLega();
@@ -3320,14 +3331,11 @@ function disegnaIntestazione() {
   const info = infoLega();
   if (legaApertaPronta() && info) {
     const daAccettare = stato.utente?.eAdmin ? stato.richieste.length : 0;
-    // Un'importazione a metà si segnala con un "!" finché non viene ripresa
-    const importDaFinire = puoRiprendereImportazione() && !importazioneInCorso;
-    const segnale = daAccettare || (importDaFinire ? "!" : "");
     const contenuto = `
-      <button class="titolo-lega" id="btnLega" type="button" aria-label="La lega ${pulisciHtml(info.name)}: membri, inviti e impostazioni${daAccettare ? `, ${daAccettare} da accettare` : ""}${importDaFinire ? ", importazione da finire" : ""}">
+      <button class="titolo-lega" id="btnLega" type="button" aria-label="La lega ${pulisciHtml(info.name)}: membri, inviti e impostazioni${daAccettare ? `, ${daAccettare} da accettare` : ""}">
         <span class="nome-lega">${pulisciHtml(info.name)}</span>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-        ${segnale ? `<span class="contatore" aria-hidden="true">${segnale}</span>` : ""}
+        ${daAccettare ? `<span class="contatore" aria-hidden="true">${daAccettare}</span>` : ""}
       </button>`;
     if (titolo.dataset.contenuto !== contenuto) {
       titolo.innerHTML = contenuto;
@@ -3559,17 +3567,6 @@ function disegnaGestioneLega() {
       <ul class="elenco-membri">${righeMembri.join("")}</ul>
     </div>`;
 
-  if (puoRiprendereImportazione()) {
-    html += `
-      <div class="blocco-lega">
-        <h3>Classifica di prima</h3>
-        <p class="hint">L'importazione non è finita. Riprendila: quello che è già dentro non viene copiato due volte.</p>
-        <button class="btn red" type="button" data-gestione="importa" ${importazioneInCorso ? "disabled" : ""}>
-          ${importazioneInCorso ? "Importazione in corso…" : "Riprendi l'importazione"}
-        </button>
-      </div>`;
-  }
-
   if (eCreatore) {
     html += `
       <div class="blocco-lega">
@@ -3579,7 +3576,14 @@ function disegnaGestioneLega() {
           <input type="text" id="campoRinominaLega" maxlength="60" value="${pulisciHtml(info.name)}">
           <button class="btn" type="submit">Rinomina</button>
         </form>
-        <p class="hint">Sei il creatore: per uscire dalla lega prima cedila a un altro membro. Nessuno può eliminarla.</p>
+        <p class="hint">Sei il creatore: per uscire dalla lega prima cedila a un altro membro.</p>
+      </div>
+      <div class="blocco-lega">
+        <h3>Elimina la lega</h3>
+        <p class="hint">${info.deleting
+          ? "L'eliminazione si è fermata a metà: riprendila per finire."
+          : "Cancella per sempre la lega con tutti i suoi dati. Solo tu puoi farlo."}</p>
+        <button class="btn quiet" type="button" data-gestione="elimina">${info.deleting ? "Finisci di eliminarla" : "Elimina la lega"}</button>
       </div>`;
   }
 
@@ -3714,8 +3718,8 @@ document.addEventListener("click", async evento => {
     gestisciRichiesta(dati.richiesta, dati.uid);
   } else if (dati.membro) {
     gestisciMembro(dati.membro, dati.uid);
-  } else if (dati.gestione === "importa") {
-    eseguiImportazione(stato.legaAttiva);
+  } else if (dati.gestione === "elimina") {
+    apriEliminaLega();
   } else if (dati.gestione === "copia") {
     copiaInvito();
   } else if (dati.gestione === "condividi") {
@@ -3753,36 +3757,22 @@ document.addEventListener("submit", async evento => {
 });
 
 
-// ===== Creare una lega e portarci la classifica di prima =====
-async function caricaVecchiaClassifica() {
+// ===== Creare ed eliminare una lega =====
+// Gli account creati a mano nella console non hanno un nome: uso quello della vecchia lista admin
+async function caricaNomeDaVecchiaLista() {
+  if (!stato.utente?.senzaNome) return;
   try {
-    stato.vecchiaClassifica = await archivio.leggiVecchiaClassifica();
-  } catch (errore) {
-    stato.vecchiaClassifica = null;
-  }
-  // Gli account creati a mano nella console non hanno un nome: uso quello della vecchia lista admin
-  const vecchia = stato.vecchiaClassifica;
-  if (vecchia?.nomeAdmin && stato.utente?.senzaNome) {
-    try {
-      await archivio.cambiaNome(vecchia.nomeAdmin);
-      stato.utente.nome = vecchia.nomeAdmin;
-      stato.utente.senzaNome = false;
-      disegna();
-    } catch (errore) { /* resta il nome preso dall'email */ }
-  }
+    const nome = await archivio.leggiNomeVecchioAdmin();
+    if (!nome) return;
+    await archivio.cambiaNome(nome);
+    stato.utente.nome = nome;
+    stato.utente.senzaNome = false;
+    disegna();
+  } catch (errore) { /* resta il nome preso dall'email */ }
 }
 
 function apriNuovaLega() {
-  const vecchia = stato.vecchiaClassifica;
-  const puoImportare = Boolean(vecchia && (vecchia.giocatori.length || vecchia.partite.length));
-  trova("#rigaImporta").hidden = !puoImportare;
-  if (puoImportare) {
-    trova("#testoImporta").textContent =
-      `Porta in questa lega la classifica di prima: ${vecchia.giocatori.length} giocatori, ${vecchia.partite.length} partite, ${vecchia.stagioni.length} stagioni e tutto lo storico.`;
-  }
   trova("#moduloNuovaLega").reset();
-  // Proposta già spuntata solo per chi non ha ancora leghe: di solito è la prima volta
-  if (puoImportare) trova("#spuntaImporta").checked = !stato.idMieLeghe.length;
   trova("#erroreNuovaLega").textContent = "";
   trova("#finestraNuovaLega").showModal();
 }
@@ -3790,7 +3780,6 @@ function apriNuovaLega() {
 trova("#moduloNuovaLega").addEventListener("submit", async evento => {
   evento.preventDefault();
   const nome = trova("#campoNomeLega").value.trim().replace(/\s+/g, " ");
-  const importa = !trova("#rigaImporta").hidden && trova("#spuntaImporta").checked;
   const errore = trova("#erroreNuovaLega");
   if (!nome) {
     errore.textContent = "Dai un nome alla lega.";
@@ -3800,30 +3789,24 @@ trova("#moduloNuovaLega").addEventListener("submit", async evento => {
   const pulsante = trova("#btnCreaLega");
   pulsante.disabled = true;
   errore.textContent = "";
-  let id;
   try {
-    id = await creaLega(nome, importa);
+    const id = await creaLega(nome);
+    trova("#finestraNuovaLega").close();
+    apriLega(id);
+    mostraNotifica("Lega creata: invita gli altri dal nome in alto");
   } catch (erroreFirebase) {
     errore.textContent = messaggioErrore(erroreFirebase);
-    pulsante.disabled = false;
-    return;
   }
-  // La lega c'è: la apro subito, e se l'importazione si ferma la si riprende da lì
-  trova("#finestraNuovaLega").close();
   pulsante.disabled = false;
-  apriLega(id);
-  if (importa) await eseguiImportazione(id);
-  else mostraNotifica("Lega creata: invita gli altri dal nome in alto");
 });
 
-// Crea solo la lega: l'importazione si fa dopo, così se si ferma la lega resta comunque aperta
-async function creaLega(nome, importa) {
+async function creaLega(nome) {
   const { uid, email } = stato.utente;
   const id = archivio.nuovoId("leagues");
 
   // Lega e primo membro nella stessa scrittura: le regole controllano proprio questo
   await archivio.salva([
-    { percorso: `leagues/${id}`, dati: { name: nome, owner: uid, createdAt: oraServer, participants: [], importOpen: importa } },
+    { percorso: `leagues/${id}`, dati: { name: nome, owner: uid, createdAt: oraServer, participants: [] } },
     { percorso: `leagues/${id}/members/${uid}`, dati: { name: stato.utente.nome, email, role: "admin", joinedAt: oraServer } },
     { percorso: `users/${uid}`, unisci: true, dati: { leagues: { aggiungiAElenco: id } } }
   ]);
@@ -3831,72 +3814,85 @@ async function creaLega(nome, importa) {
   return id;
 }
 
-const nomiRaccolteImportate = { players: "giocatori", seasons: "stagioni", games: "partite", log: "voci di storico" };
-
-// Copia la classifica di prima nella lega. Si può rilanciare: salta quello che c'è già.
-// Restituisce true se è tutto dentro e l'importazione è chiusa.
-async function importaVecchiaClassifica(id) {
-  const vecchia = stato.vecchiaClassifica;
-  const copia = (raccolta, documento, extra = {}) => {
-    const { id: idDocumento, ...dati } = documento;
-    return { lega: id, raccolta, id: idDocumento, dati: { ...dati, ...extra } };
-  };
-  // Stessi id di prima: le partite puntano ai giocatori per id
-  const tutte = [
-    ...vecchia.giocatori.map(giocatore => copia("players", giocatore)),
-    ...vecchia.stagioni.map(stagione => copia("seasons", stagione)),
-    ...vecchia.partite.map(partita => copia("games", partita)),
-    ...vecchia.storico.map(voce => copia("log", voce, { imported: true }))
-  ];
-
-  // Quello che un tentativo precedente ha già copiato non si riscrive (lo storico non si può modificare)
-  const presenti = {};
-  for (const raccolta of Object.keys(nomiRaccolteImportate)) presenti[raccolta] = await archivio.idPresenti(id, raccolta);
-  const daFare = tutte.filter(operazione => !presenti[operazione.raccolta].has(operazione.id));
-
-  const nonRiuscite = await archivio.salvaUnoAllaVolta(daFare, (fatte, totale) => mostraNotifica(`Importazione: ${fatte} di ${totale}`));
-  if (nonRiuscite.length) {
-    // Lascio l'importazione aperta: dal nome della lega si può riprendere
-    const conteggio = {};
-    for (const operazione of nonRiuscite) conteggio[operazione.raccolta] = (conteggio[operazione.raccolta] || 0) + 1;
-    const elenco = Object.entries(conteggio).map(([raccolta, quante]) => `${quante} ${nomiRaccolteImportate[raccolta]}`).join(", ");
-    throw { code: "importazione-incompleta", message: `Non sono entrati: ${elenco}.` };
-  }
-
-  // Chiudo l'importazione: da qui in poi nessuno può più aggiungere storico "vecchio"
-  await archivio.salva(
-    [{ percorso: `leagues/${id}`, unisci: true, dati: { importOpen: false, participants: nomiPartecipanti(vecchia.giocatori) } }],
-    { lega: id, action: "classifica_importata", target: id,
-      summary: `Importata la classifica di prima: ${vecchia.giocatori.length} giocatori, ${vecchia.partite.length} partite, ${vecchia.stagioni.length} stagioni`,
-      before: null, after: null }
-  );
+// Il nome da riscrivere: spazi in più all'inizio e alla fine non contano, maiuscole sì
+function nomeConfermato() {
+  const info = infoLega();
+  return Boolean(info) && trova("#campoConfermaNomeLega").value.trim() === info.name;
 }
 
-// L'importazione con i suoi messaggi: la usano sia la creazione sia "Riprendi l'importazione"
-async function eseguiImportazione(id) {
-  if (importazioneInCorso) return false;
-  importazioneInCorso = true;
-  aggiornaGestioneLegaSeAperta();
+function apriEliminaLega() {
+  const info = infoLega();
+  if (!info || mioRuolo() !== "creatore") return;
+  trova("#moduloEliminaLega").reset();
+  trova("#testoEliminaLega").textContent =
+    `Spariscono per sempre giocatori, partite, stagioni, storico e membri di ${info.name}. Non si può tornare indietro.`;
+  trova("#etichettaConfermaNomeLega").textContent = `Per confermare scrivi il nome della lega: ${info.name}`;
+  trova("#erroreEliminaLega").textContent = "";
+  trova("#btnEliminaLega").disabled = true;
+  trova("#finestraLega").close();
+  trova("#finestraEliminaLega").showModal();
+}
+
+trova("#campoConfermaNomeLega").addEventListener("input", () => {
+  trova("#btnEliminaLega").disabled = !nomeConfermato();
+});
+
+trova("#moduloEliminaLega").addEventListener("submit", async evento => {
+  evento.preventDefault();
+  if (!nomeConfermato()) return;
+  const id = stato.legaAttiva;
+  const nome = infoLega().name;
+  const pulsante = trova("#btnEliminaLega");
+  const errore = trova("#erroreEliminaLega");
+  pulsante.disabled = true;
+  pulsante.textContent = "Elimino…";
+  errore.textContent = "";
   try {
-    await importaVecchiaClassifica(id);
-    mostraNotifica("Classifica di prima importata");
-    return true;
-  } catch (errore) {
-    const dettaglio = errore?.code === "importazione-incompleta" ? errore.message : messaggioErrore(errore);
-    mostraNotifica(`Importazione non finita. ${dettaglio} Riprendila dal nome della lega.`);
-    return false;
-  } finally {
-    importazioneInCorso = false;
-    aggiornaGestioneLegaSeAperta();
-    disegna();
+    await eliminaLega(id);
+    trova("#finestraEliminaLega").close();
+    tornaAlleLeghe();
+    mostraNotifica(`${nome} è stata eliminata`);
+  } catch (erroreFirebase) {
+    // Se si ferma a metà la lega resta "in eliminazione": si riprova dallo stesso pulsante
+    errore.textContent = erroreFirebase?.code === "eliminazione-incompleta"
+      ? erroreFirebase.message
+      : messaggioErrore(erroreFirebase);
+    pulsante.disabled = !nomeConfermato();
   }
-}
+  pulsante.textContent = "Elimina per sempre";
+});
 
-// Il creatore può riprendere un'importazione rimasta a metà finché non è chiusa
-function puoRiprendereImportazione() {
-  const vecchia = stato.vecchiaClassifica;
-  return mioRuolo() === "creatore" && infoLega()?.importOpen === true
-    && Boolean(vecchia && (vecchia.giocatori.length || vecchia.partite.length));
+// Prima segno la lega come "in eliminazione" (solo così le regole permettono di cancellarne i dati),
+// poi cancello tutto un documento alla volta, e per ultimi il mio membro e la lega insieme.
+async function eliminaLega(id) {
+  const { uid } = stato.utente;
+  legaInEliminazione = id;
+  try {
+    await archivio.salva([{ percorso: `leagues/${id}`, unisci: true, dati: { deleting: true } }]);
+
+    const operazioni = [];
+    for (const raccolta of ["requests", "players", "games", "seasons", "log", "members"]) {
+      for (const idDocumento of await archivio.idPresenti(id, raccolta)) {
+        if (raccolta === "members" && idDocumento === uid) continue;
+        operazioni.push({ percorso: `leagues/${id}/${raccolta}/${idDocumento}`, elimina: true });
+      }
+    }
+    const nonRiuscite = await archivio.salvaUnoAllaVolta(operazioni, (fatte, totale) => {
+      trova("#btnEliminaLega").textContent = `Elimino… ${fatte} di ${totale}`;
+    });
+    if (nonRiuscite.length) {
+      throw { code: "eliminazione-incompleta",
+        message: `Eliminazione non finita: ${nonRiuscite.length} documenti sono rimasti. Riprova.` };
+    }
+
+    await archivio.salva([
+      { percorso: `leagues/${id}/members/${uid}`, elimina: true },
+      { percorso: `leagues/${id}`, elimina: true },
+      { percorso: `users/${uid}`, unisci: true, dati: { leagues: { togliDaElenco: id } } }
+    ]);
+  } finally {
+    legaInEliminazione = null;
+  }
 }
 
 
