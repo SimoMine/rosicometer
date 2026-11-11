@@ -265,6 +265,8 @@ dialog::backdrop { background: rgba(10, 20, 28, .55); }
   background: transparent; border-radius: 999px; padding: 4px 12px 4px 4px; min-height: 40px;
 }
 .chip[aria-pressed="true"] { border-color: var(--ink); background: var(--sea); font-weight: 700; }
+.chip:disabled { opacity: .4; cursor: not-allowed; }
+.chips > .hint { flex-basis: 100%; margin: 2px 0 0; }
 
 .outcomes { list-style: none; margin: 0; padding: 0; }
 .outcomes li { padding: 8px 0; border-bottom: 1px solid var(--sea-line); }
@@ -414,7 +416,11 @@ select {
 .btn[hidden] { display: none; }
 
 /* Durata e posta in gioco */
-.seg-durata { grid-template-columns: repeat(4, 1fr); }
+.seg-durata { grid-template-columns: repeat(3, 1fr); }
+/* Tre righe: righe sottili tra le celle, senza doppioni sui bordi */
+.seg-durata button + button { border-left: 0; }
+.seg-durata button:not(:nth-child(3n + 1)) { border-left: 1.5px solid var(--sea-line); }
+.seg-durata button:nth-child(n + 4) { border-top: 1.5px solid var(--sea-line); }
 .seg-durata button { font-size: 14px; padding: 8px 2px; }
 .seg-durata button[aria-pressed="true"] { background: var(--ink); color: var(--sea); font-weight: 700; }
 .meta-partita { margin: 4px 0 0; }
@@ -422,18 +428,73 @@ select {
 .spiegazione summary { font-weight: 700; cursor: pointer; }
 .spiegazione p { margin: 10px 0 0; }
 .spiegazione ul { margin: 6px 0 0; padding-left: 20px; }
+select.largo { width: 100%; }
+
+/* Leghe */
+.titolo-lega {
+  all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; max-width: 100%;
+  font: inherit;
+}
+.titolo-lega:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; border-radius: 6px; }
+/* Un nome lungo va a capo su due righe invece di sparire */
+.titolo-lega .nome-lega { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; overflow-wrap: anywhere; line-height: 1.05; }
+.titolo-lega svg { flex: none; width: 22px; height: 22px; }
+.contatore {
+  flex: none; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 999px;
+  background: var(--red); color: var(--red-ink); font: 700 13px/22px var(--body); text-align: center;
+}
+.top h1 { min-width: 0; }
+.top .auth-btn { flex: none; max-width: 38vw; }
+.elenco-membri li:last-child { border-bottom: 0; }
+.benvenuto { padding: 18px 0; }
+.benvenuto h2 { font-size: 36px; }
+.benvenuto p, .azione-biglietto p { max-width: 60ch; }
+.riga-pulsanti { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.elenco-leghe { list-style: none; margin: 0; padding: 0; }
+.elenco-leghe li { display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--sea-line); }
+.lega-in-elenco {
+  all: unset; cursor: pointer; box-sizing: border-box; flex: 1; min-width: 0; padding: 14px 0; display: grid; gap: 2px;
+}
+.lega-in-elenco:focus-visible { outline: 3px solid var(--focus); }
+.lega-in-elenco .nome { font: 800 26px/1.1 var(--display); overflow-wrap: anywhere; }
+.invito-incollato { margin-top: 26px; }
+.invito-incollato label { display: block; font-weight: 700; margin-bottom: 6px; }
+.biglietto-lega { background: var(--paper); border-radius: 16px; padding: 18px 16px; margin-top: 12px; }
+.biglietto-lega h2 { margin-top: 0; font-size: 36px; overflow-wrap: anywhere; }
+.biglietto-lega h3 { margin-top: 16px; }
+.nomi-partecipanti { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.nomi-partecipanti li { background: var(--sea); border-radius: 999px; padding: 4px 12px; font-weight: 700; }
+.azione-biglietto { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--sea-line); }
+.blocco-lega { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--sea-line); }
+.blocco-lega h3 { margin-bottom: 6px; }
+.blocco-lega .add-player input[readonly] { color: var(--ink-soft); }
+.elenco-membri { list-style: none; margin: 0; padding: 0; }
+.elenco-membri li { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; padding: 10px 0; border-bottom: 1px solid var(--sea-line); }
+.elenco-membri li > span:first-child { min-width: 0; overflow-wrap: anywhere; }
+.azioni-membro { display: flex; flex-wrap: wrap; gap: 6px; }
+.azioni-membro .btn { min-height: 38px; padding: 6px 12px; font-size: 14px; }
+.scelta-accesso { grid-template-columns: 1fr 1fr; margin-bottom: 14px; }
+.scelta-accesso[hidden] { display: none; }
+.scelta-accesso button[aria-pressed="true"] { background: var(--ink); color: var(--sea); font-weight: 700; }
+.riga-spunta { display: flex; gap: 10px; align-items: flex-start; margin: 6px 0 4px; }
+.riga-spunta[hidden] { display: none; }
+.riga-spunta input { width: 22px; height: 22px; margin: 2px 0 0; flex: none; accent-color: var(--red); }
+.field[hidden] { display: none; }
+.spazio-sopra-piccolo { margin-top: 8px; }
+.hint.spazio-sopra-piccolo { margin-bottom: 0; }
 </style>
 </head>
 <body>
 
 <header class="wrap top">
-  <h1>Classifica Risiko</h1>
+  <h1 id="titoloPagina">Classifica Risiko</h1>
   <button class="auth-btn" id="btnAccesso" type="button">Accedi</button>
 </header>
 <div class="wrap" id="avvisi"></div>
 <div class="wrap barra-stagione" id="barraStagione"></div>
 
 <main class="wrap">
+  <section class="view" id="vista-leghe" hidden></section>
   <section class="view" id="vista-classifica" aria-labelledby="scheda-classifica"></section>
   <section class="view" id="vista-partite" aria-labelledby="scheda-partite" hidden></section>
   <section class="view" id="vista-giocatori" aria-labelledby="scheda-giocatori" hidden></section>
@@ -490,15 +551,43 @@ select {
 <div class="toast" id="notifica" role="status" aria-live="polite" hidden></div>
 
 <dialog id="finestraAccesso" aria-labelledby="titoloAccesso">
-  <form class="sheet" id="moduloAccesso">
-    <h2 id="titoloAccesso">Accedi</h2>
-    <p class="hint">Solo chi è nella lista degli admin può registrare partite. Gli account si creano dalla console Firebase.</p>
+  <form class="sheet" id="moduloAccesso" novalidate>
+    <h2 id="titoloAccesso" tabindex="-1">Accedi</h2>
+    <div class="seg scelta-accesso" role="group" aria-label="Accedi o registrati">
+      <button type="button" data-modo-accesso="entra" aria-pressed="true">Ho già un account</button>
+      <button type="button" data-modo-accesso="registrati" aria-pressed="false">Sono nuovo</button>
+    </div>
+    <div class="field" id="rigaNome" hidden><label for="campoNomeUtente">Il tuo nome</label><input type="text" id="campoNomeUtente" maxlength="40" autocomplete="nickname"></div>
     <div class="field"><label for="campoEmail">Email</label><input type="email" id="campoEmail" autocomplete="username" required></div>
-    <div class="field"><label for="campoPassword">Password</label><input type="password" id="campoPassword" autocomplete="current-password" required></div>
+    <div class="field" id="rigaPassword"><label for="campoPassword">Password</label><input type="password" id="campoPassword" autocomplete="current-password" required></div>
+    <div class="field" id="rigaRipetiPassword" hidden><label for="campoRipetiPasswordNuova">Ripeti la password</label><input type="password" id="campoRipetiPasswordNuova" autocomplete="new-password"></div>
+    <p class="hint" id="testoAccesso"></p>
     <p class="err-msg" id="erroreAccesso"></p>
     <div class="actions">
+      <button class="btn quiet" type="button" id="btnPasswordDimenticata">Password dimenticata?</button>
       <button class="btn ghost" type="button" data-chiudi>Annulla</button>
       <button class="btn red" type="submit" id="btnEntra">Entra</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="finestraLega" aria-labelledby="titoloLega">
+  <div class="sheet" id="contenutoLega"></div>
+</dialog>
+
+<dialog id="finestraNuovaLega" aria-labelledby="titoloNuovaLega">
+  <form class="sheet" id="moduloNuovaLega">
+    <h2 id="titoloNuovaLega">Crea una lega</h2>
+    <p class="hint">Ne sarai il creatore: potrai nominare gli admin e cedere la lega a qualcun altro. Nessuno potrà eliminarla.</p>
+    <div class="field"><label for="campoNomeLega">Nome della lega</label><input type="text" id="campoNomeLega" maxlength="60" required placeholder="Per esempio Risiko del mercoledì"></div>
+    <label class="riga-spunta" id="rigaImporta" hidden>
+      <input type="checkbox" id="spuntaImporta">
+      <span id="testoImporta"></span>
+    </label>
+    <p class="err-msg" id="erroreNuovaLega"></p>
+    <div class="actions">
+      <button class="btn ghost" type="button" data-chiudi>Annulla</button>
+      <button class="btn red" type="submit" id="btnCreaLega">Crea la lega</button>
     </div>
   </form>
 </dialog>
@@ -507,6 +596,12 @@ select {
   <div class="sheet">
     <h2 id="titoloAccount" tabindex="-1" autofocus></h2>
     <p class="muted" id="emailAccount"></p>
+    <form class="add-player" id="moduloNomeUtente">
+      <label class="sr" for="campoCambiaNome">Il tuo nome</label>
+      <input type="text" id="campoCambiaNome" maxlength="40" autocomplete="nickname">
+      <button class="btn" type="submit">Cambia nome</button>
+    </form>
+    <button class="btn ghost" type="button" id="btnMieLeghe">Le tue leghe</button>
     <form id="moduloPassword" class="blocco-password">
       <h3>Cambia password</h3>
       <div class="field"><label for="campoPasswordAttuale">Password attuale</label><input type="password" id="campoPasswordAttuale" autocomplete="current-password" required></div>
@@ -530,19 +625,22 @@ select {
       <div class="field"><label for="campoNota">Nota</label><input type="text" id="campoNota" maxlength="120" placeholder="Facoltativa"></div>
     </div>
     <div class="field">
+      <span class="lbl">Chi ha giocato</span>
+      <div class="chips" id="sceltaGiocatori"></div>
+    </div>
+    <div id="esitiPartita"></div>
+    <!-- La durata viene dopo i giocatori: le fasce dipendono da quanti sono -->
+    <div class="field">
       <span class="lbl" id="etichettaDurata">Durata</span>
       <div class="seg seg-durata" role="group" aria-labelledby="etichettaDurata" id="sceltaDurata"></div>
       <p class="hint" id="testoDurata"></p>
     </div>
     <div class="field">
-      <span class="lbl">Chi ha giocato</span>
-      <div class="chips" id="sceltaGiocatori"></div>
-    </div>
-    <div id="esitiPartita"></div>
-    <div class="field">
-      <label for="campoObiettivo">Obiettivo del vincitore</label>
-      <input type="text" id="campoObiettivo" maxlength="80" list="obiettiviSuggeriti" placeholder="Facoltativo, per esempio Asia e Africa" autocomplete="off">
-      <datalist id="obiettiviSuggeriti"></datalist>
+      <label for="sceltaObiettivo">Obiettivo del vincitore</label>
+      <select id="sceltaObiettivo" class="largo"></select>
+      <label class="sr" for="campoObiettivo">Scrivi l'obiettivo</label>
+      <input type="text" id="campoObiettivo" class="spazio-sopra-piccolo" maxlength="80" placeholder="Scrivi l'obiettivo" autocomplete="off" hidden>
+      <p class="hint spazio-sopra-piccolo" id="testoObiettivo"></p>
     </div>
     <div id="anteprimaPunti"></div>
     <p class="err-msg" id="errorePartita"></p>
@@ -609,19 +707,38 @@ const versioneFirebase = "10.12.2";
 
 // ===== Regole del punteggio =====
 const eloIniziale = 1000;
-const kPrimePartite = 40;     // K finché un giocatore è "nuovo"
-const kDopo = 20;             // K quando il punteggio si è assestato
+const kPrimePartite = 80;     // K finché un giocatore è "nuovo"
+const kDopo = 40;             // K quando il punteggio si è assestato
 const partiteDaNuovo = 10;    // quante partite si resta "nuovi"
 const partiteMinime = 5;      // partite per entrare in classifica
 
 // Posta in gioco: il K si moltiplica per il fattore tavolo e per quello della durata.
 // Vale sia per chi guadagna sia per chi perde, così i punti non si gonfiano.
+// Le fasce sono scritte per 3 giocatori, dove una partita media dura 2 ore.
+// Una partita media dura (giocatori − 1) ore, quindi ogni giocatore in più
+// sposta tutte le fasce avanti di un'ora: la partita media prende sempre ×1.
+// Ogni fascia arriva fino ai suoi minuti massimi compresi: 2 h giuste a 3 giocatori valgono ×1.
 const fasceDurata = [
-  { id: "breve", etichetta: "meno di 1 h", descrizione: "meno di 1 ora", fattore: 0.75, minutiMassimi: 60 },
-  { id: "normale", etichetta: "1–2 h", descrizione: "da 1 a 2 ore", fattore: 1, minutiMassimi: 120 },
-  { id: "lunga", etichetta: "2–3 h", descrizione: "da 2 a 3 ore", fattore: 1.25, minutiMassimi: 180 },
-  { id: "lunghissima", etichetta: "oltre 3 h", descrizione: "oltre 3 ore", fattore: 1.5, minutiMassimi: Infinity }
+  { id: "sotto1h", fattore: 0.7, minutiMinimi: 0, minutiMassimi: 60 },
+  { id: "1h", fattore: 0.9, minutiMinimi: 60, minutiMassimi: 90 },
+  { id: "1h30", fattore: 1, minutiMinimi: 90, minutiMassimi: 120 },
+  { id: "2h", fattore: 1.25, minutiMinimi: 120, minutiMassimi: 150 },
+  { id: "2h30", fattore: 1.4, minutiMinimi: 150, minutiMassimi: 180 },
+  { id: "3h", fattore: 1.5, minutiMinimi: 180, minutiMassimi: 210 },
+  { id: "3h30", fattore: 1.7, minutiMinimi: 210, minutiMassimi: 240 },
+  { id: "4h", fattore: 1.8, minutiMinimi: 240, minutiMassimi: 270 },
+  { id: "oltre4h30", fattore: 1.9, minutiMinimi: 270, minutiMassimi: Infinity }
 ];
+const giocatoriDelleFasce = 3;
+// Le fasce di prima: non si scelgono più, ma le partite già salvate con queste
+// tengono il fattore con cui erano state registrate.
+const fasceVecchie = [
+  { id: "breve", descrizione: "meno di 1 ora", fattore: 0.75, minutiMinimi: 0 },
+  { id: "normale", descrizione: "da 1 a 2 ore", fattore: 1, minutiMinimi: 60 },
+  { id: "lunga", descrizione: "da 2 a 3 ore", fattore: 1.25, minutiMinimi: 120 },
+  { id: "lunghissima", descrizione: "oltre 3 ore", fattore: 1.5, minutiMinimi: 180 }
+];
+const giocatoriMassimi = 6;
 const chiaveCronometro = "cronometroPartita";
 
 // Segnaposto per "ora del server": al salvataggio diventa serverTimestamp()
@@ -668,11 +785,20 @@ const coloriArmate = [
   { id: "nero", nome: "nero", sfondo: "#23262b" }
 ];
 
-const obiettiviComuni = [
-  "Asia e Africa", "Asia e Sud America", "Nord America e Africa", "Nord America e Oceania",
-  "Europa, Sud America e un terzo continente", "Europa, Oceania e un terzo continente",
-  "24 territori", "18 territori con almeno 2 armate", "Distruggere un'armata"
+// I 9 obiettivi di Risiko (i 6 "distruggi le armate" contano come uno), dal più facile al più difficile.
+// Il fattore moltiplica solo i punti di chi vince. Un obiettivo fuori lista conta ×1.
+const obiettiviStandard = [
+  { nome: "Nord America e Oceania", livello: "Facile", fattore: 0.8 },
+  { nome: "Nord America e Africa", livello: "Facile", fattore: 0.85 },
+  { nome: "18 territori con almeno 2 armate", livello: "Medio", fattore: 0.95 },
+  { nome: "Distruggere un'armata", livello: "Medio", fattore: 1 },
+  { nome: "24 territori", livello: "Medio", fattore: 1.05 },
+  { nome: "Asia e Sud America", livello: "Difficile", fattore: 1.15 },
+  { nome: "Asia e Africa", livello: "Difficile", fattore: 1.2 },
+  { nome: "Europa, Sud America e un terzo continente", livello: "Difficile", fattore: 1.25 },
+  { nome: "Europa, Oceania e un terzo continente", livello: "Molto difficile", fattore: 1.4 }
 ];
+const valoreAltroObiettivo = "altro";
 
 const ordinali = ["primo", "secondo", "terzo", "quarto", "quinto", "sesto", "settimo", "ottavo", "nono", "decimo"];
 
@@ -686,6 +812,16 @@ const etichetteAzioni = {
   giocatore_nascosto: "Giocatore tolto dal gruppo",
   giocatore_riattivato: "Giocatore riattivato",
   giocatore_colore: "Colore cambiato",
+  lega_creata: "Lega creata",
+  lega_rinominata: "Lega rinominata",
+  lega_ceduta: "Lega ceduta",
+  classifica_importata: "Classifica importata",
+  membro_accettato: "Nuovo membro",
+  membro_rifiutato: "Richiesta rifiutata",
+  membro_tolto: "Membro tolto",
+  membro_uscito: "Membro uscito",
+  membro_admin: "Nuovo admin",
+  membro_non_admin: "Admin tolto",
   stagione_iniziata: "Nuova stagione"
 };
 
@@ -776,6 +912,11 @@ function percentuale(parte, totale) {
   return totale ? Math.round(parte / totale * 100) : 0;
 }
 
+// 1 → "1 partita", 3 → "3 partite"
+function contaPartite(numero) {
+  return `${numero} ${numero === 1 ? "partita" : "partite"}`;
+}
+
 // ["A", "B", "C"] → "A, B e C"
 function elencaNomi(nomi) {
   if (nomi.length <= 1) return nomi[0] || "";
@@ -798,11 +939,22 @@ function piuFrequente(conteggi) {
 
 // ===== Stato dell'applicazione =====
 const stato = {
+  // Dati della lega aperta
   giocatori: [],
   partite: [],
   stagioni: [],
   storico: [],
-  utente: null,
+  membri: [],
+  richieste: [],
+
+  // Chi sta usando la pagina e in quali leghe è
+  utente: null,           // { uid, email, nome, eAdmin }
+  idMieLeghe: [],         // gli id salvati in users/{uid}
+  leghe: {},              // id → { info, membro, richiesta, caricata }
+  legaAttiva: null,       // id della lega aperta
+  legaInvito: null,       // id arrivato con un link d'invito
+  vecchiaClassifica: null, // { giocatori, partite } se c'è una classifica di prima da importare
+
   limiteStorico: 100,
   schedaAttiva: "classifica",
   stagioneScelta: null,       // null = la stagione in corso, "sempre" = tutte
@@ -810,13 +962,17 @@ const stato = {
   giocatoreEvidenziato: null, // nel grafico di tutti
   testaATesta: { primo: null, secondo: null },
   coloreNuovoGiocatore: null, // null = il primo colore libero
-  erroreCaricamento: null
+  erroreCaricamento: null,
+  mieLegheCaricate: false,
+  autenticazionePronta: false  // diventa vero quando Firebase sa se qualcuno è entrato
 };
 let archivio = null;
-let smettiDiAscoltareStorico = null;
 let calcolo = null;
 let calcoliPerStagione = new Map();
 let richiestaInstallazione = null;
+
+// I ruoli come li legge chi usa la pagina
+const nomiRuoli = { creatore: "Creatore", admin: "Admin", membro: "Membro" };
 
 
 // ===== Collegamento a Firebase =====
@@ -831,7 +987,9 @@ async function collegaFirebase() {
   const app = moduloApp.initializeApp(configFirebase);
   const database = firestore.getFirestore(app);
   const auth = autenticazione.getAuth(app);
+  auth.languageCode = "it";
   let utenteCorrente = null;
+  let idLega = null;
 
   function leggiDocumenti(istantanea) {
     return istantanea.docs.map(documento => ({
@@ -840,79 +998,152 @@ async function collegaFirebase() {
     }));
   }
 
+  function leggiDocumento(istantanea) {
+    return istantanea.exists() ? { id: istantanea.id, ...istantanea.data({ serverTimestamps: "estimate" }) } : null;
+  }
+
+  // Trasforma i segnaposto della pagina in quelli di Firestore
   function preparaDati(dati) {
     const pronti = {};
     for (const [campo, valore] of Object.entries(dati)) {
-      pronti[campo] = valore === oraServer ? firestore.serverTimestamp() : valore;
+      if (valore === oraServer) pronti[campo] = firestore.serverTimestamp();
+      else if (valore?.aggiungiAElenco !== undefined) pronti[campo] = firestore.arrayUnion(valore.aggiungiAElenco);
+      else if (valore?.togliDaElenco !== undefined) pronti[campo] = firestore.arrayRemove(valore.togliDaElenco);
+      else pronti[campo] = valore;
     }
     return pronti;
   }
 
-  function ascoltaRaccolta(nome, quandoCambia, quandoErrore) {
-    return firestore.onSnapshot(firestore.collection(database, nome),
+  // Un'operazione indica una raccolta della lega aperta ("games", "members"...)
+  // oppure un percorso completo ("users/abc", "leagues/xyz")
+  function riferimento(operazione) {
+    if (operazione.percorso) return firestore.doc(database, operazione.percorso);
+    return firestore.doc(database, "leagues", operazione.lega ?? idLega, operazione.raccolta, operazione.id);
+  }
+
+  function aggiungiAlLotto(lotto, operazione) {
+    const doc = riferimento(operazione);
+    if (operazione.elimina) lotto.delete(doc);
+    else if (operazione.unisci) lotto.set(doc, preparaDati(operazione.dati), { merge: true });
+    else lotto.set(doc, preparaDati(operazione.dati));
+  }
+
+  function ascoltaRaccoltaDellaLega(nome, quandoCambia, quandoErrore) {
+    return firestore.onSnapshot(firestore.collection(database, "leagues", idLega, nome),
       istantanea => quandoCambia(leggiDocumenti(istantanea)), quandoErrore);
   }
 
+  function ascoltaDocumento(percorso, quandoCambia, quandoErrore) {
+    return firestore.onSnapshot(firestore.doc(database, percorso),
+      istantanea => quandoCambia(leggiDocumento(istantanea)), quandoErrore);
+  }
+
   return {
-    ascoltaGiocatori: (quandoCambia, quandoErrore) => ascoltaRaccolta("players", quandoCambia, quandoErrore),
-    ascoltaPartite: (quandoCambia, quandoErrore) => ascoltaRaccolta("games", quandoCambia, quandoErrore),
-    ascoltaStagioni: (quandoCambia, quandoErrore) => ascoltaRaccolta("seasons", quandoCambia, quandoErrore),
+    // Da qui in poi giocatori, partite, stagioni, storico e membri sono quelli di questa lega
+    apriLega(id) {
+      idLega = id;
+    },
+
+    ascoltaGiocatori: (quandoCambia, quandoErrore) => ascoltaRaccoltaDellaLega("players", quandoCambia, quandoErrore),
+    ascoltaPartite: (quandoCambia, quandoErrore) => ascoltaRaccoltaDellaLega("games", quandoCambia, quandoErrore),
+    ascoltaStagioni: (quandoCambia, quandoErrore) => ascoltaRaccoltaDellaLega("seasons", quandoCambia, quandoErrore),
+    ascoltaMembri: (quandoCambia, quandoErrore) => ascoltaRaccoltaDellaLega("members", quandoCambia, quandoErrore),
+    ascoltaRichieste: (quandoCambia, quandoErrore) => ascoltaRaccoltaDellaLega("requests", quandoCambia, quandoErrore),
 
     ascoltaStorico(quante, quandoCambia, quandoErrore) {
       const richiesta = firestore.query(
-        firestore.collection(database, "log"),
+        firestore.collection(database, "leagues", idLega, "log"),
         firestore.orderBy("at", "desc"),
         firestore.limit(quante)
       );
       return firestore.onSnapshot(richiesta, istantanea => quandoCambia(leggiDocumenti(istantanea)), quandoErrore);
     },
 
+    // Il biglietto da visita della lega, che vedono tutti
+    ascoltaLega: (id, quandoCambia, quandoErrore) => ascoltaDocumento(`leagues/${id}`, quandoCambia, quandoErrore),
+    ascoltaMioMembro: (id, quandoCambia, quandoErrore) => ascoltaDocumento(`leagues/${id}/members/${utenteCorrente.uid}`, quandoCambia, quandoErrore),
+    ascoltaMiaRichiesta: (id, quandoCambia, quandoErrore) => ascoltaDocumento(`leagues/${id}/requests/${utenteCorrente.uid}`, quandoCambia, quandoErrore),
+    ascoltaMieLeghe: (quandoCambia, quandoErrore) => ascoltaDocumento(`users/${utenteCorrente.uid}`, quandoCambia, quandoErrore),
+
     nuovoId(raccolta) {
-      return firestore.doc(firestore.collection(database, raccolta)).id;
+      if (raccolta === "leagues") return firestore.doc(firestore.collection(database, "leagues")).id;
+      return firestore.doc(firestore.collection(database, "leagues", idLega, raccolta)).id;
     },
 
     // Salva tutte le operazioni e la voce di storico insieme: o tutto o niente
-    async salva(operazioni, voceStorico) {
+    async salva(operazioni, voceStorico = null) {
       const lotto = firestore.writeBatch(database);
-      for (const operazione of operazioni) {
-        const riferimento = firestore.doc(database, operazione.raccolta, operazione.id);
-        if (operazione.unisci) {
-          lotto.set(riferimento, preparaDati(operazione.dati), { merge: true });
-        } else {
-          lotto.set(riferimento, preparaDati(operazione.dati));
-        }
+      for (const operazione of operazioni) aggiungiAlLotto(lotto, operazione);
+      if (voceStorico) {
+        const { lega, ...voce } = voceStorico;
+        lotto.set(firestore.doc(firestore.collection(database, "leagues", lega ?? idLega, "log")), {
+          ...voce,
+          by: utenteCorrente.email,
+          byName: utenteCorrente.nome,
+          byUid: utenteCorrente.uid,
+          at: firestore.serverTimestamp()
+        });
       }
-      lotto.set(firestore.doc(firestore.collection(database, "log")), {
-        ...voceStorico,
-        by: utenteCorrente.email,
-        byName: utenteCorrente.nome,
-        at: firestore.serverTimestamp()
-      });
       await lotto.commit();
     },
 
+    // Per le importazioni grandi: Firestore accetta al massimo 500 scritture per volta
+    async salvaInBlocchi(operazioni, quandoAvanza = () => {}) {
+      const dimensioneBlocco = 400;
+      for (let inizio = 0; inizio < operazioni.length; inizio += dimensioneBlocco) {
+        const lotto = firestore.writeBatch(database);
+        for (const operazione of operazioni.slice(inizio, inizio + dimensioneBlocco)) aggiungiAlLotto(lotto, operazione);
+        await lotto.commit();
+        quandoAvanza(Math.min(inizio + dimensioneBlocco, operazioni.length), operazioni.length);
+      }
+    },
+
+    // La classifica di prima delle leghe, se questo account ne era admin
+    async leggiVecchiaClassifica() {
+      const documentoAdmin = await firestore.getDoc(firestore.doc(database, "admins", utenteCorrente.email));
+      if (!documentoAdmin.exists()) return null;
+      const [giocatori, partite, stagioni, storico] = await Promise.all(["players", "games", "seasons", "log"].map(async nome =>
+        leggiDocumenti(await firestore.getDocs(firestore.collection(database, nome)))));
+      if (!giocatori.length && !partite.length) return null;
+      return { giocatori, partite, stagioni, storico, nomeAdmin: documentoAdmin.data().nome || "" };
+    },
+
     quandoCambiaUtente(callback) {
-      autenticazione.onAuthStateChanged(auth, async utenteFirebase => {
+      autenticazione.onAuthStateChanged(auth, utenteFirebase => {
         if (!utenteFirebase) {
           utenteCorrente = null;
           callback(null);
           return;
         }
         const email = (utenteFirebase.email || "").toLowerCase();
-        let datiAdmin = null;
-        try {
-          const documentoAdmin = await firestore.getDoc(firestore.doc(database, "admins", email));
-          datiAdmin = documentoAdmin.exists() ? documentoAdmin.data() : null;
-        } catch (errore) {
-          datiAdmin = null;
-        }
-        utenteCorrente = { email, nome: datiAdmin?.nome || email, eAdmin: Boolean(datiAdmin) };
+        utenteCorrente = {
+          uid: utenteFirebase.uid,
+          email,
+          nome: utenteFirebase.displayName || email.split("@")[0],
+          senzaNome: !utenteFirebase.displayName
+        };
         callback(utenteCorrente);
       });
     },
 
     entra(email, password) {
       return autenticazione.signInWithEmailAndPassword(auth, email, password);
+    },
+
+    async registrati(nome, email, password) {
+      const { user } = await autenticazione.createUserWithEmailAndPassword(auth, email, password);
+      await autenticazione.updateProfile(user, { displayName: nome });
+      utenteCorrente = { uid: user.uid, email: email.toLowerCase(), nome };
+      return utenteCorrente;
+    },
+
+    recuperaPassword(email) {
+      return autenticazione.sendPasswordResetEmail(auth, email);
+    },
+
+    async cambiaNome(nome) {
+      await autenticazione.updateProfile(auth.currentUser, { displayName: nome });
+      utenteCorrente.nome = nome;
     },
 
     esci() {
@@ -995,11 +1226,58 @@ function assegnaPosizioni(esiti) {
 }
 
 function trovaFascia(idFascia) {
-  return fasceDurata.find(fascia => fascia.id === idFascia) || null;
+  return [...fasceDurata, ...fasceVecchie].find(fascia => fascia.id === idFascia) || null;
 }
 
-function fasciaDaMinuti(minuti) {
-  return fasceDurata.find(fascia => minuti < fascia.minutiMassimi);
+// Di quanti minuti si spostano le fasce: 0 a 3 giocatori, 60 a 4, 180 a 6.
+// Sotto i 3 giocatori resta la tabella da 3.
+function spostamentoFasce(numeroGiocatori) {
+  return 60 * Math.max(0, numeroGiocatori - giocatoriDelleFasce);
+}
+
+function fasciaDaMinuti(minuti, numeroGiocatori) {
+  const minutiDaTre = minuti - spostamentoFasce(numeroGiocatori);
+  return fasceDurata.find(fascia => minutiDaTre <= fascia.minutiMassimi);
+}
+
+// Inizio e fine veri della fascia per quel tavolo, in minuti
+function confiniFascia(fascia, numeroGiocatori) {
+  const spostamento = spostamentoFasce(numeroGiocatori);
+  return { da: fascia.minutiMinimi + spostamento, a: fascia.minutiMassimi + spostamento };
+}
+
+// 270 → "4 h 30", 240 → "4 h"; corto: "4h30", "4h"
+function scriviOre(minuti, corto = false) {
+  const ore = Math.floor(minuti / 60);
+  const resto = minuti % 60;
+  if (corto) return resto ? `${ore}h${String(resto).padStart(2, "0")}` : `${ore}h`;
+  return resto ? `${ore} h ${resto}` : `${ore} h`;
+}
+
+function descriviFascia(fascia, numeroGiocatori) {
+  if (!fasceDurata.includes(fascia)) return fascia.descrizione;  // una fascia vecchia
+  const { da, a } = confiniFascia(fascia, numeroGiocatori);
+  if (fascia === fasceDurata[0]) return `fino a ${scriviOre(a)}`;
+  if (a === Infinity) return `oltre ${scriviOre(da)}`;
+  return `da ${scriviOre(da)} a ${scriviOre(a)}`;
+}
+
+function etichettaFascia(fascia, numeroGiocatori) {
+  const { da, a } = confiniFascia(fascia, numeroGiocatori);
+  if (fascia === fasceDurata[0]) return `≤ ${scriviOre(a, true)}`;
+  if (a === Infinity) return `> ${scriviOre(da, true)}`;
+  return `${scriviOre(da, true)}–${scriviOre(a, true)}`;
+}
+
+// Per il premio Maratoneta: conta la durata vera, non la fascia
+function durataOltre(partita, minuti) {
+  if (partita.minutes) return partita.minutes > minuti;
+  const fascia = trovaFascia(partita.duration);
+  if (!fascia) return false;
+  const inizio = fasceDurata.includes(fascia)
+    ? confiniFascia(fascia, (partita.results || []).length).da
+    : fascia.minutiMinimi;
+  return inizio >= minuti;
 }
 
 // Più avversari al tavolo, più è difficile vincere: con 3 giocatori ×1, con 6 circa ×1,58
@@ -1012,6 +1290,17 @@ function postaInGioco(numeroGiocatori, idFascia) {
   const tavolo = fattoreTavolo(numeroGiocatori);
   const durata = fascia ? fascia.fattore : 1;
   return { tavolo, durata, fascia, totale: tavolo * durata };
+}
+
+// Riconosce l'obiettivo anche se è scritto con maiuscole o spazi diversi
+function obiettivoStandard(testo) {
+  const pulito = String(testo ?? "").trim().replace(/\s+/g, " ").toLowerCase();
+  if (!pulito) return null;
+  return obiettiviStandard.find(obiettivo => obiettivo.nome.toLowerCase() === pulito) ?? null;
+}
+
+function fattoreObiettivo(testo) {
+  return obiettivoStandard(testo)?.fattore ?? 1;
 }
 
 // Ordine cronologico: prima la data, poi l'ora di inserimento
@@ -1064,6 +1353,11 @@ function calcolaElo(giocatori, partite) {
       variazioni[esito.p] = k / (numeroGiocatori - 1) * somma;
     }
 
+    // Come ha vinto: l'obiettivo pesa solo sui punti del vincitore, gli altri restano come sono
+    const obiettivo = obiettivoStandard(partita.objective);
+    const vincitore = esiti.find(esito => esito.s === "w");
+    if (vincitore && obiettivo) variazioni[vincitore.p] *= obiettivo.fattore;
+
     const eloDopo = {};
     for (const esito of esiti) {
       const s = statistiche[esito.p];
@@ -1103,14 +1397,15 @@ function calcolaElo(giocatori, partite) {
         o: esito.o,
         eliminazioni: eliminazioniInPartita,
         eraIlPiuBasso: numeroGiocatori >= 3 && eloPrima[esito.p] < Math.min(...altriElo),
-        durata: partita.duration ?? null
+        durata: partita.duration ?? null,
+        oltreTreOre: durataOltre(partita, 180)
       });
       eloDopo[esito.p] = s.elo;
     }
 
     variazioniPerPartita[partita.id] = variazioni;
     eloDopoPerPartita[partita.id] = eloDopo;
-    partiteInOrdine.push({ partita, esiti, eloPrima, eloDopo, variazioni, posta });
+    partiteInOrdine.push({ partita, esiti, eloPrima, eloDopo, variazioni, posta, obiettivo });
   }
 
   const perElo = (primo, secondo) => statistiche[secondo.id].elo - statistiche[primo.id].elo;
@@ -1160,7 +1455,7 @@ function premiDelGiocatore(s) {
   aggiungi("Ammazzagiganti", "Ha vinto partendo con l'Elo più basso del tavolo", voci.filter(voce => voce.s === "w" && voce.eraIlPiuBasso).length);
   aggiungi("Boia", "Ha eliminato almeno 2 giocatori nella stessa partita", voci.filter(voce => voce.eliminazioni >= 2).length);
   aggiungi("Kamikaze", "Eliminato per primo 3 partite di fila", contaSerie(voci, voce => voce.s === "o" && voce.o === 1, 3));
-  aggiungi("Maratoneta", "Ha vinto una partita durata più di 3 ore", voci.filter(voce => voce.s === "w" && voce.durata === "lunghissima").length);
+  aggiungi("Maratoneta", "Ha vinto una partita durata più di 3 ore", voci.filter(voce => voce.s === "w" && voce.oltreTreOre).length);
   aggiungi("Veterano", "Almeno 25 partite giocate", s.partite >= 25 ? 1 : 0);
   return premi;
 }
@@ -1415,19 +1710,22 @@ function fotografiaPartita(partita) {
 }
 
 // I minuti del cronometro se ci sono, altrimenti la fascia scelta a mano
-function testoDurata(idFascia, minuti) {
+function testoDurata(idFascia, minuti, numeroGiocatori) {
   if (minuti) return formattaMinuti(minuti);
-  return trovaFascia(idFascia)?.descrizione ?? "";
+  const fascia = trovaFascia(idFascia);
+  return fascia ? descriviFascia(fascia, numeroGiocatori) : "";
 }
 
-// "4 giocatori, 2 h 14 min, posta ×1,53"
+// "4 giocatori, 2 h 14 min, posta ×1,53, obiettivo ×1,4 per chi vince"
 function dettagliPartita(partita) {
   const numeroGiocatori = (partita.results || []).length;
   const posta = postaInGioco(numeroGiocatori, partita.duration);
   const parti = [`${numeroGiocatori} giocatori`];
-  const durata = testoDurata(partita.duration, partita.minutes);
+  const durata = testoDurata(partita.duration, partita.minutes, numeroGiocatori);
   if (durata) parti.push(durata);
   parti.push(`posta ${formattaFattore(posta.totale)}`);
+  const obiettivo = obiettivoStandard(partita.objective);
+  if (obiettivo) parti.push(`obiettivo ${formattaFattore(obiettivo.fattore)} per chi vince`);
   return parti.join(", ");
 }
 
@@ -1444,7 +1742,7 @@ function testoFotografia(fotografia) {
     const colori = risultati.filter(r => r.colore).map(r => `${r.nome} ${r.colore}`);
     let testo = `${formattaData(fotografia.data)}. ${riassunto}.`;
     if (fotografia.obiettivo) testo += ` Obiettivo: ${fotografia.obiettivo}.`;
-    const durata = testoDurata(fotografia.durata, fotografia.minuti);
+    const durata = testoDurata(fotografia.durata, fotografia.minuti, risultati.length);
     if (durata) testo += ` Durata: ${durata}.`;
     if (colori.length) testo += ` Armate: ${colori.join(", ")}.`;
     if (fotografia.nota) testo += ` Nota: "${fotografia.nota}".`;
@@ -1473,7 +1771,7 @@ function mostraNotifica(messaggio) {
 
 function messaggioErrore(errore) {
   const codice = errore?.code || "";
-  if (codice.includes("permission-denied")) return "Salvataggio rifiutato: il tuo account non è nella lista degli admin.";
+  if (codice.includes("permission-denied")) return "Salvataggio rifiutato: in questa lega non hai i permessi per farlo.";
   if (codice.includes("unavailable") || codice.includes("network")) return "Connessione assente: riprova quando sei online.";
   return `Salvataggio non riuscito (${codice || errore?.message || "errore"}).`;
 }
@@ -1495,9 +1793,6 @@ function disegnaAvvisi() {
   const avvisi = [];
   if (stato.erroreCaricamento) {
     avvisi.push(`<div class="notice err">${pulisciHtml(stato.erroreCaricamento)}</div>`);
-  }
-  if (stato.utente && !stato.utente.eAdmin) {
-    avvisi.push(`<div class="notice">Sei entrato come ${pulisciHtml(stato.utente.email)}, ma questo indirizzo non è tra gli admin: puoi solo guardare. Aggiungilo alla raccolta admins in Firestore.</div>`);
   }
   if (richiestaInstallazione) {
     avvisi.push(`<div class="notice">Puoi installare la classifica come app, con la sua icona nella schermata Home.
@@ -1531,15 +1826,25 @@ function disegnaBarraStagione() {
 }
 
 function disegna() {
+  aggiornaPermessi();
   calcoliPerStagione = new Map();
   calcolo = calcoloDi(idStagioneVisibile());
   disegnaAvvisi();
-  disegnaBarraStagione();
+  disegnaIntestazione();
 
-  const btnAccesso = trova("#btnAccesso");
-  btnAccesso.textContent = stato.utente ? stato.utente.nome : "Accedi";
-  btnAccesso.setAttribute("aria-label", stato.utente ? `Il tuo account, ${stato.utente.nome}` : "Accedi");
+  // Fuori da una lega si vede solo l'elenco delle leghe (o il biglietto da visita di un invito)
+  const dentroUnaLega = legaApertaPronta();
+  document.body.classList.toggle("fuori-dalle-leghe", !dentroUnaLega);
+  trova("#vista-leghe").hidden = dentroUnaLega;
+  trova("#barraStagione").hidden = !dentroUnaLega;
+  trova(".tabs").hidden = !dentroUnaLega;
   disegnaCronometro();
+  if (!dentroUnaLega) {
+    for (const scheda of ["classifica", "partite", "giocatori", "numeri", "storico"]) trova("#vista-" + scheda).hidden = true;
+    vistaLeghe();
+    return;
+  }
+  disegnaBarraStagione();
 
   for (const scheda of ["classifica", "partite", "giocatori", "numeri", "storico"]) {
     trova("#vista-" + scheda).hidden = stato.schedaAttiva !== scheda;
@@ -1577,7 +1882,7 @@ function vistaClassifica() {
         ${pedina(primo.id, "big")}
         <div>
           <div class="who"><button type="button" data-giocatore="${primo.id}">${pulisciHtml(primo.name)}</button></div>
-          <div class="muted small">${s.partite} partite, ${s.vittorie} ${s.vittorie === 1 ? "vittoria" : "vittorie"}</div>
+          <div class="muted small">${contaPartite(s.partite)}, ${s.vittorie} ${s.vittorie === 1 ? "vittoria" : "vittorie"}</div>
         </div>
         <div class="score"><b>${Math.round(s.elo)}</b><span>punti Elo${ultima}</span></div>
       </div>`;
@@ -1620,7 +1925,7 @@ function vistaClassifica() {
         ${pedina(giocatore.id)}
         <div class="main">
           <button class="name" type="button" data-giocatore="${giocatore.id}">${pulisciHtml(giocatore.name)}</button>
-          <span class="sub">${s.partite} partite, ${s.vittorie} ${s.vittorie === 1 ? "vittoria" : "vittorie"} (${percentuale(s.vittorie, s.partite)}%)</span>
+          <span class="sub">${contaPartite(s.partite)}, ${s.vittorie} ${s.vittorie === 1 ? "vittoria" : "vittorie"} (${percentuale(s.vittorie, s.partite)}%)</span>
           ${barra}
         </div>
         <div class="elo"><b>${Math.round(s.elo)}</b>${variazione}</div>
@@ -1631,8 +1936,11 @@ function vistaClassifica() {
 // Le regole scritte a partire dalle costanti, così restano sempre vere
 function spiegazionePunti() {
   const tavoli = [3, 4, 5, 6].map(numero => `${numero} giocatori ${formattaFattore(fattoreTavolo(numero))}`);
-  const durate = fasceDurata.map(fascia => `${fascia.descrizione} ${formattaFattore(fascia.fattore)}`);
+  const durate = fasceDurata.map(fascia => `${descriviFascia(fascia, giocatoriDelleFasce)} ${formattaFattore(fascia.fattore)}`);
   durate.push("non segnata ×1");
+  const fasciaMedia = fasceDurata.find(fascia => fascia.fattore === 1);
+  const obiettivi = obiettiviStandard.map(obiettivo =>
+    `<li>${pulisciHtml(obiettivo.nome)}: ${obiettivo.livello.toLowerCase()}, ${formattaFattore(obiettivo.fattore)}</li>`);
   return `
     <details class="spiegazione">
       <summary>Come si calcolano i punti</summary>
@@ -1642,8 +1950,13 @@ function spiegazionePunti() {
       <p>La posta in gioco cresce con il tavolo e con la durata, sia per chi guadagna sia per chi perde:</p>
       <ul>
         <li>${tavoli.join(", ")}</li>
-        <li>${durate.join(", ")}</li>
+        <li>Durata a ${giocatoriDelleFasce} giocatori: ${durate.join(", ")}</li>
       </ul>
+      <p>Una partita media dura un'ora per ogni giocatore meno uno, quindi ogni giocatore in più
+        sposta tutte le fasce avanti di un'ora: a 6 giocatori ×1 vale ${descriviFascia(fasciaMedia, 6)}.</p>
+      <p>Chi vince prende in più il moltiplicatore dell'obiettivo con cui ha vinto; per gli altri non cambia niente.
+        Un obiettivo non segnato o fuori lista conta ×1.</p>
+      <ul>${obiettivi.join("")}</ul>
       <p>Nelle prime ${partiteDaNuovo} partite di ognuno i punti contano il doppio, così il punteggio si assesta in fretta.
         Si entra in classifica dopo ${partiteMinime} partite.</p>
     </details>`;
@@ -1770,7 +2083,7 @@ function vistaGiocatori() {
   const voceElenco = giocatore => `
     <li><button type="button" data-giocatore="${giocatore.id}">
       ${pedina(giocatore.id)}
-      <span><span class="pn">${pulisciHtml(giocatore.name)}</span><br><span class="muted small">${statistiche[giocatore.id].partite} partite</span></span>
+      <span><span class="pn">${pulisciHtml(giocatore.name)}</span><br><span class="muted small">${contaPartite(statistiche[giocatore.id].partite)}</span></span>
       <span class="pe">${Math.round(statistiche[giocatore.id].elo)}</span>
     </button></li>`;
 
@@ -1798,7 +2111,10 @@ async function aggiungiGiocatore(evento) {
   const colore = stato.coloreNuovoGiocatore ?? primoColoreLibero();
   const id = archivio.nuovoId("players");
   const salvato = await salva(
-    [{ raccolta: "players", id, dati: { name: nome, color: colore, active: true, createdAt: oraServer } }],
+    [
+      { raccolta: "players", id, dati: { name: nome, color: colore, active: true, createdAt: oraServer } },
+      operazionePartecipanti([...stato.giocatori, { name: nome, active: true }])
+    ],
     { action: "giocatore_aggiunto", target: id, summary: `Aggiunto il giocatore ${nome}, colore ${nomeColore(colore)}`, before: null, after: { nome, colore } },
     `${nome} è nella lega`
   );
@@ -1843,10 +2159,20 @@ function vistaNumeri() {
 
   const obiettivi = statisticheObiettivi(calcolo);
   html += `<h2>Obiettivi vincenti</h2>`;
-  html += obiettivi.length
-    ? `<ul class="lista-numeri">${obiettivi.map(voce => `
-        <li><span>${pulisciHtml(voce.obiettivo)}</span><span class="valore-record"><b>${voce.vittorie}</b><span class="muted small">${voce.vittorie === 1 ? "vittoria" : "vittorie"}</span></span></li>`).join("")}</ul>`
-    : `<p class="muted">Segna l'obiettivo del vincitore per vedere quali si completano più spesso.</p>`;
+  if (obiettivi.length) {
+    const righe = obiettivi.map(voce => {
+      const standard = obiettivoStandard(voce.obiettivo);
+      const livello = standard ? `<br><span class="muted small">${standard.livello}, ${formattaFattore(standard.fattore)}</span>` : "";
+      return `
+        <li>
+          <span>${pulisciHtml(voce.obiettivo)}${livello}</span>
+          <span class="valore-record"><b>${voce.vittorie}</b><span class="muted small">${voce.vittorie === 1 ? "vittoria" : "vittorie"}</span></span>
+        </li>`;
+    });
+    html += `<ul class="lista-numeri">${righe.join("")}</ul>`;
+  } else {
+    html += `<p class="muted">Segna l'obiettivo del vincitore per vedere quali si completano più spesso.</p>`;
+  }
 
   contenitore.innerHTML = html;
 }
@@ -1964,7 +2290,7 @@ function vistaStorico() {
       <li>
         <div class="what">${pulisciHtml(etichetteAzioni[voce.action] || voce.action)}</div>
         <div>${pulisciHtml(voce.summary || "")}</div>
-        <div class="when">${pulisciHtml(voce.byName || voce.by)} (${pulisciHtml(voce.by)}), ${pulisciHtml(formattaMomento(voce.at))}</div>
+        <div class="when">${pulisciHtml(voce.byName || voce.by)} (${pulisciHtml(voce.by)}), ${pulisciHtml(formattaMomento(voce.at))}${voce.imported ? ", dalla classifica di prima" : ""}</div>
         ${dettagli}
       </li>`;
   });
@@ -2108,7 +2434,10 @@ function apriGiocatore(id) {
       return;
     }
     const salvato = await salva(
-      [{ raccolta: "players", id, unisci: true, dati: { name: nuovoNome } }],
+      [
+        { raccolta: "players", id, unisci: true, dati: { name: nuovoNome } },
+        operazionePartecipanti(stato.giocatori.map(g => g.id === id ? { ...g, name: nuovoNome } : g))
+      ],
       { action: "giocatore_rinominato", target: id, summary: `${giocatore.name} ora si chiama ${nuovoNome}`,
         before: { nome: giocatore.name }, after: { nome: nuovoNome } },
       "Nome cambiato"
@@ -2119,7 +2448,10 @@ function apriGiocatore(id) {
   trova("#btnCambiaGruppo")?.addEventListener("click", async () => {
     const rientra = giocatore.active === false;
     const salvato = await salva(
-      [{ raccolta: "players", id, unisci: true, dati: { active: rientra } }],
+      [
+        { raccolta: "players", id, unisci: true, dati: { active: rientra } },
+        operazionePartecipanti(stato.giocatori.map(g => g.id === id ? { ...g, active: rientra } : g))
+      ],
       {
         action: rientra ? "giocatore_riattivato" : "giocatore_nascosto",
         target: id,
@@ -2170,7 +2502,7 @@ function apriPartita(idPartita, tempoCronometrato = null) {
   if (tempoCronometrato != null) {
     const minuti = Math.max(1, Math.round(tempoCronometrato / 60000));
     bozza.minuti = minuti;
-    bozza.durata = fasciaDaMinuti(minuti).id;
+    bozza.durata = fasciaDaMinuti(minuti, bozza.scelti.length).id;
     bozza.daCronometro = true;
     // Una serata che finisce dopo mezzanotte conta per il giorno in cui è iniziata
     bozza.data = dataLocale(cronometro.avviatoIl);
@@ -2180,13 +2512,8 @@ function apriPartita(idPartita, tempoCronometrato = null) {
   trova("#btnSalvaPartita").textContent = partita ? "Salva modifiche" : "Salva partita";
   trova("#campoData").value = bozza.data;
   trova("#campoNota").value = bozza.nota;
-  trova("#campoObiettivo").value = bozza.obiettivo;
   trova("#errorePartita").textContent = "";
-
-  // Suggerimenti: obiettivi già usati, poi quelli più comuni
-  const giaUsati = stato.partite.map(p => (p.objective || "").trim()).filter(Boolean);
-  const suggerimenti = [...new Set([...giaUsati, ...obiettiviComuni])];
-  trova("#obiettiviSuggeriti").innerHTML = suggerimenti.map(testo => `<option value="${pulisciHtml(testo)}"></option>`).join("");
+  preparaSceltaObiettivo(bozza.obiettivo);
 
   disegnaBozza();
   trova("#finestraPartita").showModal();
@@ -2216,6 +2543,7 @@ function esitiDellaBozza() {
 
 function problemaDellaBozza() {
   if (bozza.scelti.length < 2) return "Scegli almeno 2 giocatori.";
+  if (bozza.scelti.length > giocatoriMassimi) return `Al massimo ${giocatoriMassimi} giocatori per partita.`;
   const vincitori = bozza.scelti.filter(id => bozza.esiti[id] === "w").length;
   if (vincitori === 0) return "Indica chi ha vinto.";
   if (vincitori > 1) return "Può vincere una sola persona.";
@@ -2224,12 +2552,33 @@ function problemaDellaBozza() {
 }
 
 function disegnaDurata() {
+  const numero = bozza.scelti.length;
   trova("#sceltaDurata").innerHTML = fasceDurata.map(fascia =>
-    `<button type="button" data-durata="${fascia.id}" aria-pressed="${bozza.durata === fascia.id}" aria-label="${fascia.descrizione}">${fascia.etichetta}</button>`
+    `<button type="button" data-durata="${fascia.id}" aria-pressed="${bozza.durata === fascia.id}" aria-label="${descriviFascia(fascia, numero)}, ${formattaFattore(fascia.fattore)}">${etichettaFascia(fascia, numero)}</button>`
   ).join("");
-  trova("#testoDurata").textContent = bozza.minuti
-    ? `Dal cronometro: ${formattaMinuti(bozza.minuti)}.`
-    : "Facoltativa: più dura la partita, più punti sono in gioco.";
+
+  const tavolo = Math.max(numero, giocatoriDelleFasce);
+  const media = `A ${tavolo} giocatori una partita media dura ${scriviOre((tavolo - 1) * 60)}.`;
+  const vecchia = trovaFascia(bozza.durata);
+  let testo;
+  if (bozza.minuti) testo = `Dal cronometro: ${formattaMinuti(bozza.minuti)}. ${media}`;
+  else if (vecchia && !fasceDurata.includes(vecchia)) testo = `Salvata con le fasce di prima (${vecchia.descrizione}, ${formattaFattore(vecchia.fattore)}). Scegline una per cambiarla.`;
+  else testo = `Facoltativa. ${media} Più dura rispetto alla media, più punti sono in gioco.`;
+  trova("#testoDurata").textContent = testo;
+}
+
+// Quando cambia il numero di giocatori le fasce si spostano: tengo ferma la durata vera.
+// Col cronometro ricalcolo dai minuti; con una scelta a mano uso il centro della fascia.
+function adeguaDurata(giocatoriPrima) {
+  if (bozza.minuti) {
+    bozza.durata = fasciaDaMinuti(bozza.minuti, bozza.scelti.length).id;
+    return;
+  }
+  const fascia = fasceDurata.find(f => f.id === bozza.durata);
+  if (!fascia) return;
+  const { da, a } = confiniFascia(fascia, giocatoriPrima);
+  const centro = a === Infinity ? da + 15 : Math.max(1, (da + a) / 2);
+  bozza.durata = fasciaDaMinuti(centro, bozza.scelti.length).id;
 }
 
 function disegnaBozza() {
@@ -2240,11 +2589,17 @@ function disegnaBozza() {
     .filter(giocatore => giocatore.active !== false || bozza.scelti.includes(giocatore.id))
     .sort((a, b) => a.name.localeCompare(b.name));
 
+  // Arrivati a 6 gli altri si spengono finché non se ne toglie uno
+  const tavoloPieno = bozza.scelti.length >= giocatoriMassimi;
   trova("#sceltaGiocatori").innerHTML = disponibili.length
-    ? disponibili.map(giocatore => `
-        <button type="button" class="chip" data-scegli="${giocatore.id}" aria-pressed="${bozza.scelti.includes(giocatore.id)}">
+    ? disponibili.map(giocatore => {
+        const scelto = bozza.scelti.includes(giocatore.id);
+        return `
+        <button type="button" class="chip" data-scegli="${giocatore.id}" aria-pressed="${scelto}" ${tavoloPieno && !scelto ? "disabled" : ""}>
           ${pedina(giocatore.id, "sm")}${pulisciHtml(giocatore.name)}
-        </button>`).join("")
+        </button>`;
+      }).join("")
+      + (tavoloPieno ? `<p class="hint">Tavolo pieno: al massimo ${giocatoriMassimi} giocatori.</p>` : "")
     : `<p class="muted">Prima aggiungi i giocatori nella scheda Giocatori.</p>`;
 
   let html = "";
@@ -2315,6 +2670,7 @@ function disegnaAnteprima() {
     id: bozza.id || "anteprima",
     date: bozza.data,
     duration: bozza.durata,
+    objective: bozza.obiettivo,
     results: esiti,
     deleted: false,
     createdAt: partitaOriginale ? partitaOriginale.createdAt : Date.now() + 1e9
@@ -2345,8 +2701,9 @@ function disegnaAnteprima() {
 
   const posta = voce.posta;
   let testoPosta = `Posta in gioco ${formattaFattore(posta.tavolo)} per ${esiti.length} giocatori`;
-  if (posta.fascia) testoPosta += `, ${formattaFattore(posta.durata)} per ${posta.fascia.descrizione}: in totale ${formattaFattore(posta.totale)}`;
+  if (posta.fascia) testoPosta += `, ${formattaFattore(posta.durata)} per la durata (${descriviFascia(posta.fascia, esiti.length)}): in totale ${formattaFattore(posta.totale)}`;
   testoPosta += ".";
+  if (voce.obiettivo) testoPosta += ` Chi vince prende anche ${formattaFattore(voce.obiettivo.fattore)} per l'obiettivo.`;
 
   contenitore.innerHTML = `
     <div class="field">
@@ -2363,6 +2720,7 @@ trova("#moduloPartita").addEventListener("click", evento => {
 
   if (dati.scegli) {
     const id = dati.scegli;
+    const giocatoriPrima = bozza.scelti.length;
     if (bozza.scelti.includes(id)) {
       bozza.scelti = bozza.scelti.filter(x => x !== id);
       bozza.ordineEliminati = bozza.ordineEliminati.filter(x => x !== id);
@@ -2370,9 +2728,11 @@ trova("#moduloPartita").addEventListener("click", evento => {
       delete bozza.uccisoDa[id];
       delete bozza.coloreDi[id];
     } else {
+      if (bozza.scelti.length >= giocatoriMassimi) return;
       bozza.scelti.push(id);
       bozza.esiti[id] = "a";
     }
+    adeguaDurata(giocatoriPrima);
   } else if (dati.esitoDi) {
     const id = dati.esitoDi;
     const esito = dati.esito;
@@ -2431,8 +2791,59 @@ trova("#campoNota").addEventListener("input", evento => {
   bozza.nota = evento.target.value;
 });
 
+// Il menu con i 9 obiettivi divisi per fascia, più "Altro" per scriverne uno a mano
+function preparaSceltaObiettivo(obiettivoAttuale) {
+  const standard = obiettivoStandard(obiettivoAttuale);
+  const livelli = [...new Set(obiettiviStandard.map(obiettivo => obiettivo.livello))];
+  const gruppi = livelli.map(livello => {
+    const opzioni = obiettiviStandard
+      .filter(obiettivo => obiettivo.livello === livello)
+      .map(obiettivo => `<option value="${pulisciHtml(obiettivo.nome)}">${pulisciHtml(obiettivo.nome)}</option>`);
+    return `<optgroup label="${livello}">${opzioni.join("")}</optgroup>`;
+  });
+
+  const menu = trova("#sceltaObiettivo");
+  menu.innerHTML = `
+    <option value="">Non segnato</option>
+    ${gruppi.join("")}
+    <option value="${valoreAltroObiettivo}">Altro obiettivo…</option>`;
+
+  const campo = trova("#campoObiettivo");
+  if (standard) {
+    menu.value = standard.nome;
+    campo.value = "";
+  } else if (obiettivoAttuale.trim()) {
+    menu.value = valoreAltroObiettivo;
+    campo.value = obiettivoAttuale;
+  } else {
+    menu.value = "";
+    campo.value = "";
+  }
+  aggiornaTestoObiettivo();
+}
+
+function aggiornaTestoObiettivo() {
+  const sceltaAltro = trova("#sceltaObiettivo").value === valoreAltroObiettivo;
+  trova("#campoObiettivo").hidden = !sceltaAltro;
+  const standard = obiettivoStandard(bozza.obiettivo);
+  let testo = "Facoltativo: un obiettivo difficile fa prendere più punti a chi vince.";
+  if (standard) testo = `${standard.livello}: i punti di chi vince ${formattaFattore(standard.fattore)}, per gli altri non cambia niente.`;
+  else if (sceltaAltro) testo = "Un obiettivo fuori lista conta ×1.";
+  trova("#testoObiettivo").textContent = testo;
+}
+
+trova("#sceltaObiettivo").addEventListener("change", evento => {
+  const valore = evento.target.value;
+  bozza.obiettivo = valore === valoreAltroObiettivo ? trova("#campoObiettivo").value : valore;
+  aggiornaTestoObiettivo();
+  if (valore === valoreAltroObiettivo) trova("#campoObiettivo").focus();
+  disegnaAnteprima();
+});
+
 trova("#campoObiettivo").addEventListener("input", evento => {
   bozza.obiettivo = evento.target.value;
+  aggiornaTestoObiettivo();
+  disegnaAnteprima();
 });
 
 trova("#moduloPartita").addEventListener("submit", async evento => {
@@ -2581,7 +2992,7 @@ async function creaImmaginePartita(partita) {
   c.fillText(`Partita ${calcoloStagione.numeroPartita[partita.id] ?? ""}`, 72, 150);
   c.fillStyle = "#4d5f6c";
   c.font = `400 38px ${fontTesto}`;
-  const durata = testoDurata(partita.duration, partita.minutes);
+  const durata = testoDurata(partita.duration, partita.minutes, partita.results.length);
   c.fillText(`${formattaData(partita.date)}, ${stagione.name}${durata ? ", " + durata : ""}`, 72, 210);
   if (partita.objective) {
     c.fillStyle = "#172634";
@@ -2672,12 +3083,747 @@ trova("#btnScaricaImmagine").addEventListener("click", () => {
 });
 
 
+// ===== Leghe, membri e permessi =====
+let ascoltatoriLeghe = {};          // id lega → funzioni per smettere di ascoltare
+let ascoltatoriLegaAperta = [];
+let smettiDiAscoltareStorico = null;
+let smettiDiAscoltareRichieste = null;
+let smettiDiAscoltareMieLeghe = null;
+let legaInUscita = null;            // la lega da cui l'utente sta uscendo di sua volontà
+
+function voceLega(id) {
+  stato.leghe[id] ??= { info: null, membro: null, richiesta: null, caricata: false };
+  return stato.leghe[id];
+}
+
+function infoLega(id = stato.legaAttiva) {
+  return stato.leghe[id]?.info ?? null;
+}
+
+// "creatore", "admin", "membro", oppure null se non fa parte della lega
+function mioRuolo(id = stato.legaAttiva) {
+  const lega = stato.leghe[id];
+  if (!stato.utente || !lega?.membro) return null;
+  if (lega.info?.owner === stato.utente.uid) return "creatore";
+  return lega.membro.role === "admin" ? "admin" : "membro";
+}
+
+function ruoloDelMembro(membro) {
+  if (membro.id === infoLega()?.owner) return "creatore";
+  return membro.role === "admin" ? "admin" : "membro";
+}
+
+function aggiornaPermessi() {
+  if (!stato.utente) return;
+  const ruolo = mioRuolo();
+  stato.utente.eAdmin = ruolo === "creatore" || ruolo === "admin";
+}
+
+// La lega aperta è una di cui l'utente fa parte: si possono mostrare i suoi dati
+function legaApertaPronta() {
+  return Boolean(stato.legaAttiva && mioRuolo(stato.legaAttiva));
+}
+
+// Il biglietto da visita di una lega lo legge chiunque; lo stato di membro solo chi è entrato
+function seguiLega(id) {
+  if (ascoltatoriLeghe[id]) return;
+  const voce = voceLega(id);
+  const smetti = [archivio.ascoltaLega(id, info => {
+    voce.info = info;
+    voce.caricata = true;
+    if (id === stato.legaAttiva) aggiornaGestioneLegaSeAperta();
+    disegna();
+  }, () => {
+    voce.caricata = true;
+    disegna();
+  })];
+  if (stato.utente) {
+    smetti.push(archivio.ascoltaMioMembro(id, membro => {
+      voce.membro = membro;
+      quandoCambiaMembro(id);
+    }, () => { /* chi non è membro può non avere il permesso: va bene così */ }));
+    smetti.push(archivio.ascoltaMiaRichiesta(id, richiesta => {
+      voce.richiesta = richiesta;
+      disegna();
+    }, () => { /* come sopra */ }));
+  }
+  ascoltatoriLeghe[id] = smetti;
+}
+
+function smettiDiSeguireTutte() {
+  for (const smetti of Object.values(ascoltatoriLeghe)) smetti.forEach(funzione => funzione());
+  ascoltatoriLeghe = {};
+  stato.leghe = {};
+}
+
+function aggiornaLegheSeguite() {
+  const daSeguire = new Set([...stato.idMieLeghe, stato.legaAttiva].filter(Boolean));
+  for (const id of daSeguire) seguiLega(id);
+}
+
+function quandoCambiaMembro(id) {
+  const voce = voceLega(id);
+  if (id === stato.legaAttiva) {
+    if (voce.membro && !ascoltatoriLegaAperta.length) {
+      caricaDatiLega();
+    } else if (!voce.membro && ascoltatoriLegaAperta.length && id === legaInUscita) {
+      // È uscito lui: torna dritto all'elenco, senza passare dal "non fai più parte"
+      trova("#finestraLega").close();
+      tornaAlleLeghe();
+      return;
+    } else if (!voce.membro && ascoltatoriLegaAperta.length) {
+      // Tolto dalla lega proprio mentre la guardava
+      const nome = voce.info?.name ?? "questa lega";
+      fermaDatiLega();
+      trova("#finestraLega").close();
+      mostraNotifica(`Non fai più parte di ${nome}`);
+    }
+    aggiornaAscoltoRichieste();
+    aggiornaGestioneLegaSeAperta();
+  }
+  disegna();
+}
+
+function apriLega(id) {
+  if (stato.legaAttiva === id) return;
+  chiudiLega();
+  stato.legaAttiva = id;
+  impostaIndirizzo(id);
+  try { localStorage.setItem("ultimaLega", id); } catch (errore) { /* niente */ }
+  seguiLega(id);
+  if (voceLega(id).membro) caricaDatiLega();
+  disegna();
+  window.scrollTo(0, 0);
+}
+
+function caricaDatiLega() {
+  archivio.apriLega(stato.legaAttiva);
+  fermaDatiLega();
+  ascoltatoriLegaAperta = [
+    archivio.ascoltaGiocatori(giocatori => { stato.giocatori = giocatori; disegna(); }, gestisciErroreLettura),
+    archivio.ascoltaPartite(partite => { stato.partite = partite; disegna(); }, gestisciErroreLettura),
+    archivio.ascoltaStagioni(stagioni => { stato.stagioni = stagioni; disegna(); }, gestisciErroreLettura),
+    archivio.ascoltaMembri(membri => {
+      stato.membri = membri;
+      aggiornaGestioneLegaSeAperta();
+      disegna();
+    }, gestisciErroreLettura)
+  ];
+  ascoltaStorico();
+  aggiornaAscoltoRichieste();
+}
+
+// Le richieste di entrare le vedono solo gli admin
+function aggiornaAscoltoRichieste() {
+  const ruolo = mioRuolo();
+  const puoVederle = Boolean(ascoltatoriLegaAperta.length) && (ruolo === "creatore" || ruolo === "admin");
+  if (puoVederle && !smettiDiAscoltareRichieste) {
+    smettiDiAscoltareRichieste = archivio.ascoltaRichieste(richieste => {
+      stato.richieste = richieste;
+      aggiornaGestioneLegaSeAperta();
+      disegna();
+    }, () => { /* appena tolto come admin: smetterà al prossimo giro */ });
+  } else if (!puoVederle && smettiDiAscoltareRichieste) {
+    smettiDiAscoltareRichieste();
+    smettiDiAscoltareRichieste = null;
+    stato.richieste = [];
+  }
+}
+
+// Smette di ascoltare i dati della lega e li svuota, ma resta sulla stessa lega
+function fermaDatiLega() {
+  ascoltatoriLegaAperta.forEach(funzione => funzione());
+  ascoltatoriLegaAperta = [];
+  if (smettiDiAscoltareStorico) smettiDiAscoltareStorico();
+  smettiDiAscoltareStorico = null;
+  if (smettiDiAscoltareRichieste) smettiDiAscoltareRichieste();
+  smettiDiAscoltareRichieste = null;
+  Object.assign(stato, { giocatori: [], partite: [], stagioni: [], storico: [], membri: [], richieste: [], erroreCaricamento: null });
+}
+
+function chiudiLega() {
+  fermaDatiLega();
+  Object.assign(stato, {
+    legaAttiva: null, stagioneScelta: null, schedaAttiva: "classifica", mostraEliminate: false,
+    giocatoreEvidenziato: null, testaATesta: { primo: null, secondo: null }, limiteStorico: 100
+  });
+}
+
+function tornaAlleLeghe() {
+  chiudiLega();
+  impostaIndirizzo(null);
+  try { localStorage.removeItem("ultimaLega"); } catch (errore) { /* niente */ }
+  disegna();
+  window.scrollTo(0, 0);
+}
+
+// Il link d'invito è l'indirizzo della lega: ...#lega=ID
+function leggiLegaDallIndirizzo() {
+  const corrispondenza = location.hash.match(/lega=([A-Za-z0-9]+)/);
+  return corrispondenza ? corrispondenza[1] : null;
+}
+
+function impostaIndirizzo(id) {
+  const base = location.href.split("#")[0];
+  history.replaceState(null, "", id ? `${base}#lega=${id}` : base);
+}
+
+function linkInvito(id = stato.legaAttiva) {
+  return `${location.href.split("#")[0]}#lega=${id}`;
+}
+
+window.addEventListener("hashchange", () => {
+  const id = leggiLegaDallIndirizzo();
+  if (id && id !== stato.legaAttiva && archivio) apriLega(id);
+});
+
+// L'elenco dei giocatori del gruppo che vedono anche i non membri
+function nomiPartecipanti(giocatori) {
+  return giocatori
+    .filter(giocatore => giocatore.active !== false)
+    .map(giocatore => giocatore.name)
+    .sort((primo, secondo) => primo.localeCompare(secondo));
+}
+
+function operazionePartecipanti(giocatoriDopo) {
+  return { percorso: `leagues/${stato.legaAttiva}`, unisci: true, dati: { participants: nomiPartecipanti(giocatoriDopo) } };
+}
+
+function formattaGiorno(momento) {
+  return new Date(inMillisecondi(momento)).toLocaleDateString("it-IT", { day: "numeric", month: "long", year: "numeric" });
+}
+
+
+// ===== Intestazione ed elenco delle leghe =====
+function disegnaIntestazione() {
+  const titolo = trova("#titoloPagina");
+  const info = infoLega();
+  if (legaApertaPronta() && info) {
+    const daAccettare = stato.utente?.eAdmin ? stato.richieste.length : 0;
+    const contenuto = `
+      <button class="titolo-lega" id="btnLega" type="button" aria-label="La lega ${pulisciHtml(info.name)}: membri, inviti e impostazioni${daAccettare ? `, ${daAccettare} da accettare` : ""}">
+        <span class="nome-lega">${pulisciHtml(info.name)}</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        ${daAccettare ? `<span class="contatore" aria-hidden="true">${daAccettare}</span>` : ""}
+      </button>`;
+    if (titolo.dataset.contenuto !== contenuto) {
+      titolo.innerHTML = contenuto;
+      titolo.dataset.contenuto = contenuto;
+    }
+  } else if (titolo.dataset.contenuto !== "titolo") {
+    titolo.textContent = "Classifica Risiko";
+    titolo.dataset.contenuto = "titolo";
+  }
+
+  const btnAccesso = trova("#btnAccesso");
+  btnAccesso.textContent = stato.utente ? stato.utente.nome : "Accedi";
+  btnAccesso.setAttribute("aria-label", stato.utente ? `Il tuo account, ${stato.utente.nome}` : "Accedi o registrati");
+}
+
+function bigliettoLega(id) {
+  const voce = voceLega(id);
+  if (!voce.caricata) return `<div class="empty">Carico la lega…</div>`;
+  if (!voce.info) {
+    return `
+      <div class="empty"><strong>Questa lega non esiste.</strong>Controlla il link che ti hanno mandato.</div>
+      ${stato.utente ? `<button class="btn ghost" type="button" data-azione-lega="elenco">Le tue leghe</button>` : ""}`;
+  }
+
+  const info = voce.info;
+  const partecipanti = info.participants?.length
+    ? `<ul class="nomi-partecipanti">${info.participants.map(nome => `<li>${pulisciHtml(nome)}</li>`).join("")}</ul>`
+    : `<p class="muted">Ancora nessun giocatore.</p>`;
+
+  let azione;
+  if (!stato.utente) {
+    azione = `
+      <p>Per entrare in questa lega accedi o crea un account: poi chiedi di entrare e aspetti che un admin ti accetti.</p>
+      <div class="riga-pulsanti">
+        <button class="btn red" type="button" data-azione-lega="registrati">Crea un account</button>
+        <button class="btn ghost" type="button" data-azione-lega="accedi">Accedi</button>
+      </div>`;
+  } else if (voce.richiesta) {
+    azione = `
+      <p>Hai chiesto di entrare il ${formattaGiorno(voce.richiesta.at)}. Appena un admin ti accetta, la lega si apre da sola.</p>
+      <div class="riga-pulsanti">
+        <button class="btn ghost" type="button" data-azione-lega="annullaRichiesta">Annulla la richiesta</button>
+        <button class="btn quiet" type="button" data-azione-lega="elenco">Le tue leghe</button>
+      </div>`;
+  } else {
+    const eraNellElenco = stato.idMieLeghe.includes(id);
+    azione = `
+      ${eraNellElenco ? `<p>Non fai più parte di questa lega. Puoi chiedere di rientrare.</p>` : `<p>Non fai ancora parte di questa lega.</p>`}
+      <div class="riga-pulsanti">
+        <button class="btn red" type="button" data-azione-lega="chiedi">Chiedi di entrare</button>
+        <button class="btn quiet" type="button" data-azione-lega="elenco">Le tue leghe</button>
+      </div>`;
+  }
+
+  return `
+    <article class="biglietto-lega">
+      <h2>${pulisciHtml(info.name)}</h2>
+      <p class="muted">Creata il ${formattaGiorno(info.createdAt)}</p>
+      <h3>Partecipanti</h3>
+      ${partecipanti}
+      <div class="azione-biglietto">${azione}</div>
+    </article>`;
+}
+
+function vistaLeghe() {
+  const contenitore = trova("#vista-leghe");
+  let html = "";
+
+  // Un link d'invito, o una lega di cui non si fa (più) parte
+  if (stato.legaAttiva) {
+    contenitore.innerHTML = bigliettoLega(stato.legaAttiva);
+    return;
+  }
+
+  if (!stato.autenticazionePronta) {
+    contenitore.innerHTML = `<div class="empty">Un attimo…</div>`;
+    return;
+  }
+
+  if (!stato.utente) {
+    contenitore.innerHTML = `
+      <div class="benvenuto">
+        <h2>La classifica Elo delle vostre partite di Risiko</h2>
+        <p>Crea una lega per il tuo gruppo, invita gli amici con un link e registrate le partite: punteggi, statistiche e storico si aggiornano da soli.</p>
+        <div class="riga-pulsanti">
+          <button class="btn red" type="button" data-azione-lega="registrati">Crea un account</button>
+          <button class="btn ghost" type="button" data-azione-lega="accedi">Accedi</button>
+        </div>
+      </div>`;
+    return;
+  }
+
+  html += `<h2>Le tue leghe</h2>`;
+  const ids = stato.idMieLeghe;
+  if (!stato.mieLegheCaricate) {
+    html += `<div class="empty">Carico le tue leghe…</div>`;
+  } else if (!ids.length) {
+    html += `<div class="empty"><strong>Non sei ancora in nessuna lega.</strong>Creane una per il tuo gruppo, oppure apri il link d'invito che ti ha mandato un amico.</div>`;
+  } else {
+    const righe = ids.map(id => {
+      const voce = voceLega(id);
+      const nome = voce.info?.name ?? (voce.caricata ? "Lega non trovata" : "Carico…");
+      const ruolo = mioRuolo(id);
+      let statoLega;
+      if (ruolo) statoLega = nomiRuoli[ruolo];
+      else if (voce.richiesta) statoLega = "In attesa di essere accettato";
+      else statoLega = "Non ne fai più parte";
+      const quanti = voce.info?.participants?.length ?? 0;
+      const dettaglio = voce.info ? `${statoLega}, ${quanti} ${quanti === 1 ? "giocatore" : "giocatori"}` : statoLega;
+      const togli = !ruolo && !voce.richiesta && voce.caricata
+        ? `<button class="btn quiet" type="button" data-togli-lega="${id}">Togli dall'elenco</button>` : "";
+      return `
+        <li>
+          <button type="button" class="lega-in-elenco" data-apri-lega="${id}">
+            <span class="nome">${pulisciHtml(nome)}</span>
+            <span class="muted small">${pulisciHtml(dettaglio)}</span>
+          </button>
+          ${togli}
+        </li>`;
+    });
+    html += `<ul class="elenco-leghe">${righe.join("")}</ul>`;
+  }
+
+  html += `
+    <button class="btn red spazio-sopra" type="button" data-azione-lega="crea">Crea una lega</button>
+    <form class="invito-incollato" id="moduloLinkInvito">
+      <label for="campoLinkInvito">Hai un link d'invito?</label>
+      <div class="add-player">
+        <input type="text" id="campoLinkInvito" placeholder="Incolla qui il link" autocomplete="off" inputmode="url">
+        <button class="btn" type="submit">Apri</button>
+      </div>
+    </form>`;
+  contenitore.innerHTML = html;
+}
+
+
+// ===== Entrare, uscire e gestire una lega =====
+async function chiediDiEntrare() {
+  const id = stato.legaAttiva;
+  await salva([
+    { percorso: `leagues/${id}/requests/${stato.utente.uid}`, dati: { name: stato.utente.nome, email: stato.utente.email, at: oraServer } },
+    { percorso: `users/${stato.utente.uid}`, unisci: true, dati: { leagues: { aggiungiAElenco: id } } }
+  ], null, "Richiesta inviata");
+}
+
+async function annullaRichiesta() {
+  const id = stato.legaAttiva;
+  await salva([
+    { percorso: `leagues/${id}/requests/${stato.utente.uid}`, elimina: true },
+    { percorso: `users/${stato.utente.uid}`, unisci: true, dati: { leagues: { togliDaElenco: id } } }
+  ], null, "Richiesta annullata");
+}
+
+async function togliDallElenco(id) {
+  await salva([{ percorso: `users/${stato.utente.uid}`, unisci: true, dati: { leagues: { togliDaElenco: id } } }], null, "Tolta dall'elenco");
+}
+
+function aggiornaGestioneLegaSeAperta() {
+  if (trova("#finestraLega").open) disegnaGestioneLega();
+}
+
+function apriGestioneLega() {
+  disegnaGestioneLega();
+  trova("#finestraLega").showModal();
+}
+
+function disegnaGestioneLega() {
+  const info = infoLega();
+  if (!info) return;
+  const ruolo = mioRuolo();
+  const eCreatore = ruolo === "creatore";
+  const eAdmin = eCreatore || ruolo === "admin";
+  const puoCondividere = Boolean(navigator.share);
+
+  let html = `
+    <h2 id="titoloLega" tabindex="-1" autofocus>${pulisciHtml(info.name)}</h2>
+    <p class="muted">Creata il ${formattaGiorno(info.createdAt)}. Il tuo ruolo: ${nomiRuoli[ruolo]?.toLowerCase() ?? ""}.</p>
+    <div class="blocco-lega">
+      <h3>Invita qualcuno</h3>
+      <p class="hint">Mandagli questo link: chi lo apre chiede di entrare e un admin lo accetta.</p>
+      <div class="add-player">
+        <label class="sr" for="campoInvito">Link d'invito</label>
+        <input type="text" id="campoInvito" value="${pulisciHtml(linkInvito())}" readonly>
+        <button class="btn" type="button" data-gestione="copia">Copia</button>
+        ${puoCondividere ? `<button class="btn ghost" type="button" data-gestione="condividi">Condividi</button>` : ""}
+      </div>
+    </div>`;
+
+  if (eAdmin) {
+    const richieste = stato.richieste.slice().sort((a, b) => inMillisecondi(a.at) - inMillisecondi(b.at));
+    html += `<div class="blocco-lega"><h3>Chiedono di entrare</h3>`;
+    html += richieste.length
+      ? `<ul class="elenco-membri">${richieste.map(richiesta => `
+          <li>
+            <span><b>${pulisciHtml(richiesta.name)}</b><br><span class="muted small">${pulisciHtml(richiesta.email)}, ${formattaGiorno(richiesta.at)}</span></span>
+            <span class="azioni-membro">
+              <button class="btn red" type="button" data-richiesta="accetta" data-uid="${richiesta.id}">Accetta</button>
+              <button class="btn ghost" type="button" data-richiesta="rifiuta" data-uid="${richiesta.id}">Rifiuta</button>
+            </span>
+          </li>`).join("")}</ul>`
+      : `<p class="muted small">Nessuna richiesta in attesa.</p>`;
+    html += `</div>`;
+  }
+
+  const ordineRuoli = { creatore: 0, admin: 1, membro: 2 };
+  const membri = stato.membri.slice().sort((a, b) =>
+    ordineRuoli[ruoloDelMembro(a)] - ordineRuoli[ruoloDelMembro(b)] || a.name.localeCompare(b.name));
+  const righeMembri = membri.map(membro => {
+    const suoRuolo = ruoloDelMembro(membro);
+    const sonoIo = membro.id === stato.utente.uid;
+    const azioni = [];
+    if (eCreatore && !sonoIo) {
+      if (suoRuolo === "membro") azioni.push(`<button class="btn ghost" type="button" data-membro="rendiAdmin" data-uid="${membro.id}">Rendi admin</button>`);
+      if (suoRuolo === "admin") azioni.push(`<button class="btn ghost" type="button" data-membro="togliAdmin" data-uid="${membro.id}">Togli admin</button>`);
+      azioni.push(`<button class="btn ghost" type="button" data-membro="cedi" data-uid="${membro.id}">Cedi la lega</button>`);
+    }
+    const puoToglierlo = !sonoIo && suoRuolo !== "creatore" && (eCreatore || (eAdmin && suoRuolo === "membro"));
+    if (puoToglierlo) azioni.push(`<button class="btn quiet" type="button" data-membro="togli" data-uid="${membro.id}">Togli dalla lega</button>`);
+    return `
+      <li>
+        <span><b>${pulisciHtml(membro.name)}${sonoIo ? " (tu)" : ""}</b><br><span class="muted small">${nomiRuoli[suoRuolo]}, ${pulisciHtml(membro.email || "")}</span></span>
+        ${azioni.length ? `<span class="azioni-membro">${azioni.join("")}</span>` : ""}
+      </li>`;
+  });
+  html += `
+    <div class="blocco-lega">
+      <h3>Membri</h3>
+      <p class="hint">Chi esce o viene tolto resta nelle partite, nella classifica e nello storico.</p>
+      <ul class="elenco-membri">${righeMembri.join("")}</ul>
+    </div>`;
+
+  if (eCreatore) {
+    html += `
+      <div class="blocco-lega">
+        <h3>Nome della lega</h3>
+        <form class="add-player" id="moduloRinominaLega">
+          <label class="sr" for="campoRinominaLega">Nome della lega</label>
+          <input type="text" id="campoRinominaLega" maxlength="60" value="${pulisciHtml(info.name)}">
+          <button class="btn" type="submit">Rinomina</button>
+        </form>
+        <p class="hint">Sei il creatore: per uscire dalla lega prima cedila a un altro membro. Nessuno può eliminarla.</p>
+      </div>`;
+  }
+
+  html += `
+    <div class="actions">
+      ${eCreatore ? "" : `<button class="btn quiet" type="button" data-gestione="esci">Esci dalla lega</button>`}
+      <button class="btn ghost" type="button" data-gestione="elenco">Le tue leghe</button>
+      <button class="btn red" type="button" data-chiudi>Chiudi</button>
+    </div>`;
+
+  // Non ridisegno mentre si sta scrivendo il nuovo nome
+  const scrivendo = document.activeElement?.id === "campoRinominaLega";
+  if (!scrivendo) trova("#contenutoLega").innerHTML = html;
+}
+
+function trovaMembro(uid) {
+  return stato.membri.find(membro => membro.id === uid);
+}
+
+async function gestisciRichiesta(azione, uid) {
+  const richiesta = stato.richieste.find(voce => voce.id === uid);
+  if (!richiesta) return;
+  if (azione === "accetta") {
+    await salva([
+      { raccolta: "members", id: uid, dati: { name: richiesta.name, email: richiesta.email, role: "member", joinedAt: oraServer } },
+      { raccolta: "requests", id: uid, elimina: true }
+    ], { action: "membro_accettato", target: uid, summary: `${richiesta.name} entra nella lega`, before: null, after: null },
+    `${richiesta.name} è nella lega`);
+  } else if (azione === "rifiuta") {
+    const conferma = await chiediConferma("Rifiutare la richiesta?", `${richiesta.name} non entrerà nella lega. Potrà chiederlo di nuovo.`, "Rifiuta");
+    if (!conferma) return;
+    await salva([{ raccolta: "requests", id: uid, elimina: true }],
+      { action: "membro_rifiutato", target: uid, summary: `Richiesta di ${richiesta.name} rifiutata`, before: null, after: null },
+      "Richiesta rifiutata");
+  }
+}
+
+async function gestisciMembro(azione, uid) {
+  const membro = trovaMembro(uid);
+  if (!membro) return;
+  const nome = membro.name;
+
+  if (azione === "rendiAdmin") {
+    await salva([{ raccolta: "members", id: uid, unisci: true, dati: { role: "admin" } }],
+      { action: "membro_admin", target: uid, summary: `${nome} ora è admin`, before: null, after: null }, `${nome} ora è admin`);
+  } else if (azione === "togliAdmin") {
+    await salva([{ raccolta: "members", id: uid, unisci: true, dati: { role: "member" } }],
+      { action: "membro_non_admin", target: uid, summary: `${nome} non è più admin`, before: null, after: null }, `${nome} non è più admin`);
+  } else if (azione === "togli") {
+    const conferma = await chiediConferma(`Togliere ${nome} dalla lega?`,
+      "Non vedrà più la lega. Resta nelle partite, nella classifica e nello storico, e potrà chiedere di rientrare.", "Togli");
+    if (!conferma) return;
+    await salva([{ raccolta: "members", id: uid, elimina: true }],
+      { action: "membro_tolto", target: uid, summary: `${nome} tolto dalla lega`, before: null, after: null }, `${nome} tolto dalla lega`);
+  } else if (azione === "cedi") {
+    const conferma = await chiediConferma(`Cedere la lega a ${nome}?`,
+      `${nome} diventerà il creatore: solo lui potrà nominare e togliere gli admin o cederla di nuovo. Tu resterai admin.`, "Cedi la lega");
+    if (!conferma) return;
+    await salva([
+      { percorso: `leagues/${stato.legaAttiva}`, unisci: true, dati: { owner: uid } },
+      { raccolta: "members", id: uid, unisci: true, dati: { role: "admin" } }
+    ], { action: "lega_ceduta", target: uid, summary: `${stato.utente.nome} cede la lega a ${nome}`, before: null, after: null },
+    `Ora il creatore è ${nome}`);
+  }
+}
+
+async function esciDallaLega() {
+  const info = infoLega();
+  const conferma = await chiediConferma(`Uscire da ${info.name}?`,
+    "Non vedrai più la lega. Resti nelle partite, nella classifica e nello storico, e potrai chiedere di rientrare.", "Esci");
+  if (!conferma) return;
+  const id = stato.legaAttiva;
+  legaInUscita = id;
+  const uscito = await salva([
+    { raccolta: "members", id: stato.utente.uid, elimina: true },
+    { percorso: `users/${stato.utente.uid}`, unisci: true, dati: { leagues: { togliDaElenco: id } } }
+  ], { action: "membro_uscito", target: stato.utente.uid, summary: `${stato.utente.nome} esce dalla lega`, before: null, after: null },
+  `Sei uscito da ${info.name}`);
+  if (uscito && stato.legaAttiva === id) {
+    trova("#finestraLega").close();
+    tornaAlleLeghe();
+  }
+  legaInUscita = null;
+}
+
+async function copiaInvito() {
+  const link = linkInvito();
+  try {
+    await navigator.clipboard.writeText(link);
+    mostraNotifica("Link copiato");
+  } catch (errore) {
+    // Senza permesso per gli appunti, seleziono il testo così si copia a mano
+    const campo = trova("#campoInvito");
+    campo.focus();
+    campo.select();
+    mostraNotifica("Tieni premuto sul link per copiarlo");
+  }
+}
+
+async function condividiInvito() {
+  try {
+    await navigator.share({ title: infoLega().name, text: `Entra nella lega ${infoLega().name} di Risiko`, url: linkInvito() });
+  } catch (errore) {
+    if (errore?.name !== "AbortError") copiaInvito();
+  }
+}
+
+document.addEventListener("click", async evento => {
+  const pulsante = evento.target.closest("button");
+  if (!pulsante) return;
+  const dati = pulsante.dataset;
+
+  if (dati.apriLega) {
+    apriLega(dati.apriLega);
+  } else if (dati.togliLega) {
+    togliDallElenco(dati.togliLega);
+  } else if (dati.azioneLega === "accedi") {
+    apriAccesso("entra");
+  } else if (dati.azioneLega === "registrati") {
+    apriAccesso("registrati");
+  } else if (dati.azioneLega === "crea") {
+    apriNuovaLega();
+  } else if (dati.azioneLega === "chiedi") {
+    chiediDiEntrare();
+  } else if (dati.azioneLega === "annullaRichiesta") {
+    annullaRichiesta();
+  } else if (dati.azioneLega === "elenco") {
+    tornaAlleLeghe();
+  } else if (pulsante.id === "btnLega") {
+    apriGestioneLega();
+  } else if (dati.richiesta) {
+    gestisciRichiesta(dati.richiesta, dati.uid);
+  } else if (dati.membro) {
+    gestisciMembro(dati.membro, dati.uid);
+  } else if (dati.gestione === "copia") {
+    copiaInvito();
+  } else if (dati.gestione === "condividi") {
+    condividiInvito();
+  } else if (dati.gestione === "esci") {
+    esciDallaLega();
+  } else if (dati.gestione === "elenco") {
+    trova("#finestraLega").close();
+    tornaAlleLeghe();
+  }
+});
+
+document.addEventListener("submit", async evento => {
+  const modulo = evento.target;
+  if (modulo.id === "moduloLinkInvito") {
+    evento.preventDefault();
+    const testo = trova("#campoLinkInvito").value.trim();
+    // Va bene sia il link intero sia il solo codice della lega
+    const id = testo.match(/lega=([A-Za-z0-9]+)/)?.[1] ?? (/^[A-Za-z0-9]{10,}$/.test(testo) ? testo : null);
+    if (!id) {
+      mostraNotifica("Non riconosco il link: copialo intero dal messaggio che ti hanno mandato");
+      return;
+    }
+    apriLega(id);
+  } else if (modulo.id === "moduloRinominaLega") {
+    evento.preventDefault();
+    const nome = trova("#campoRinominaLega").value.trim().replace(/\s+/g, " ");
+    const vecchioNome = infoLega().name;
+    if (!nome || nome === vecchioNome) return;
+    trova("#campoRinominaLega").blur();
+    await salva([{ percorso: `leagues/${stato.legaAttiva}`, unisci: true, dati: { name: nome } }],
+      { action: "lega_rinominata", target: stato.legaAttiva, summary: `La lega ${vecchioNome} ora si chiama ${nome}`, before: null, after: null },
+      "Nome della lega cambiato");
+  }
+});
+
+
+// ===== Creare una lega e portarci la classifica di prima =====
+async function caricaVecchiaClassifica() {
+  try {
+    stato.vecchiaClassifica = await archivio.leggiVecchiaClassifica();
+  } catch (errore) {
+    stato.vecchiaClassifica = null;
+  }
+  // Gli account creati a mano nella console non hanno un nome: uso quello della vecchia lista admin
+  const vecchia = stato.vecchiaClassifica;
+  if (vecchia?.nomeAdmin && stato.utente?.senzaNome) {
+    try {
+      await archivio.cambiaNome(vecchia.nomeAdmin);
+      stato.utente.nome = vecchia.nomeAdmin;
+      stato.utente.senzaNome = false;
+      disegna();
+    } catch (errore) { /* resta il nome preso dall'email */ }
+  }
+}
+
+function apriNuovaLega() {
+  const vecchia = stato.vecchiaClassifica;
+  const puoImportare = Boolean(vecchia && (vecchia.giocatori.length || vecchia.partite.length));
+  trova("#rigaImporta").hidden = !puoImportare;
+  if (puoImportare) {
+    trova("#testoImporta").textContent =
+      `Porta in questa lega la classifica di prima: ${vecchia.giocatori.length} giocatori, ${vecchia.partite.length} partite, ${vecchia.stagioni.length} stagioni e tutto lo storico.`;
+  }
+  trova("#moduloNuovaLega").reset();
+  // Proposta già spuntata solo per chi non ha ancora leghe: di solito è la prima volta
+  if (puoImportare) trova("#spuntaImporta").checked = !stato.idMieLeghe.length;
+  trova("#erroreNuovaLega").textContent = "";
+  trova("#finestraNuovaLega").showModal();
+}
+
+trova("#moduloNuovaLega").addEventListener("submit", async evento => {
+  evento.preventDefault();
+  const nome = trova("#campoNomeLega").value.trim().replace(/\s+/g, " ");
+  const importa = !trova("#rigaImporta").hidden && trova("#spuntaImporta").checked;
+  const errore = trova("#erroreNuovaLega");
+  if (!nome) {
+    errore.textContent = "Dai un nome alla lega.";
+    return;
+  }
+
+  const pulsante = trova("#btnCreaLega");
+  pulsante.disabled = true;
+  errore.textContent = "";
+  try {
+    const id = await creaLega(nome, importa);
+    trova("#finestraNuovaLega").close();
+    apriLega(id);
+    mostraNotifica(importa ? "Lega creata con la classifica di prima" : "Lega creata: invita gli altri dal nome in alto");
+  } catch (erroreFirebase) {
+    errore.textContent = messaggioErrore(erroreFirebase);
+  }
+  pulsante.disabled = false;
+});
+
+async function creaLega(nome, importa) {
+  const { uid, email } = stato.utente;
+  const id = archivio.nuovoId("leagues");
+
+  // Lega e primo membro nella stessa scrittura: le regole controllano proprio questo
+  await archivio.salva([
+    { percorso: `leagues/${id}`, dati: { name: nome, owner: uid, createdAt: oraServer, participants: [], importOpen: importa } },
+    { percorso: `leagues/${id}/members/${uid}`, dati: { name: stato.utente.nome, email, role: "admin", joinedAt: oraServer } },
+    { percorso: `users/${uid}`, unisci: true, dati: { leagues: { aggiungiAElenco: id } } }
+  ]);
+  await archivio.salva([], { lega: id, action: "lega_creata", target: id, summary: `${stato.utente.nome} crea la lega ${nome}`, before: null, after: null });
+
+  if (importa) await importaVecchiaClassifica(id);
+  return id;
+}
+
+async function importaVecchiaClassifica(id) {
+  const vecchia = stato.vecchiaClassifica;
+  const copia = (raccolta, documento, extra = {}) => {
+    const { id: idDocumento, ...dati } = documento;
+    return { lega: id, raccolta, id: idDocumento, dati: { ...dati, ...extra } };
+  };
+  // Stessi id di prima: le partite puntano ai giocatori per id
+  const operazioni = [
+    ...vecchia.giocatori.map(giocatore => copia("players", giocatore)),
+    ...vecchia.stagioni.map(stagione => copia("seasons", stagione)),
+    ...vecchia.partite.map(partita => copia("games", partita)),
+    ...vecchia.storico.map(voce => copia("log", voce, { imported: true }))
+  ];
+  await archivio.salvaInBlocchi(operazioni, (fatte, totale) => mostraNotifica(`Importazione: ${fatte} di ${totale}`));
+
+  // Chiudo l'importazione: da qui in poi nessuno può più aggiungere storico "vecchio"
+  await archivio.salva(
+    [{ percorso: `leagues/${id}`, unisci: true, dati: { importOpen: false, participants: nomiPartecipanti(vecchia.giocatori) } }],
+    { lega: id, action: "classifica_importata", target: id,
+      summary: `Importata la classifica di prima: ${vecchia.giocatori.length} giocatori, ${vecchia.partite.length} partite, ${vecchia.stagioni.length} stagioni`,
+      before: null, after: null }
+  );
+}
+
+
 // ===== Account =====
 function apriAccount() {
   trova("#titoloAccount").textContent = stato.utente.nome;
-  trova("#emailAccount").textContent = stato.utente.eAdmin
-    ? `${stato.utente.email}, admin`
-    : `${stato.utente.email}, solo lettura`;
+  const ruolo = mioRuolo();
+  trova("#emailAccount").textContent = ruolo
+    ? `${stato.utente.email}. In ${infoLega()?.name ?? "questa lega"} il tuo ruolo è ${nomiRuoli[ruolo].toLowerCase()}.`
+    : stato.utente.email;
+  trova("#campoCambiaNome").value = stato.utente.nome;
   trova("#moduloPassword").reset();
   trova("#errorePassword").textContent = "";
   trova("#finestraAccount").showModal();
@@ -2723,9 +3869,37 @@ trova("#moduloPassword").addEventListener("submit", async evento => {
 });
 
 trova("#btnEsci").addEventListener("click", async () => {
+  // Chi esce dall'account torna alla pagina iniziale, non al biglietto della lega
+  tornaAlleLeghe();
   await archivio.esci();
   trova("#finestraAccount").close();
   mostraNotifica("Sei uscito");
+});
+
+trova("#btnMieLeghe").addEventListener("click", () => {
+  trova("#finestraAccount").close();
+  tornaAlleLeghe();
+});
+
+// Il nome compare nelle richieste, tra i membri e nello storico
+trova("#moduloNomeUtente").addEventListener("submit", async evento => {
+  evento.preventDefault();
+  const nome = trova("#campoCambiaNome").value.trim().replace(/\s+/g, " ");
+  if (!nome || nome === stato.utente.nome) return;
+  try {
+    await archivio.cambiaNome(nome);
+    stato.utente.nome = nome;
+    // Aggiorno il nome anche nelle leghe di cui fa parte
+    const mieiMembri = Object.entries(stato.leghe)
+      .filter(([, voce]) => voce.membro)
+      .map(([id]) => ({ percorso: `leagues/${id}/members/${stato.utente.uid}`, unisci: true, dati: { name: nome } }));
+    if (mieiMembri.length) await archivio.salva(mieiMembri);
+    trova("#titoloAccount").textContent = nome;
+    mostraNotifica("Nome cambiato");
+    disegna();
+  } catch (errore) {
+    mostraNotifica(messaggioErrore(errore));
+  }
 });
 
 
@@ -2999,34 +4173,119 @@ document.addEventListener("submit", evento => {
 trova("#btnNuovaPartita").addEventListener("click", () => apriPartita(null));
 
 
-// ===== Accesso =====
-trova("#btnAccesso").addEventListener("click", () => {
-  if (stato.utente) {
-    apriAccount();
-    return;
-  }
+// ===== Accesso e registrazione =====
+let modoAccesso = "entra";
+
+function apriAccesso(modo = "entra") {
+  impostaModoAccesso(modo);
   trova("#erroreAccesso").textContent = "";
+  trova("#campoPassword").value = "";
+  trova("#campoRipetiPasswordNuova").value = "";
   trova("#finestraAccesso").showModal();
-  trova("#campoEmail").focus();
+  trova(modo === "registrati" ? "#campoNomeUtente" : "#campoEmail").focus();
+}
+
+function impostaModoAccesso(modo) {
+  modoAccesso = modo;
+  const registrazione = modo === "registrati";
+  const recupero = modo === "recupera";
+  trova("#titoloAccesso").textContent = registrazione ? "Crea un account" : recupero ? "Password dimenticata" : "Accedi";
+  for (const pulsante of document.querySelectorAll("[data-modo-accesso]")) {
+    pulsante.setAttribute("aria-pressed", String(pulsante.dataset.modoAccesso === modo));
+  }
+  trova(".scelta-accesso").hidden = recupero;
+  trova("#rigaNome").hidden = !registrazione;
+  trova("#rigaPassword").hidden = recupero;
+  trova("#rigaRipetiPassword").hidden = !registrazione;
+  trova("#btnPasswordDimenticata").hidden = modo !== "entra";
+  trova("#campoPassword").autocomplete = registrazione ? "new-password" : "current-password";
+  trova("#btnEntra").textContent = registrazione ? "Crea l'account" : recupero ? "Mandami l'email" : "Entra";
+  trova("#testoAccesso").textContent = registrazione
+    ? "Con un account puoi creare leghe ed entrare in quelle dei tuoi amici."
+    : recupero ? "Scrivi la tua email: ti mandiamo un link per scegliere una nuova password." : "";
+  trova("#erroreAccesso").textContent = "";
+}
+
+function messaggioErroreAccesso(errore) {
+  const codice = errore?.code || "";
+  if (codice.includes("email-already-in-use")) return "C'è già un account con questa email: accedi con quella.";
+  if (codice.includes("invalid-email")) return "L'email non è scritta bene.";
+  if (codice.includes("weak-password")) return "La password è troppo debole: usane una di almeno 6 caratteri.";
+  if (codice.includes("operation-not-allowed") || codice.includes("admin-restricted-operation")) {
+    return "Le registrazioni sono disattivate: attivale in Firebase, Authentication, Impostazioni.";
+  }
+  if (codice.includes("too-many")) return "Troppi tentativi: riprova tra qualche minuto.";
+  if (codice.includes("network")) return "Connessione assente: riprova quando sei online.";
+  if (codice.includes("unauthorized-domain")) return "Questo sito non è tra i domini autorizzati in Firebase Authentication.";
+  return modoAccesso === "entra" ? "Email o password non corretti." : `Operazione non riuscita (${codice || "errore"}).`;
+}
+
+trova("#btnAccesso").addEventListener("click", () => {
+  if (stato.utente) apriAccount();
+  else apriAccesso("entra");
+});
+
+trova("#finestraAccesso").addEventListener("click", evento => {
+  const pulsante = evento.target.closest("button");
+  if (pulsante?.dataset.modoAccesso) impostaModoAccesso(pulsante.dataset.modoAccesso);
+  else if (pulsante?.id === "btnPasswordDimenticata") impostaModoAccesso("recupera");
 });
 
 trova("#moduloAccesso").addEventListener("submit", async evento => {
   evento.preventDefault();
   const btnEntra = trova("#btnEntra");
   const erroreAccesso = trova("#erroreAccesso");
-  btnEntra.disabled = true;
+  const email = trova("#campoEmail").value.trim();
+  const password = trova("#campoPassword").value;
   erroreAccesso.textContent = "";
 
+  if (!email) {
+    erroreAccesso.textContent = "Scrivi la tua email.";
+    return;
+  }
+  if (modoAccesso === "registrati") {
+    const nome = trova("#campoNomeUtente").value.trim().replace(/\s+/g, " ");
+    if (!nome) {
+      erroreAccesso.textContent = "Scrivi il tuo nome: è quello che vedranno gli altri.";
+      return;
+    }
+    if (password.length < 6) {
+      erroreAccesso.textContent = "La password deve avere almeno 6 caratteri.";
+      return;
+    }
+    if (password !== trova("#campoRipetiPasswordNuova").value) {
+      erroreAccesso.textContent = "Le due password non coincidono.";
+      return;
+    }
+  } else if (modoAccesso === "entra" && !password) {
+    erroreAccesso.textContent = "Scrivi la password.";
+    return;
+  }
+
+  btnEntra.disabled = true;
   try {
-    await archivio.entra(trova("#campoEmail").value.trim(), trova("#campoPassword").value);
-    trova("#campoPassword").value = "";
-    trova("#finestraAccesso").close();
+    if (modoAccesso === "registrati") {
+      const nome = trova("#campoNomeUtente").value.trim().replace(/\s+/g, " ");
+      await archivio.registrati(nome, email, password);
+      // onAuthStateChanged può arrivare prima che il nome sia salvato
+      if (stato.utente) {
+        stato.utente.nome = nome;
+        stato.utente.senzaNome = false;
+      }
+      trova("#finestraAccesso").close();
+      mostraNotifica(`Benvenuto, ${nome}`);
+      disegna();
+    } else if (modoAccesso === "recupera") {
+      await archivio.recuperaPassword(email);
+      impostaModoAccesso("entra");
+      trova("#testoAccesso").textContent = "Se l'indirizzo ha un account, ti arriva un'email con il link per scegliere una nuova password. Guarda anche nello spam.";
+    } else {
+      await archivio.entra(email, password);
+      trova("#campoPassword").value = "";
+      trova("#finestraAccesso").close();
+    }
   } catch (errore) {
-    const codice = errore?.code || "";
-    if (codice.includes("too-many")) erroreAccesso.textContent = "Troppi tentativi: riprova tra qualche minuto.";
-    else if (codice.includes("network")) erroreAccesso.textContent = "Connessione assente: riprova quando sei online.";
-    else if (codice.includes("unauthorized-domain")) erroreAccesso.textContent = "Questo sito non è tra i domini autorizzati in Firebase Authentication.";
-    else erroreAccesso.textContent = "Email o password non corretti.";
+    erroreAccesso.textContent = messaggioErroreAccesso(errore);
   }
   btnEntra.disabled = false;
 });
@@ -3058,13 +4317,54 @@ function ascoltaStorico() {
 
 function gestisciErroreLettura(errore) {
   const codice = errore?.code || "";
+  // Chi è appena stato tolto dalla lega perde il permesso: ci pensa l'ascolto del membro
+  if (codice.includes("permission-denied") && !mioRuolo()) return;
   stato.erroreCaricamento = codice.includes("permission-denied")
     ? "Non riesco a leggere i dati: controlla di aver pubblicato le regole Firestore aggiornate."
     : `Non riesco a leggere i dati (${codice || errore?.message || "errore"}).`;
   disegna();
 }
 
+// A ogni accesso o uscita si riparte da zero, perché i permessi dipendono da chi è entrato
+function quandoCambiaUtente(utente) {
+  const legaVista = stato.legaAttiva;
+  chiudiLega();
+  smettiDiSeguireTutte();
+  if (smettiDiAscoltareMieLeghe) smettiDiAscoltareMieLeghe();
+  smettiDiAscoltareMieLeghe = null;
+
+  stato.utente = utente ? { ...utente, eAdmin: false } : null;
+  stato.autenticazionePronta = true;
+  stato.idMieLeghe = [];
+  stato.mieLegheCaricate = false;
+  stato.vecchiaClassifica = null;
+  stato.legaAttiva = legaVista;
+
+  if (utente) {
+    smettiDiAscoltareMieLeghe = archivio.ascoltaMieLeghe(documento => {
+      const primaVolta = !stato.mieLegheCaricate;
+      stato.mieLegheCaricate = true;
+      stato.idMieLeghe = documento?.leagues ?? [];
+      aggiornaLegheSeguite();
+      // Al primo caricamento riapro l'ultima lega usata
+      if (primaVolta && !stato.legaAttiva) {
+        let ultima = null;
+        try { ultima = localStorage.getItem("ultimaLega"); } catch (errore) { /* niente */ }
+        if (ultima && stato.idMieLeghe.includes(ultima)) {
+          apriLega(ultima);
+          return;
+        }
+      }
+      disegna();
+    }, gestisciErroreLettura);
+    caricaVecchiaClassifica();
+  }
+  aggiornaLegheSeguite();
+  disegna();
+}
+
 async function avvia() {
+  stato.legaAttiva = leggiLegaDallIndirizzo();
   disegna();
   try {
     archivio = await collegaFirebase();
@@ -3073,28 +4373,7 @@ async function avvia() {
     disegna();
     return;
   }
-
-  archivio.ascoltaGiocatori(giocatori => {
-    stato.giocatori = giocatori;
-    disegna();
-  }, gestisciErroreLettura);
-
-  archivio.ascoltaPartite(partite => {
-    stato.partite = partite;
-    disegna();
-  }, gestisciErroreLettura);
-
-  archivio.ascoltaStagioni(stagioni => {
-    stato.stagioni = stagioni;
-    disegna();
-  }, gestisciErroreLettura);
-
-  ascoltaStorico();
-
-  archivio.quandoCambiaUtente(utente => {
-    stato.utente = utente;
-    disegna();
-  });
+  archivio.quandoCambiaUtente(quandoCambiaUtente);
 }
 
 avvia();
