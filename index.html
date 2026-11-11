@@ -27,6 +27,7 @@
   --up: #23744a;
   --down: #b23a2e;
   --focus: #2457a6;
+  --bordo-pedina: rgba(23, 38, 52, .16);
   --display: "Big Shoulders Display", "Arial Narrow", sans-serif;
   --body: "Atkinson Hyperlegible", system-ui, sans-serif;
   --nav-h: 64px;
@@ -44,6 +45,7 @@
     --up: #5cc28b;
     --down: #f07a6e;
     --focus: #8fb6ff;
+    --bordo-pedina: rgba(229, 238, 240, .22);
     color-scheme: dark;
   }
 }
@@ -87,12 +89,15 @@ button { cursor: pointer; }
   flex: none; width: 36px; height: 36px; border-radius: 7px;
   display: grid; place-items: center; background: var(--c); color: var(--t);
   font: 800 19px/1 var(--display);
-  box-shadow: inset 0 -4px 0 rgba(0,0,0,.22), inset 0 2px 0 rgba(255,255,255,.18);
+  /* Il bordo sottile tiene visibili anche il bianco su fondo chiaro e il nero su fondo scuro */
+  box-shadow: inset 0 -4px 0 rgba(0,0,0,.22), inset 0 2px 0 rgba(255,255,255,.18), 0 0 0 1px var(--bordo-pedina);
 }
 .token.big { width: 68px; height: 68px; border-radius: 12px; font-size: 38px;
-  box-shadow: inset 0 -7px 0 rgba(0,0,0,.22), inset 0 3px 0 rgba(255,255,255,.18); }
+  box-shadow: inset 0 -7px 0 rgba(0,0,0,.22), inset 0 3px 0 rgba(255,255,255,.18), 0 0 0 1px var(--bordo-pedina); }
+.token.medio { width: 50px; height: 50px; border-radius: 9px; font-size: 28px;
+  box-shadow: inset 0 -5px 0 rgba(0,0,0,.22), inset 0 2px 0 rgba(255,255,255,.18), 0 0 0 1px var(--bordo-pedina); }
 .token.sm { width: 26px; height: 26px; border-radius: 5px; font-size: 14px;
-  box-shadow: inset 0 -3px 0 rgba(0,0,0,.22); }
+  box-shadow: inset 0 -3px 0 rgba(0,0,0,.22), 0 0 0 1px var(--bordo-pedina); }
 
 /* Viste */
 .view[hidden] { display: none; }
@@ -164,14 +169,34 @@ h3 { font: 700 18px/1.25 var(--body); margin: 0; }
 .btn.ghost { background: transparent; color: var(--ink); border: 1.5px solid var(--sea-line); }
 .btn.quiet { background: transparent; color: var(--ink); padding: 8px 10px; min-height: 40px; font-size: 15px; text-decoration: underline; text-underline-offset: 3px; }
 .btn:disabled { opacity: .45; cursor: not-allowed; }
-.fab {
+.azioni-fluttuanti {
   position: fixed; right: max(16px, calc(50vw - 304px)); bottom: calc(var(--nav-h) + env(safe-area-inset-bottom) + 14px);
+  display: flex; gap: 10px; z-index: 5;
+}
+.azioni-fluttuanti[hidden] { display: none; }
+.fab {
   display: flex; align-items: center; gap: 8px; border: 0; border-radius: 16px;
   background: var(--red); color: var(--red-ink); padding: 14px 18px; font-weight: 700; font-size: 16px;
-  box-shadow: 0 6px 18px rgba(80, 20, 15, .35); z-index: 5;
+  box-shadow: 0 6px 18px rgba(80, 20, 15, .35);
 }
-.fab[hidden] { display: none; }
+.fab.secondario { background: var(--paper); color: var(--ink); box-shadow: 0 4px 14px rgba(10, 20, 28, .2); }
 .fab svg { width: 20px; height: 20px; }
+
+/* Cronometro */
+.barra-cronometro {
+  position: fixed; left: 0; right: 0; bottom: calc(var(--nav-h) + env(safe-area-inset-bottom)); z-index: 5;
+  background: var(--ink); color: var(--sea);
+}
+.barra-cronometro[hidden] { display: none; }
+.barra-cronometro .wrap { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-top: 10px; padding-bottom: 10px; }
+.tempo-cronometro { display: grid; line-height: 1.1; }
+.tempo-cronometro span { font-size: 13px; opacity: .8; }
+.tempo-cronometro b { font: 800 32px/1 var(--display); font-variant-numeric: tabular-nums; letter-spacing: .01em; }
+.pulsanti-cronometro { display: flex; gap: 8px; align-items: center; }
+.pulsanti-cronometro .btn { background: var(--sea); color: var(--ink); padding: 8px 14px; }
+.pulsanti-cronometro .btn.red { background: var(--red); color: var(--red-ink); }
+.pulsanti-cronometro .icon-btn { border-color: rgba(255, 255, 255, .35); color: var(--sea); }
+.in-pausa .tempo-cronometro b { opacity: .6; }
 
 /* Barra in basso */
 .tabs {
@@ -335,12 +360,16 @@ select {
 .valore-record b { display: block; font: 800 28px/1 var(--display); }
 .riga-colore { display: flex; align-items: center; font-weight: 700; }
 .grafico-tutti { height: 220px; margin-bottom: 6px; }
-.linea-giocatore { fill: none; stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+.linea-giocatore polyline { fill: none; stroke-linejoin: round; stroke-linecap: round; }
+.linea-giocatore .tratto { stroke-width: 2.5; }
+/* Contorno sotto ogni linea, così anche il bianco e il giallo si vedono sul fondo chiaro */
+.linea-giocatore .contorno { stroke: var(--ink); stroke-opacity: .3; stroke-width: 5; }
 .linea-giocatore.attenuata { opacity: .15; }
-.linea-giocatore.spessa { stroke-width: 4.5; }
+.linea-giocatore.spessa .tratto { stroke-width: 4.5; }
+.linea-giocatore.spessa .contorno { stroke-width: 7.5; }
 .scelta-sfida { display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: center; }
 .punteggio-sfida { display: flex; justify-content: center; align-items: center; gap: 18px; margin: 18px 0 6px; }
-.punteggio-sfida span { display: flex; align-items: center; gap: 12px; }
+.punteggio-sfida > span { display: flex; align-items: center; gap: 14px; }
 .punteggio-sfida b { font: 800 56px/1 var(--display); }
 .trattino { font: 800 40px/1 var(--display); color: var(--ink-soft); }
 .centrato { text-align: center; }
@@ -350,7 +379,28 @@ select {
 .premi li { background: var(--sea); border-radius: 10px; padding: 8px 12px; }
 .premi b { display: block; }
 .premi span { font-size: 14px; color: var(--ink-soft); }
-.rivalita li span:last-child { display: flex; align-items: center; gap: 8px; }
+.rivalita li > span:last-child { display: flex; align-items: center; gap: 8px; }
+
+/* Scelta del colore del giocatore */
+.nuovo-giocatore { margin-bottom: 18px; }
+.nuovo-giocatore .add-player { align-items: center; margin-bottom: 10px; }
+.campioni-colore { display: flex; flex-wrap: wrap; gap: 6px; }
+.campione-colore {
+  position: relative; width: 34px; height: 34px; border-radius: 7px; border: 0; padding: 0;
+  background: var(--c); box-shadow: inset 0 -3px 0 rgba(0,0,0,.2), 0 0 0 1px var(--bordo-pedina);
+}
+.campione-colore.usato::after {
+  content: ""; position: absolute; right: 3px; top: 3px; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--paper); box-shadow: 0 0 0 1.5px var(--ink);
+}
+.campione-colore[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--paper), 0 0 0 4.5px var(--ink); }
+.ruota-colori { background: conic-gradient(#e33, #ec3, #3c3, #3cc, #33e, #c3c, #e33); overflow: hidden; }
+.ruota-colori.scelto { background: var(--c); }
+.ruota-colori input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; border: 0; padding: 0; }
+.ruota-colori:focus-within { outline: 3px solid var(--focus); outline-offset: 2px; }
+.nome-colore { margin: 8px 0 0; }
+.blocco-colore { margin: 14px 0 10px; }
+.blocco-colore h3 { margin-bottom: 8px; }
 
 /* Varie */
 .tabs .wrap { grid-template-columns: repeat(5, 1fr); }
@@ -362,6 +412,16 @@ select {
 .blocco-password h3 { margin-bottom: 10px; }
 .anteprima-immagine { width: 100%; border-radius: 12px; display: block; }
 .btn[hidden] { display: none; }
+
+/* Durata e posta in gioco */
+.seg-durata { grid-template-columns: repeat(4, 1fr); }
+.seg-durata button { font-size: 14px; padding: 8px 2px; }
+.seg-durata button[aria-pressed="true"] { background: var(--ink); color: var(--sea); font-weight: 700; }
+.meta-partita { margin: 4px 0 0; }
+.spiegazione { margin-top: 26px; background: var(--paper); border-radius: 12px; padding: 12px 14px; }
+.spiegazione summary { font-weight: 700; cursor: pointer; }
+.spiegazione p { margin: 10px 0 0; }
+.spiegazione ul { margin: 6px 0 0; padding-left: 20px; }
 </style>
 </head>
 <body>
@@ -381,10 +441,26 @@ select {
   <section class="view" id="vista-storico" aria-labelledby="scheda-storico" hidden></section>
 </main>
 
-<button class="fab" id="btnNuovaPartita" type="button" hidden>
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-  Nuova partita
-</button>
+<div class="azioni-fluttuanti" id="azioniFluttuanti" hidden>
+  <button class="fab secondario" id="btnAvviaCronometro" type="button">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="13.5" r="7.5"/><path d="M12 9.5v4l2.5 1.5M9.5 2.5h5M12 2.5V6"/></svg>
+    Cronometro
+  </button>
+  <button class="fab" id="btnNuovaPartita" type="button">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+    Nuova partita
+  </button>
+</div>
+
+<div class="barra-cronometro" id="barraCronometro" hidden>
+  <div class="wrap">
+    <div class="tempo-cronometro">
+      <span id="statoCronometro">Partita in corso</span>
+      <b id="tempoCronometro" role="timer" aria-live="off">0:00:00</b>
+    </div>
+    <div class="pulsanti-cronometro" id="pulsantiCronometro"></div>
+  </div>
+</div>
 
 <nav class="tabs" aria-label="Sezioni">
   <div class="wrap">
@@ -452,6 +528,11 @@ select {
     <div class="row2">
       <div class="field"><label for="campoData">Data</label><input type="date" id="campoData" required></div>
       <div class="field"><label for="campoNota">Nota</label><input type="text" id="campoNota" maxlength="120" placeholder="Facoltativa"></div>
+    </div>
+    <div class="field">
+      <span class="lbl" id="etichettaDurata">Durata</span>
+      <div class="seg seg-durata" role="group" aria-labelledby="etichettaDurata" id="sceltaDurata"></div>
+      <p class="hint" id="testoDurata"></p>
     </div>
     <div class="field">
       <span class="lbl">Chi ha giocato</span>
@@ -533,13 +614,44 @@ const kDopo = 20;             // K quando il punteggio si è assestato
 const partiteDaNuovo = 10;    // quante partite si resta "nuovi"
 const partiteMinime = 5;      // partite per entrare in classifica
 
+// Posta in gioco: il K si moltiplica per il fattore tavolo e per quello della durata.
+// Vale sia per chi guadagna sia per chi perde, così i punti non si gonfiano.
+const fasceDurata = [
+  { id: "breve", etichetta: "meno di 1 h", descrizione: "meno di 1 ora", fattore: 0.75, minutiMassimi: 60 },
+  { id: "normale", etichetta: "1–2 h", descrizione: "da 1 a 2 ore", fattore: 1, minutiMassimi: 120 },
+  { id: "lunga", etichetta: "2–3 h", descrizione: "da 2 a 3 ore", fattore: 1.25, minutiMassimi: 180 },
+  { id: "lunghissima", etichetta: "oltre 3 h", descrizione: "oltre 3 ore", fattore: 1.5, minutiMassimi: Infinity }
+];
+const chiaveCronometro = "cronometroPartita";
+
 // Segnaposto per "ora del server": al salvataggio diventa serverTimestamp()
 const oraServer = { segnaposto: "ora" };
 
 // La prima stagione esiste sempre e parte "dall'inizio dei tempi"
 const primaStagione = { id: "iniziale", name: "Stagione 1", start: "0000-01-01" };
 
-// Colori delle pedine dei giocatori (sfondo, testo), in ordine di assegnazione
+// I 16 colori dei coloranti di Minecraft (Java Edition), nell'ordine dell'inventario creativo
+const coloriMinecraft = [
+  { nome: "Bianco", hex: "#f9fffe" },
+  { nome: "Grigio chiaro", hex: "#9d9d97" },
+  { nome: "Grigio", hex: "#474f52" },
+  { nome: "Nero", hex: "#1d1d21" },
+  { nome: "Marrone", hex: "#835432" },
+  { nome: "Rosso", hex: "#b02e26" },
+  { nome: "Arancione", hex: "#f9801d" },
+  { nome: "Giallo", hex: "#fed83d" },
+  { nome: "Lime", hex: "#80c71f" },
+  { nome: "Verde", hex: "#5e7c16" },
+  { nome: "Ciano", hex: "#169c9c" },
+  { nome: "Azzurro", hex: "#3ab3da" },
+  { nome: "Blu", hex: "#3c44aa" },
+  { nome: "Viola", hex: "#8932b8" },
+  { nome: "Magenta", hex: "#c74ebd" },
+  { nome: "Rosa", hex: "#f38baa" }
+];
+
+// Colori delle pedine dei primi giocatori (sfondo, testo): chi è stato aggiunto
+// prima dei colori di Minecraft ha salvato un numero che punta qui
 const coloriPedine = [
   ["#c8352b", "#fff"], ["#2457a6", "#fff"], ["#e2b42b", "#1b1400"], ["#2e7d4f", "#fff"],
   ["#6b3fa0", "#fff"], ["#23262b", "#fff"], ["#d9702a", "#fff"], ["#1f8a8a", "#fff"],
@@ -573,6 +685,7 @@ const etichetteAzioni = {
   giocatore_rinominato: "Giocatore rinominato",
   giocatore_nascosto: "Giocatore tolto dal gruppo",
   giocatore_riattivato: "Giocatore riattivato",
+  giocatore_colore: "Colore cambiato",
   stagione_iniziata: "Nuova stagione"
 };
 
@@ -595,10 +708,28 @@ function inMillisecondi(momento) {
   return Date.now();
 }
 
+// Data locale in formato 2026-11-11 (toISOString da solo darebbe la data di Greenwich)
+function dataLocale(momento = Date.now()) {
+  const data = new Date(momento);
+  data.setMinutes(data.getMinutes() - data.getTimezoneOffset());
+  return data.toISOString().slice(0, 10);
+}
+
 function dataDiOggi() {
-  const oggi = new Date();
-  oggi.setMinutes(oggi.getMinutes() - oggi.getTimezoneOffset());
-  return oggi.toISOString().slice(0, 10);
+  return dataLocale();
+}
+
+// 134 → "2 h 14 min", 45 → "45 min"
+function formattaMinuti(minuti) {
+  if (minuti < 60) return `${minuti} min`;
+  const ore = Math.floor(minuti / 60);
+  const resto = minuti % 60;
+  return resto ? `${ore} h ${resto} min` : `${ore} h`;
+}
+
+// 1.2247 → "×1,22"
+function formattaFattore(fattore) {
+  return "×" + fattore.toLocaleString("it-IT", { maximumFractionDigits: 2 });
 }
 
 function daStringaAData(dataIso) {
@@ -612,6 +743,13 @@ function formattaData(dataIso) {
 
 function formattaDataBreve(dataIso) {
   return daStringaAData(dataIso).toLocaleDateString("it-IT", { day: "numeric", month: "short", year: "2-digit" });
+}
+
+// "del 4 nov 26", ma "dell'1", "dell'8" e "dell'11"
+function delGiorno(dataIso) {
+  const giorno = daStringaAData(dataIso).getDate();
+  const articolo = [1, 8, 11].includes(giorno) ? "dell'" : "del ";
+  return articolo + formattaDataBreve(dataIso);
 }
 
 function formattaMomento(momento) {
@@ -671,6 +809,7 @@ const stato = {
   mostraEliminate: false,
   giocatoreEvidenziato: null, // nel grafico di tutti
   testaATesta: { primo: null, secondo: null },
+  coloreNuovoGiocatore: null, // null = il primo colore libero
   erroreCaricamento: null
 };
 let archivio = null;
@@ -855,6 +994,26 @@ function assegnaPosizioni(esiti) {
   });
 }
 
+function trovaFascia(idFascia) {
+  return fasceDurata.find(fascia => fascia.id === idFascia) || null;
+}
+
+function fasciaDaMinuti(minuti) {
+  return fasceDurata.find(fascia => minuti < fascia.minutiMassimi);
+}
+
+// Più avversari al tavolo, più è difficile vincere: con 3 giocatori ×1, con 6 circa ×1,58
+function fattoreTavolo(numeroGiocatori) {
+  return Math.sqrt((numeroGiocatori - 1) / 2);
+}
+
+function postaInGioco(numeroGiocatori, idFascia) {
+  const fascia = trovaFascia(idFascia);
+  const tavolo = fattoreTavolo(numeroGiocatori);
+  const durata = fascia ? fascia.fattore : 1;
+  return { tavolo, durata, fascia, totale: tavolo * durata };
+}
+
 // Ordine cronologico: prima la data, poi l'ora di inserimento
 function confrontaPartite(primaPartita, secondaPartita) {
   if (primaPartita.date !== secondaPartita.date) return primaPartita.date < secondaPartita.date ? -1 : 1;
@@ -888,9 +1047,11 @@ function calcolaElo(giocatori, partite) {
     const eloPrima = {};
     for (const esito of esiti) eloPrima[esito.p] = statistiche[esito.p].elo;
 
+    const posta = postaInGioco(numeroGiocatori, partita.duration);
     const variazioni = {};
     for (const esito of esiti) {
-      const k = statistiche[esito.p].partite < partiteDaNuovo ? kPrimePartite : kDopo;
+      const kBase = statistiche[esito.p].partite < partiteDaNuovo ? kPrimePartite : kDopo;
+      const k = kBase * posta.totale;
       let somma = 0;
       for (const avversario of esiti) {
         if (avversario === esito) continue;
@@ -941,14 +1102,15 @@ function calcolaElo(giocatori, partite) {
         s: esito.s,
         o: esito.o,
         eliminazioni: eliminazioniInPartita,
-        eraIlPiuBasso: numeroGiocatori >= 3 && eloPrima[esito.p] < Math.min(...altriElo)
+        eraIlPiuBasso: numeroGiocatori >= 3 && eloPrima[esito.p] < Math.min(...altriElo),
+        durata: partita.duration ?? null
       });
       eloDopo[esito.p] = s.elo;
     }
 
     variazioniPerPartita[partita.id] = variazioni;
     eloDopoPerPartita[partita.id] = eloDopo;
-    partiteInOrdine.push({ partita, esiti, eloPrima, eloDopo, variazioni });
+    partiteInOrdine.push({ partita, esiti, eloPrima, eloDopo, variazioni, posta });
   }
 
   const perElo = (primo, secondo) => statistiche[secondo.id].elo - statistiche[primo.id].elo;
@@ -998,6 +1160,7 @@ function premiDelGiocatore(s) {
   aggiungi("Ammazzagiganti", "Ha vinto partendo con l'Elo più basso del tavolo", voci.filter(voce => voce.s === "w" && voce.eraIlPiuBasso).length);
   aggiungi("Boia", "Ha eliminato almeno 2 giocatori nella stessa partita", voci.filter(voce => voce.eliminazioni >= 2).length);
   aggiungi("Kamikaze", "Eliminato per primo 3 partite di fila", contaSerie(voci, voce => voce.s === "o" && voce.o === 1, 3));
+  aggiungi("Maratoneta", "Ha vinto una partita durata più di 3 ore", voci.filter(voce => voce.s === "w" && voce.durata === "lunghissima").length);
   aggiungi("Veterano", "Almeno 25 partite giocate", s.partite >= 25 ? 1 : 0);
   return premi;
 }
@@ -1006,8 +1169,15 @@ function calcolaRecord(calcoloStagione) {
   let eloPiuAlto = null;
   let saltoPiuGrande = null;
   let crolloPiuGrande = null;
+  let partitaPiuLunga = null;
 
   for (const voce of calcoloStagione.partiteInOrdine) {
+    // Conta solo le partite misurate col cronometro: le fasce sono troppo vaghe per un record
+    const minuti = voce.partita.minutes;
+    if (minuti && (!partitaPiuLunga || minuti > partitaPiuLunga.valore)) {
+      const vincitore = voce.esiti.find(esito => esito.s === "w");
+      partitaPiuLunga = { chi: vincitore.p, valore: minuti, data: voce.partita.date };
+    }
     for (const esito of voce.esiti) {
       const elo = voce.eloDopo[esito.p];
       const variazione = voce.variazioni[esito.p];
@@ -1030,6 +1200,7 @@ function calcolaRecord(calcoloStagione) {
   if (saltoPiuGrande && saltoPiuGrande.valore > 0) record.push({ titolo: "Salto più grande", chi: saltoPiuGrande.chi, valore: conSegno(saltoPiuGrande.valore), dettaglio: formattaDataBreve(saltoPiuGrande.data) });
   if (crolloPiuGrande && crolloPiuGrande.valore < 0) record.push({ titolo: "Crollo più grande", chi: crolloPiuGrande.chi, valore: conSegno(crolloPiuGrande.valore), dettaglio: formattaDataBreve(crolloPiuGrande.data) });
   if (boia) record.push({ titolo: "Più eliminazioni", chi: boia.chi, valore: boia.valore, dettaglio: boia.valore === 1 ? "giocatore eliminato" : "giocatori eliminati" });
+  if (partitaPiuLunga) record.push({ titolo: "Partita più lunga, vinta da", chi: partitaPiuLunga.chi, valore: formattaMinuti(partitaPiuLunga.valore), dettaglio: formattaDataBreve(partitaPiuLunga.data) });
   return record;
 }
 
@@ -1085,14 +1256,104 @@ function nomeGiocatore(id) {
   return trovaGiocatore(id)?.name ?? "Giocatore rimosso";
 }
 
-function colorePedina(id) {
-  return coloriPedine[(trovaGiocatore(id)?.color ?? 0) % coloriPedine.length];
+// Il colore di un giocatore: un "#rrggbb" scelto, oppure il numero dei vecchi colori
+function hexDelGiocatore(giocatore) {
+  const colore = giocatore?.color;
+  if (typeof colore === "string" && /^#[0-9a-f]{6}$/i.test(colore)) return colore.toLowerCase();
+  return coloriPedine[(colore ?? 0) % coloriPedine.length][0];
 }
 
-function pedina(id, taglia = "") {
+// Luminosità percepita secondo WCAG, da 0 (nero) a 1 (bianco)
+function luminosita(hex) {
+  const canali = [1, 3, 5].map(inizio => parseInt(hex.slice(inizio, inizio + 2), 16) / 255);
+  const lineari = canali.map(valore => valore <= 0.03928 ? valore / 12.92 : Math.pow((valore + 0.055) / 1.055, 2.4));
+  return 0.2126 * lineari[0] + 0.7152 * lineari[1] + 0.0722 * lineari[2];
+}
+
+// Lettera bianca o scura, quella che si legge meglio sul colore
+function testoLeggibile(hex) {
+  const sfondo = luminosita(hex);
+  const contrastoBianco = 1.05 / (sfondo + 0.05);
+  const contrastoScuro = (sfondo + 0.05) / (luminosita("#172634") + 0.05);
+  return contrastoBianco >= contrastoScuro ? "#ffffff" : "#172634";
+}
+
+function colorePedina(id) {
+  const hex = hexDelGiocatore(trovaGiocatore(id));
+  return [hex, testoLeggibile(hex)];
+}
+
+// "Lime" per i colori di Minecraft, altrimenti il codice del colore
+function nomeColore(hex) {
+  return coloriMinecraft.find(colore => colore.hex === hex)?.nome ?? hex.toUpperCase();
+}
+
+// Il primo colore di Minecraft che nessuno ha ancora
+function primoColoreLibero() {
+  const usati = new Set(stato.giocatori.map(hexDelGiocatore));
+  return (coloriMinecraft.find(colore => !usati.has(colore.hex)) ?? coloriMinecraft[0]).hex;
+}
+
+// I 16 colori più la ruota. "dove" distingue il modulo del nuovo giocatore dalla sua scheda
+function selettoreColore(dove, scelto, idGiocatore = null) {
+  const proprietari = {};
+  for (const giocatore of stato.giocatori) {
+    if (giocatore.id === idGiocatore) continue;
+    (proprietari[hexDelGiocatore(giocatore)] ??= []).push(giocatore.name);
+  }
+  const campioni = coloriMinecraft.map(colore => {
+    const chi = proprietari[colore.hex];
+    const etichetta = chi ? `${colore.nome}, già di ${elencaNomi(chi)}` : colore.nome;
+    return `<button type="button" class="campione-colore${chi ? " usato" : ""}" data-colore-giocatore="${colore.hex}" data-dove="${dove}"
+      style="--c:${colore.hex}" aria-pressed="${colore.hex === scelto}" aria-label="${pulisciHtml(etichetta)}" title="${pulisciHtml(etichetta)}"></button>`;
+  });
+  const personalizzato = !coloriMinecraft.some(colore => colore.hex === scelto);
+  campioni.push(`
+    <label class="campione-colore ruota-colori${personalizzato ? " scelto" : ""}" style="--c:${scelto}" aria-pressed="${personalizzato}" title="Scegli un altro colore">
+      <input type="color" value="${scelto}" data-ruota="${dove}" aria-label="Scegli un altro colore dalla ruota">
+    </label>`);
+  return `
+    <div class="campioni-colore" role="group" aria-label="Colore della pedina">${campioni.join("")}</div>
+    <p class="muted small nome-colore" data-nome-colore="${dove}">${pulisciHtml(descriviScelta(scelto, proprietari))}</p>`;
+}
+
+function descriviScelta(hex, proprietari = {}) {
+  const chi = proprietari[hex];
+  return chi ? `${nomeColore(hex)}: ce l'ha già ${elencaNomi(chi)}.` : nomeColore(hex);
+}
+
+// Aggiorna il selettore senza ridisegnare la pagina, così il nome scritto non si perde
+function mostraColoreScelto(dove, hex, idGiocatore = null) {
+  for (const campione of document.querySelectorAll(`[data-colore-giocatore][data-dove="${dove}"]`)) {
+    campione.setAttribute("aria-pressed", String(campione.dataset.coloreGiocatore === hex));
+  }
+  const ruota = trova(`[data-ruota="${dove}"]`);
+  if (ruota) {
+    const personalizzato = !coloriMinecraft.some(colore => colore.hex === hex);
+    const contenitore = ruota.closest(".ruota-colori");
+    contenitore.classList.toggle("scelto", personalizzato);
+    contenitore.style.setProperty("--c", hex);
+    contenitore.setAttribute("aria-pressed", String(personalizzato));
+    if (ruota.value !== hex) ruota.value = hex;
+  }
+  const proprietari = {};
+  for (const giocatore of stato.giocatori) {
+    if (giocatore.id !== idGiocatore) (proprietari[hexDelGiocatore(giocatore)] ??= []).push(giocatore.name);
+  }
+  const testo = trova(`[data-nome-colore="${dove}"]`);
+  if (testo) testo.textContent = descriviScelta(hex, proprietari);
+  const anteprima = trova(`[data-anteprima-pedina="${dove}"]`);
+  if (anteprima) {
+    anteprima.style.setProperty("--c", hex);
+    anteprima.style.setProperty("--t", testoLeggibile(hex));
+  }
+}
+
+// attributiExtra: per esempio 'data-anteprima-pedina="scheda"', per aggiornarla al volo
+function pedina(id, taglia = "", attributiExtra = "") {
   const [sfondo, testo] = colorePedina(id);
   const iniziale = (trovaGiocatore(id)?.name || "?").trim().charAt(0).toUpperCase();
-  return `<span class="token ${taglia}" style="--c:${sfondo};--t:${testo}" aria-hidden="true">${pulisciHtml(iniziale)}</span>`;
+  return `<span class="token ${taglia}" style="--c:${sfondo};--t:${testo}" aria-hidden="true" ${attributiExtra}>${pulisciHtml(iniziale)}</span>`;
 }
 
 function pallinoArmata(idColore) {
@@ -1141,6 +1402,8 @@ function fotografiaPartita(partita) {
     data: partita.date,
     nota: partita.note || "",
     obiettivo: partita.objective || "",
+    durata: partita.duration ?? null,
+    minuti: partita.minutes ?? null,
     risultati: ordinaPerPosizione(partita.results).map(esito => ({
       nome: nomeGiocatore(esito.p),
       esito: esito.s === "w" ? "vince" : esito.s === "a" ? "sopravvive" : "eliminato",
@@ -1149,6 +1412,23 @@ function fotografiaPartita(partita) {
       colore: esito.c ?? null
     }))
   };
+}
+
+// I minuti del cronometro se ci sono, altrimenti la fascia scelta a mano
+function testoDurata(idFascia, minuti) {
+  if (minuti) return formattaMinuti(minuti);
+  return trovaFascia(idFascia)?.descrizione ?? "";
+}
+
+// "4 giocatori, 2 h 14 min, posta ×1,53"
+function dettagliPartita(partita) {
+  const numeroGiocatori = (partita.results || []).length;
+  const posta = postaInGioco(numeroGiocatori, partita.duration);
+  const parti = [`${numeroGiocatori} giocatori`];
+  const durata = testoDurata(partita.duration, partita.minutes);
+  if (durata) parti.push(durata);
+  parti.push(`posta ${formattaFattore(posta.totale)}`);
+  return parti.join(", ");
 }
 
 function testoFotografia(fotografia) {
@@ -1164,12 +1444,19 @@ function testoFotografia(fotografia) {
     const colori = risultati.filter(r => r.colore).map(r => `${r.nome} ${r.colore}`);
     let testo = `${formattaData(fotografia.data)}. ${riassunto}.`;
     if (fotografia.obiettivo) testo += ` Obiettivo: ${fotografia.obiettivo}.`;
+    const durata = testoDurata(fotografia.durata, fotografia.minuti);
+    if (durata) testo += ` Durata: ${durata}.`;
     if (colori.length) testo += ` Armate: ${colori.join(", ")}.`;
     if (fotografia.nota) testo += ` Nota: "${fotografia.nota}".`;
     return testo;
   }
   if (fotografia.inizio) return `${fotografia.nome}, dal ${formattaData(fotografia.inizio)}`;
-  if (fotografia.nome) return fotografia.nome + (fotografia.attivo === false ? " (fuori dal gruppo)" : "");
+  if (fotografia.nome) {
+    let testo = fotografia.nome;
+    if (fotografia.colore) testo += `, colore ${nomeColore(fotografia.colore)}`;
+    if (fotografia.attivo === false) testo += " (fuori dal gruppo)";
+    return testo;
+  }
   return "";
 }
 
@@ -1252,7 +1539,7 @@ function disegna() {
   const btnAccesso = trova("#btnAccesso");
   btnAccesso.textContent = stato.utente ? stato.utente.nome : "Accedi";
   btnAccesso.setAttribute("aria-label", stato.utente ? `Il tuo account, ${stato.utente.nome}` : "Accedi");
-  trova("#btnNuovaPartita").hidden = !stato.utente?.eAdmin || ["storico", "numeri"].includes(stato.schedaAttiva);
+  disegnaCronometro();
 
   for (const scheda of ["classifica", "partite", "giocatori", "numeri", "storico"]) {
     trova("#vista-" + scheda).hidden = stato.schedaAttiva !== scheda;
@@ -1314,6 +1601,7 @@ function vistaClassifica() {
   }
 
   html += alboDOro();
+  html += spiegazionePunti();
   contenitore.innerHTML = html;
 
   function rigaClassifica(giocatore, posizione, eloMinimo, eloMassimo) {
@@ -1338,6 +1626,27 @@ function vistaClassifica() {
         <div class="elo"><b>${Math.round(s.elo)}</b>${variazione}</div>
       </li>`;
   }
+}
+
+// Le regole scritte a partire dalle costanti, così restano sempre vere
+function spiegazionePunti() {
+  const tavoli = [3, 4, 5, 6].map(numero => `${numero} giocatori ${formattaFattore(fattoreTavolo(numero))}`);
+  const durate = fasceDurata.map(fascia => `${fascia.descrizione} ${formattaFattore(fascia.fattore)}`);
+  durate.push("non segnata ×1");
+  return `
+    <details class="spiegazione">
+      <summary>Come si calcolano i punti</summary>
+      <p>Si parte da ${eloIniziale}. In ogni partita ognuno viene confrontato con tutti gli altri:
+        arrivare davanti a chi ha più Elo di te vale di più, finire dietro a chi ne ha meno costa di più.
+        Prima chi vince, poi i sopravvissuti alla pari, poi gli eliminati: chi esce prima sta più in basso.</p>
+      <p>La posta in gioco cresce con il tavolo e con la durata, sia per chi guadagna sia per chi perde:</p>
+      <ul>
+        <li>${tavoli.join(", ")}</li>
+        <li>${durate.join(", ")}</li>
+      </ul>
+      <p>Nelle prime ${partiteDaNuovo} partite di ognuno i punti contano il doppio, così il punteggio si assesta in fretta.
+        Si entra in classifica dopo ${partiteMinime} partite.</p>
+    </details>`;
 }
 
 // Vincitori delle stagioni già concluse
@@ -1391,6 +1700,7 @@ function schedaPartita(partita) {
     <article class="game${partita.deleted ? " deleted" : ""}">
       <header><span class="num">${titolo}</span><span class="muted small">${pulisciHtml(formattaData(partita.date))}</span></header>
       ${partita.deleted ? `<span class="tag">eliminata, non conta nel punteggio</span>` : ""}
+      <p class="meta-partita muted small">${pulisciHtml(dettagliPartita(partita))}</p>
       ${partita.objective ? `<p class="note">Obiettivo: ${pulisciHtml(partita.objective)}</p>` : ""}
       ${partita.note ? `<p class="note muted">${pulisciHtml(partita.note)}</p>` : ""}
       <ol class="result">${righe.join("")}</ol>
@@ -1432,13 +1742,24 @@ function vistaGiocatori() {
     .filter(giocatore => giocatore.active === false)
     .sort((a, b) => a.name.localeCompare(b.name));
 
+  // Il nome che si sta scrivendo sopravvive ai ridisegni che arrivano dal database
+  const campoPrecedente = trova("#campoNuovoNome");
+  const nomeInScrittura = campoPrecedente?.value ?? "";
+  const stavaScrivendo = document.activeElement === campoPrecedente;
+
   let html = `<h2>Giocatori</h2>`;
   if (stato.utente?.eAdmin) {
+    const colore = stato.coloreNuovoGiocatore ?? primoColoreLibero();
+    const iniziale = nomeInScrittura.trim().charAt(0).toUpperCase() || "?";
     html += `
-      <form class="add-player" id="moduloNuovoGiocatore">
-        <label class="sr" for="campoNuovoNome">Nome del giocatore</label>
-        <input type="text" id="campoNuovoNome" maxlength="40" placeholder="Nome del nuovo giocatore" autocomplete="off">
-        <button class="btn red" type="submit">Aggiungi</button>
+      <form class="nuovo-giocatore" id="moduloNuovoGiocatore">
+        <div class="add-player">
+          <span class="token" data-anteprima-pedina="nuovo" style="--c:${colore};--t:${testoLeggibile(colore)}" aria-hidden="true">${pulisciHtml(iniziale)}</span>
+          <label class="sr" for="campoNuovoNome">Nome del giocatore</label>
+          <input type="text" id="campoNuovoNome" maxlength="40" placeholder="Nome del nuovo giocatore" autocomplete="off" value="${pulisciHtml(nomeInScrittura)}">
+          <button class="btn red" type="submit">Aggiungi</button>
+        </div>
+        ${selettoreColore("nuovo", colore)}
       </form>`;
   }
   if (!stato.giocatori.length) {
@@ -1461,6 +1782,7 @@ function vistaGiocatori() {
       <ul class="plist">${nonAttivi.map(voceElenco).join("")}</ul>`;
   }
   contenitore.innerHTML = html;
+  if (stavaScrivendo) trova("#campoNuovoNome")?.focus();
 }
 
 async function aggiungiGiocatore(evento) {
@@ -1473,18 +1795,19 @@ async function aggiungiGiocatore(evento) {
     return;
   }
 
-  // Primo colore libero; se sono tutti usati si ricomincia
-  const coloriUsati = new Set(stato.giocatori.map(giocatore => giocatore.color));
-  let colore = coloriPedine.findIndex((_, indice) => !coloriUsati.has(indice));
-  if (colore < 0) colore = stato.giocatori.length % coloriPedine.length;
-
+  const colore = stato.coloreNuovoGiocatore ?? primoColoreLibero();
   const id = archivio.nuovoId("players");
   const salvato = await salva(
     [{ raccolta: "players", id, dati: { name: nome, color: colore, active: true, createdAt: oraServer } }],
-    { action: "giocatore_aggiunto", target: id, summary: `Aggiunto il giocatore ${nome}`, before: null, after: { nome } },
-    `${nome} aggiunto`
+    { action: "giocatore_aggiunto", target: id, summary: `Aggiunto il giocatore ${nome}, colore ${nomeColore(colore)}`, before: null, after: { nome, colore } },
+    `${nome} è nella lega`
   );
-  if (salvato) campo.value = "";
+  if (salvato) {
+    // Il prossimo giocatore riparte dal primo colore libero
+    stato.coloreNuovoGiocatore = null;
+    trova("#campoNuovoNome").value = "";
+    disegna();
+  }
 }
 
 
@@ -1553,7 +1876,11 @@ function graficoDiTutti() {
     const punti = serie[giocatore.id].map((valore, indice) => `${x(indice).toFixed(1)},${y(valore).toFixed(1)}`).join(" ");
     const attenuata = evidenziato && evidenziato !== giocatore.id ? " attenuata" : "";
     const spessa = evidenziato === giocatore.id ? " spessa" : "";
-    return `<polyline class="linea-giocatore${attenuata}${spessa}" points="${punti}" style="stroke:${colorePedina(giocatore.id)[0]}" vector-effect="non-scaling-stroke"/>`;
+    return `
+      <g class="linea-giocatore${attenuata}${spessa}">
+        <polyline class="contorno" points="${punti}" vector-effect="non-scaling-stroke"/>
+        <polyline class="tratto" points="${punti}" style="stroke:${colorePedina(giocatore.id)[0]}" vector-effect="non-scaling-stroke"/>
+      </g>`;
   });
   // La linea evidenziata va disegnata per ultima, sopra le altre
   if (evidenziato) {
@@ -1601,9 +1928,9 @@ function sezioneTestaATesta() {
     if (confronto.secondoEliminaPrimo) eliminazioni.push(`${pulisciHtml(nomeGiocatore(secondo))} ha eliminato ${pulisciHtml(nomeGiocatore(primo))} ${confronto.secondoEliminaPrimo} ${confronto.secondoEliminaPrimo === 1 ? "volta" : "volte"}`);
     dettaglio = `
       <div class="punteggio-sfida">
-        <span>${pedina(primo)}<b>${confronto.davantiPrimo}</b></span>
+        <span>${pedina(primo, "medio")}<b>${confronto.davantiPrimo}</b></span>
         <span class="trattino">–</span>
-        <span><b>${confronto.davantiSecondo}</b>${pedina(secondo)}</span>
+        <span><b>${confronto.davantiSecondo}</b>${pedina(secondo, "medio")}</span>
       </div>
       <p class="muted small centrato">Volte in cui uno è arrivato davanti all'altro, su ${confronto.insieme} ${confronto.insieme === 1 ? "partita" : "partite"} insieme${confronto.pari ? `, ${confronto.pari} alla pari` : ""}.</p>
       ${eliminazioni.length ? `<p class="centrato">${eliminazioni.join(". ")}.</p>` : ""}`;
@@ -1713,8 +2040,14 @@ function apriGiocatore(id) {
 
   let strumentiAdmin = "";
   if (stato.utente?.eAdmin) {
+    coloreInModifica = { idGiocatore: id, originale: hexDelGiocatore(giocatore), scelto: hexDelGiocatore(giocatore) };
     strumentiAdmin = `
       <div class="admin-box">
+        <div class="blocco-colore">
+          <h3>Colore</h3>
+          ${selettoreColore("scheda", coloreInModifica.scelto, id)}
+          <button class="btn spazio-sopra" type="button" id="btnSalvaColore" disabled>Salva colore</button>
+        </div>
         <form class="add-player" id="moduloRinomina">
           <label class="sr" for="campoRinomina">Nuovo nome</label>
           <input type="text" id="campoRinomina" maxlength="40" value="${pulisciHtml(giocatore.name)}">
@@ -1726,7 +2059,7 @@ function apriGiocatore(id) {
 
   trova("#contenutoGiocatore").innerHTML = `
     <div class="p-head">
-      ${pedina(id, "big")}
+      ${pedina(id, "big", 'data-anteprima-pedina="scheda"')}
       <div>
         <div class="nm" id="titoloGiocatore" tabindex="-1" autofocus>${pulisciHtml(giocatore.name)}</div>
         <div class="muted small">${pulisciHtml(sottotitolo)}</div>
@@ -1753,6 +2086,18 @@ function apriGiocatore(id) {
     <div class="actions"><button class="btn ghost" type="button" data-chiudi>Chiudi</button></div>`;
 
   const finestra = trova("#finestraGiocatore");
+
+  trova("#btnSalvaColore")?.addEventListener("click", async () => {
+    const { originale, scelto } = coloreInModifica;
+    if (scelto === originale) return;
+    const salvato = await salva(
+      [{ raccolta: "players", id, unisci: true, dati: { color: scelto } }],
+      { action: "giocatore_colore", target: id, summary: `${giocatore.name} passa da ${nomeColore(originale)} a ${nomeColore(scelto)}`,
+        before: { nome: giocatore.name, colore: originale }, after: { nome: giocatore.name, colore: scelto } },
+      "Colore cambiato"
+    );
+    if (salvato) finestra.close();
+  });
 
   trova("#moduloRinomina")?.addEventListener("submit", async evento => {
     evento.preventDefault();
@@ -1793,8 +2138,10 @@ function apriGiocatore(id) {
 
 // ===== Modulo nuova partita / modifica =====
 let bozza = null;
+let coloreInModifica = null; // { idGiocatore, originale, scelto } nella scheda del giocatore
 
-function apriPartita(idPartita) {
+// tempoCronometrato: millisecondi misurati dal cronometro, se la partita nasce da lì
+function apriPartita(idPartita, tempoCronometrato = null) {
   const partita = idPartita ? stato.partite.find(p => p.id === idPartita) : null;
 
   if (partita) {
@@ -1804,6 +2151,9 @@ function apriPartita(idPartita) {
       data: partita.date,
       nota: partita.note || "",
       obiettivo: partita.objective || "",
+      durata: partita.duration ?? null,
+      minuti: partita.minutes ?? null,
+      daCronometro: false,
       scelti: ordinaPerPosizione(esiti).map(esito => esito.p),
       esiti: Object.fromEntries(esiti.map(esito => [esito.p, esito.s])),
       ordineEliminati: esiti.filter(esito => esito.s === "o").sort((a, b) => a.o - b.o).map(esito => esito.p),
@@ -1811,7 +2161,19 @@ function apriPartita(idPartita) {
       coloreDi: Object.fromEntries(esiti.filter(esito => esito.c).map(esito => [esito.p, esito.c]))
     };
   } else {
-    bozza = { id: null, data: dataDiOggi(), nota: "", obiettivo: "", scelti: [], esiti: {}, ordineEliminati: [], uccisoDa: {}, coloreDi: {} };
+    bozza = {
+      id: null, data: dataDiOggi(), nota: "", obiettivo: "", durata: null, minuti: null, daCronometro: false,
+      scelti: [], esiti: {}, ordineEliminati: [], uccisoDa: {}, coloreDi: {}
+    };
+  }
+
+  if (tempoCronometrato != null) {
+    const minuti = Math.max(1, Math.round(tempoCronometrato / 60000));
+    bozza.minuti = minuti;
+    bozza.durata = fasciaDaMinuti(minuti).id;
+    bozza.daCronometro = true;
+    // Una serata che finisce dopo mezzanotte conta per il giorno in cui è iniziata
+    bozza.data = dataLocale(cronometro.avviatoIl);
   }
 
   trova("#titoloPartita").textContent = partita ? "Modifica partita" : "Nuova partita";
@@ -1861,7 +2223,18 @@ function problemaDellaBozza() {
   return "";
 }
 
+function disegnaDurata() {
+  trova("#sceltaDurata").innerHTML = fasceDurata.map(fascia =>
+    `<button type="button" data-durata="${fascia.id}" aria-pressed="${bozza.durata === fascia.id}" aria-label="${fascia.descrizione}">${fascia.etichetta}</button>`
+  ).join("");
+  trova("#testoDurata").textContent = bozza.minuti
+    ? `Dal cronometro: ${formattaMinuti(bozza.minuti)}.`
+    : "Facoltativa: più dura la partita, più punti sono in gioco.";
+}
+
 function disegnaBozza() {
+  disegnaDurata();
+
   // Nella scelta compaiono i giocatori del gruppo, più chi era già nella partita che si modifica
   const disponibili = stato.giocatori
     .filter(giocatore => giocatore.active !== false || bozza.scelti.includes(giocatore.id))
@@ -1941,6 +2314,7 @@ function disegnaAnteprima() {
   const partitaDiProva = {
     id: bozza.id || "anteprima",
     date: bozza.data,
+    duration: bozza.durata,
     results: esiti,
     deleted: false,
     createdAt: partitaOriginale ? partitaOriginale.createdAt : Date.now() + 1e9
@@ -1969,10 +2343,15 @@ function disegnaAnteprima() {
         </li>`;
     });
 
+  const posta = voce.posta;
+  let testoPosta = `Posta in gioco ${formattaFattore(posta.tavolo)} per ${esiti.length} giocatori`;
+  if (posta.fascia) testoPosta += `, ${formattaFattore(posta.durata)} per ${posta.fascia.descrizione}: in totale ${formattaFattore(posta.totale)}`;
+  testoPosta += ".";
+
   contenitore.innerHTML = `
     <div class="field">
       <span class="lbl">${conEsito ? "Pronostico e punti Elo" : "Pronostico"}</span>
-      <p class="hint">Le probabilità di vittoria che l'Elo dava prima di giocare.</p>
+      <p class="hint">Le probabilità di vittoria che l'Elo dava prima di giocare. ${testoPosta}</p>
       <ul class="preview">${righe.join("")}</ul>
     </div>`;
 }
@@ -2019,6 +2398,10 @@ trova("#moduloPartita").addEventListener("click", evento => {
       }
       bozza.coloreDi[id] = colore;
     }
+  } else if (dati.durata) {
+    // Toccare la fascia già scelta la toglie; scegliendone una a mano i minuti del cronometro non valgono più
+    bozza.durata = bozza.durata === dati.durata ? null : dati.durata;
+    bozza.minuti = null;
   } else if (dati.su) {
     const i = Number(dati.su);
     [bozza.ordineEliminati[i - 1], bozza.ordineEliminati[i]] = [bozza.ordineEliminati[i], bozza.ordineEliminati[i - 1]];
@@ -2061,8 +2444,15 @@ trova("#moduloPartita").addEventListener("submit", async evento => {
   }
 
   const esiti = esitiDellaBozza();
-  const nuovaVersione = { date: bozza.data, note: bozza.nota.trim(), objective: bozza.obiettivo.trim(), results: esiti };
-  const riassunto = `Partita del ${formattaDataBreve(bozza.data)}: ${descriviPartita(esiti)}`;
+  const nuovaVersione = {
+    date: bozza.data,
+    note: bozza.nota.trim(),
+    objective: bozza.obiettivo.trim(),
+    duration: bozza.durata,
+    minutes: bozza.minuti,
+    results: esiti
+  };
+  const riassunto = `Partita ${delGiorno(bozza.data)}: ${descriviPartita(esiti)}`;
   const btnSalva = trova("#btnSalvaPartita");
   btnSalva.disabled = true;
 
@@ -2092,6 +2482,7 @@ trova("#moduloPartita").addEventListener("submit", async evento => {
   btnSalva.disabled = false;
   if (!salvato) return;
   const eraNuova = !bozza.id;
+  if (bozza.daCronometro) azzeraCronometro();
   trova("#finestraPartita").close();
 
   // Dopo una partita nuova propongo subito l'immagine da mandare al gruppo
@@ -2190,7 +2581,8 @@ async function creaImmaginePartita(partita) {
   c.fillText(`Partita ${calcoloStagione.numeroPartita[partita.id] ?? ""}`, 72, 150);
   c.fillStyle = "#4d5f6c";
   c.font = `400 38px ${fontTesto}`;
-  c.fillText(`${formattaData(partita.date)}, ${stagione.name}`, 72, 210);
+  const durata = testoDurata(partita.duration, partita.minutes);
+  c.fillText(`${formattaData(partita.date)}, ${stagione.name}${durata ? ", " + durata : ""}`, 72, 210);
   if (partita.objective) {
     c.fillStyle = "#172634";
     c.fillText(`Obiettivo: ${partita.objective}`, 72, 270);
@@ -2206,6 +2598,10 @@ async function creaImmaginePartita(partita) {
     rettangoloArrotondato(c, 72, y, 84, 84, 14);
     c.fillStyle = sfondo;
     c.fill();
+    // Bordo leggero, perché la pedina bianca non sparisca sul fondo chiaro
+    c.strokeStyle = "rgba(23, 38, 52, .18)";
+    c.lineWidth = 2;
+    c.stroke();
     c.fillStyle = testo;
     c.font = `800 52px ${fontTitoli}`;
     c.textAlign = "center";
@@ -2333,6 +2729,154 @@ trova("#btnEsci").addEventListener("click", async () => {
 });
 
 
+// ===== Cronometro della partita =====
+// Si salva sul telefono: se la pagina si chiude o il telefono si spegne, al ritorno il tempo è ancora lì.
+// { avviatoIl, accumulato (ms già contati), ripartitoIl (ms, null se fermo), finito }
+let cronometro = leggiCronometro();
+let intervalloCronometro = null;
+let ultimiPulsantiCronometro = "";
+
+function leggiCronometro() {
+  try {
+    return JSON.parse(localStorage.getItem(chiaveCronometro)) || null;
+  } catch (errore) {
+    return null;
+  }
+}
+
+function salvaCronometro() {
+  try {
+    if (cronometro) localStorage.setItem(chiaveCronometro, JSON.stringify(cronometro));
+    else localStorage.removeItem(chiaveCronometro);
+  } catch (errore) {
+    // Senza memoria del browser il cronometro funziona lo stesso, finché la pagina resta aperta
+  }
+}
+
+function tempoTrascorso() {
+  if (!cronometro) return 0;
+  const inCorso = cronometro.ripartitoIl ? Date.now() - cronometro.ripartitoIl : 0;
+  return cronometro.accumulato + inCorso;
+}
+
+// 5025000 → "1:23:45"
+function formattaCronometro(millisecondi) {
+  const secondiTotali = Math.floor(millisecondi / 1000);
+  const ore = Math.floor(secondiTotali / 3600);
+  const minuti = String(Math.floor(secondiTotali / 60) % 60).padStart(2, "0");
+  const secondi = String(secondiTotali % 60).padStart(2, "0");
+  return `${ore}:${minuti}:${secondi}`;
+}
+
+function avviaCronometro() {
+  cronometro = { avviatoIl: Date.now(), accumulato: 0, ripartitoIl: Date.now(), finito: false };
+  salvaCronometro();
+  disegna();
+}
+
+function mettiInPausa() {
+  cronometro.accumulato = tempoTrascorso();
+  cronometro.ripartitoIl = null;
+  salvaCronometro();
+  disegna();
+}
+
+function riprendiCronometro() {
+  cronometro.ripartitoIl = Date.now();
+  cronometro.finito = false;
+  salvaCronometro();
+  disegna();
+}
+
+// Il tempo resta salvato finché la partita non viene registrata:
+// se si chiude il modulo per sbaglio, basta toccare Registra
+function fermaCronometro() {
+  cronometro.accumulato = tempoTrascorso();
+  cronometro.ripartitoIl = null;
+  cronometro.finito = true;
+  salvaCronometro();
+  disegna();
+  apriPartita(null, cronometro.accumulato);
+}
+
+function azzeraCronometro() {
+  cronometro = null;
+  salvaCronometro();
+  disegna();
+}
+
+function aggiornaTempoCronometro() {
+  trova("#tempoCronometro").textContent = formattaCronometro(tempoTrascorso());
+}
+
+function disegnaCronometro() {
+  const eAdmin = Boolean(stato.utente?.eAdmin);
+  const schedaConPulsanti = !["storico", "numeri"].includes(stato.schedaAttiva);
+  const barra = trova("#barraCronometro");
+
+  trova("#azioniFluttuanti").hidden = !eAdmin || !schedaConPulsanti || Boolean(cronometro);
+  barra.hidden = !eAdmin || !cronometro;
+
+  if (barra.hidden) {
+    clearInterval(intervalloCronometro);
+    intervalloCronometro = null;
+    return;
+  }
+
+  const inCorso = Boolean(cronometro.ripartitoIl);
+  let statoTesto = "Partita in corso";
+  if (!inCorso) statoTesto = cronometro.finito ? "Tempo fermato" : "In pausa";
+  trova("#statoCronometro").textContent = statoTesto;
+  barra.classList.toggle("in-pausa", !inCorso);
+
+  let pulsanti = "";
+  if (inCorso) pulsanti += `<button class="btn" type="button" data-cronometro="pausa">Pausa</button>`;
+  else pulsanti += `<button class="btn" type="button" data-cronometro="riprendi">Riprendi</button>`;
+  if (cronometro.finito) pulsanti += `<button class="btn red" type="button" data-cronometro="registra">Registra</button>`;
+  else pulsanti += `<button class="btn red" type="button" data-cronometro="stop">Stop</button>`;
+  pulsanti += `<button class="icon-btn" type="button" data-cronometro="azzera" aria-label="Azzera il cronometro">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>`;
+
+  // Ridisegno i pulsanti solo quando cambiano, così il dito non li "perde" mentre li tocca
+  if (pulsanti !== ultimiPulsantiCronometro) {
+    trova("#pulsantiCronometro").innerHTML = pulsanti;
+    ultimiPulsantiCronometro = pulsanti;
+  }
+
+  aggiornaTempoCronometro();
+  if (inCorso && !intervalloCronometro) {
+    intervalloCronometro = setInterval(aggiornaTempoCronometro, 1000);
+  } else if (!inCorso && intervalloCronometro) {
+    clearInterval(intervalloCronometro);
+    intervalloCronometro = null;
+  }
+}
+
+async function gestisciCronometro(azione) {
+  if (azione === "pausa") mettiInPausa();
+  else if (azione === "riprendi") riprendiCronometro();
+  else if (azione === "stop") fermaCronometro();
+  else if (azione === "registra") apriPartita(null, cronometro.accumulato);
+  else if (azione === "azzera") {
+    const conferma = await chiediConferma(
+      "Azzerare il cronometro?",
+      `Il tempo misurato (${formattaCronometro(tempoTrascorso())}) andrà perso.`,
+      "Azzera"
+    );
+    if (conferma) azzeraCronometro();
+  }
+}
+
+trova("#btnAvviaCronometro").addEventListener("click", avviaCronometro);
+
+// Se il cronometro cambia in un'altra scheda del browser, mi allineo
+window.addEventListener("storage", evento => {
+  if (evento.key !== chiaveCronometro) return;
+  cronometro = leggiCronometro();
+  disegna();
+});
+
+
 // ===== Finestra di conferma =====
 function chiediConferma(titolo, testo, testoPulsante) {
   return new Promise(risolvi => {
@@ -2364,6 +2908,10 @@ document.addEventListener("click", async evento => {
   } else if (dati.evidenzia) {
     stato.giocatoreEvidenziato = stato.giocatoreEvidenziato === dati.evidenzia ? null : dati.evidenzia;
     disegna();
+  } else if (dati.coloreGiocatore) {
+    scegliColoreGiocatore(dati.dove, dati.coloreGiocatore);
+  } else if (dati.cronometro) {
+    gestisciCronometro(dati.cronometro);
   } else if (dati.condividi) {
     apriCondivisione(dati.condividi);
   } else if (dati.modifica) {
@@ -2372,14 +2920,14 @@ document.addEventListener("click", async evento => {
     const partita = stato.partite.find(p => p.id === dati.elimina);
     const conferma = await chiediConferma(
       "Eliminare la partita?",
-      `La partita del ${formattaDataBreve(partita.date)} smetterà di contare nel punteggio. Resta nello storico e si può ripristinare.`,
+      `La partita ${delGiorno(partita.date)} smetterà di contare nel punteggio. Resta nello storico e si può ripristinare.`,
       "Elimina"
     );
     if (!conferma) return;
     salva(
       [{ raccolta: "games", id: partita.id, unisci: true, dati: { deleted: true, updatedAt: oraServer, updatedBy: stato.utente.email } }],
       { action: "partita_eliminata", target: partita.id,
-        summary: `Partita del ${formattaDataBreve(partita.date)}: ${descriviPartita(partita.results)}`,
+        summary: `Partita ${delGiorno(partita.date)}: ${descriviPartita(partita.results)}`,
         before: fotografiaPartita(partita), after: null },
       "Partita eliminata"
     );
@@ -2388,7 +2936,7 @@ document.addEventListener("click", async evento => {
     salva(
       [{ raccolta: "games", id: partita.id, unisci: true, dati: { deleted: false, updatedAt: oraServer, updatedBy: stato.utente.email } }],
       { action: "partita_ripristinata", target: partita.id,
-        summary: `Partita del ${formattaDataBreve(partita.date)}: ${descriviPartita(partita.results)}`,
+        summary: `Partita ${delGiorno(partita.date)}: ${descriviPartita(partita.results)}`,
         before: null, after: fotografiaPartita(partita) },
       "Partita ripristinata"
     );
@@ -2408,6 +2956,28 @@ document.addEventListener("click", async evento => {
     richiestaInstallazione = null;
     try { localStorage.setItem("installazioneRifiutata", "si"); } catch (errore) { /* niente */ }
     disegna();
+  }
+});
+
+// "nuovo" è il modulo del nuovo giocatore, "scheda" la scheda di un giocatore già nella lega
+function scegliColoreGiocatore(dove, hex) {
+  if (dove === "nuovo") {
+    stato.coloreNuovoGiocatore = hex;
+    mostraColoreScelto("nuovo", hex);
+  } else if (dove === "scheda" && coloreInModifica) {
+    coloreInModifica.scelto = hex;
+    mostraColoreScelto("scheda", hex, coloreInModifica.idGiocatore);
+    trova("#btnSalvaColore").disabled = hex === coloreInModifica.originale;
+  }
+}
+
+document.addEventListener("input", evento => {
+  const elemento = evento.target;
+  if (elemento.dataset.ruota) {
+    scegliColoreGiocatore(elemento.dataset.ruota, elemento.value.toLowerCase());
+  } else if (elemento.id === "campoNuovoNome") {
+    const anteprima = trova('[data-anteprima-pedina="nuovo"]');
+    if (anteprima) anteprima.textContent = elemento.value.trim().charAt(0).toUpperCase() || "?";
   }
 });
 
